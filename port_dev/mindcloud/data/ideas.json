@@ -1,0 +1,79 @@
+[
+  {
+    "id": "test-1",
+    "title": "3D printing",
+    "description": "Exploring additive manufacturing for small-batch sculptural pieces. Curious about mixing resin and FDM textures in one object.",
+    "link": "https://example.com/ideas/3d-printing",
+    "createdAt": "2026-09-25T12:00:00.000Z"
+  },
+  {
+    "id": "test-2",
+    "title": "4D time structures",
+    "description": "Sketches for objects that visibly change shape over time, not just space. Thinking shape-memory materials and slow-release mechanisms.",
+    "link": "https://example.com/ideas/4d-time-structures",
+    "createdAt": "2026-09-25T12:01:00.000Z"
+  },
+  {
+    "id": "test-3",
+    "title": "knitting",
+    "description": "Chunky, hand-knit textures with irregular tension as a deliberate design choice. Could pair with the wheel pottery glaze studies.",
+    "link": "https://example.com/ideas/knitting",
+    "createdAt": "2026-09-25T12:02:00.000Z"
+  },
+  {
+    "id": "test-4",
+    "title": "garment rendering",
+    "description": "Testing cloth simulation software to visualize garments before cutting real fabric. Want believable drape and weight without a physical sample.",
+    "link": "https://example.com/ideas/garment-rendering",
+    "createdAt": "2026-09-25T12:03:00.000Z"
+  },
+  {
+    "id": "test-5",
+    "title": "wheel pottery",
+    "description": "Weeknight throwing sessions \u2014 small vessels, asymmetric rims, unglazed bases. A slower, tactile counterpart to the digital work.",
+    "link": "https://example.com/ideas/wheel-pottery",
+    "createdAt": "2026-09-25T12:04:00.000Z"
+  },
+  {
+    "id": "test-6",
+    "title": "glass blowing",
+    "description": "One intro class down and already hooked on the timing and heat. Want to try color-layering technique next.",
+    "link": "https://example.com/ideas/glass-blowing",
+    "createdAt": "2026-09-25T12:05:00.000Z"
+  },
+  {
+    "id": "test-7",
+    "title": "oil paint",
+    "description": "Returning to oils after years of working only digitally. Studying wet-on-wet blending for skin tones.",
+    "link": "https://example.com/ideas/oil-paint",
+    "createdAt": "2026-09-25T12:06:00.000Z"
+  },
+  {
+    "id": "test-8",
+    "title": "Prada fw 26",
+    "description": "Runway notes: structured tailoring against soft draping, high-contrast textures throughout. Good reference for the garment rendering test.",
+    "link": "https://example.com/ideas/prada-fw-26",
+    "createdAt": "2026-09-25T12:07:00.000Z"
+  },
+  {
+    "id": "f27034a7458cdbfe",
+    "title": "rock music",
+    "description": "layers upon layers in the genre, all referencing each other but adding new context. all political in a new way",
+    "link": "https://open.spotify.com/track/6PnluwP0fjGnpIBsqTdUTq?si=4e1ae937329a488a",
+    "createdAt": "2026-10-06T22:26:53.000Z"
+  },
+  {
+    "id": "e610f6b68bdcfba2",
+    "title": "contemporary art - virgil abloh",
+    "description": "the ephemeral nature of what can be considered art confuses me. artists like abloh or warhol",
+    "link": "https://share.google/AkywIa8FcITkgmaks",
+    "createdAt": "2026-10-06T22:28:58.000Z"
+  },
+  {
+    "id": "34360b79ed7c08c4",
+    "title": "baroque era",
+    "description": "color and pastels coming back in a big way this szn across designers/houses. are we entering into the baroque once again? 2013-16 noticed sm similar. what does this say about the environment?",
+    "link": "https://share.google/ze3m0VQrYQZ4XaxKd",
+    "createdAt": "2026-10-06T22:31:01.000Z"
+  }
+]

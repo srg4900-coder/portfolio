@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mind Cloud — Sadie Gold</title>
+<style>
+  :root {
+    --bg: #F7F6EF;
+    --ink: #1D1D1E;
+    --olive: #71744F;
+    --tan: #C5B172;
+    --brown: #71584B;
+    --mauve: #B67B8A;
+    --blue: #4672A5;
+    --pale-blue: #D3E4EB;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; }
+
+  .cursor-lens {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 300;
+    transform: translate(-50%, -50%);
+    will-change: left, top;
+  }
+
+  .cursor-lens.is-active {
+    opacity: 1;
+  }
+
+  .cursor-lens__ball {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--ink);
+    box-shadow: 0 6px 14px rgba(29, 29, 30, 0.2);
+    animation: cursorFloat 2.6s ease-in-out infinite;
+  }
+
+  @keyframes cursorFloat {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-6px) scale(1.06); }
+  }
+
+  @media (pointer: coarse) {
+    .cursor-lens { display: none; } /* no persistent cursor on touch */
+  }
+
+  .back {
+    position: fixed;
+    top: 24px;
+    left: 28px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    opacity: 0.6;
+    z-index: 50;
+  }
+
+  .live {
+    position: fixed;
+    top: 24px;
+    right: 28px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.45;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .live__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ink);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 1; }
+  }
+
+  .thinking {
+    position: fixed;
+    top: 22%;
+    left: 8%;
+    font-size: 24pt;
+    opacity: 0;
+    color: var(--ink);
+    pointer-events: none;
+    z-index: 60;
+    transition: opacity 0.4s ease;
+  }
+
+  .thinking.is-visible {
+    opacity: 0.6;
+  }
+
+  /* ---------- pop-in burst for a newly added idea ---------- */
+
+  .pop-burst {
+    position: fixed;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    z-index: 400;
+  }
+
+  .pop-burst__line {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 3px;
+    height: 26px;
+    background: var(--tan);
+    transform-origin: center center;
+    transform: translate(-50%, -50%) rotate(var(--angle)) scaleY(0);
+    opacity: 1;
+    animation: popLine 480ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  }
+
+  @keyframes popLine {
+    0%   { transform: translate(-50%, -50%) rotate(var(--angle)) scaleY(0); opacity: 1; }
+    55%  { transform: translate(-50%, -50%) rotate(var(--angle)) scaleY(1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) rotate(var(--angle)) scaleY(1); opacity: 0; }
+  }
+
+  .idea-node--pop-in {
+    animation: ideaPopIn 420ms ease-out;
+  }
+
+  @keyframes ideaPopIn {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  .hint {
+    position: fixed;
+    bottom: 8vh;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: clamp(20px, 4vw, 34px);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.22;
+    z-index: 40;
+    pointer-events: none;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .scroller {
+    height: 500vh;
+    position: relative;
+  }
+
+  .stage {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    perspective: 1400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /*
+    .bg-word sits under .stage's perspective(1400px), whose origin is the
+    stage's own horizontal center. Pushing an off-center element back with
+    translateZ doesn't just shrink it — perspective foreshortening also
+    pulls it toward that center point, so "left: 24px" alone would NOT land
+    24px from the edge once translateZ is applied (it lands well right of
+    that, more so the further back it sits).
+
+    To get a true, constant 24px edge padding at every depth, `left` is
+    solved per breakpoint from the perspective projection math:
+      apparentX = 50vw + (left - 50vw) * scale,   scale = P / (P + |z|)
+    solved for `left` with apparentX pinned to 24px. Change the padding by
+    editing the 24px figures below AND updating these calc()s to match if
+    the translateZ values ever change.
+  */
+  .bg-word {
+    position: absolute;
+    left: calc(-21.4286vw + 34.2857px); /* 24px apparent padding at translateZ(-600px) */
+    top: 50%;
+    transform: translateY(-50%) translateZ(-600px);
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 600;
+    font-size: 176pt; /* fixed everywhere — size only ever changes via z-depth below, never this value */
+    letter-spacing: 0;
+    line-height: 1;
+    color: var(--pale-blue);
+    opacity: 0.3;
+    text-transform: lowercase;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Tablet/mobile: the font-size above never changes — instead we push the
+     mark further back in z-space, so perspective foreshortening is what
+     shrinks it, exactly like moving a real object away from the camera.
+     `left` is recalculated for each depth so the 24px edge padding holds. */
+  @media (max-width: 1023px) {
+    .bg-word {
+      left: calc(-57.1429vw + 51.4286px); /* 24px apparent padding at translateZ(-1600px) */
+      transform: translateY(-50%) translateZ(-1600px);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .bg-word {
+      left: calc(-128.5714vw + 85.7143px); /* 24px apparent padding at translateZ(-3600px) */
+      transform: translateY(-50%) translateZ(-3600px);
+    }
+  }
+
+  .column {
+    position: relative;
+    width: 1px;
+    height: 70vh;
+    transform-style: preserve-3d;
+    transform: rotateY(0deg);
+    will-change: transform;
+    z-index: 1;
+  }
+
+  .idea-node {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-style: preserve-3d;
+    white-space: nowrap;
+    font-size: 20pt;
+    cursor: pointer;
+    padding: 6px 10px;
+    pointer-events: auto;
+    color: var(--ink);
+    transition: opacity 0.4s ease;
+  }
+
+  .idea-node:hover {
+    opacity: 0.55;
+  }
+
+  .empty-state {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    opacity: 0.4;
+    text-align: center;
+    padding: 0 10vw;
+  }
+
+  /* ---------- modal ---------- */
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(29, 29, 30, 0.35);
+    backdrop-filter: blur(2px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+  }
+
+  .modal-backdrop.is-open {
+    display: flex;
+  }
+
+  .modal-card {
+    background: var(--bg);
+    width: min(420px, 86vw);
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 40px 32px 32px;
+    position: relative;
+    box-shadow: 0 40px 80px rgba(29, 29, 30, 0.25);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.5;
+    font-family: inherit;
+    letter-spacing: inherit;
+  }
+
+  .modal-close:hover { opacity: 1; }
+
+  .modal-card h2 {
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    margin-bottom: 18px;
+    padding-right: 40px;
+  }
+
+  .modal-card p {
+    font-size: 14px;
+    line-height: 1.7;
+    letter-spacing: 0.03em;
+    margin-bottom: 22px;
+    opacity: 0.85;
+  }
+
+  .modal-link {
+    display: inline-block;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid var(--ink);
+    padding: 12px 22px;
+  }
+
+  .modal-link:hover {
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  @media (max-width: 767px) {
+    .idea-node { font-size: 15pt; }
+  }
+</style>
+</head>
+<body>
+
+  <!--
+    Hovering cursor sphere: a small ball that trails the mouse with a slow,
+    eased 0.6s follow (see the ease loop in the script below) and gently
+    bobs in place via the cursorFloat keyframes above. Its color updates
+    instantly (no transition, no lag) to match whatever idea text the real
+    cursor is over right now — independent of the ball's own lagged
+    position. The "sadie's brain" background wordmark has pointer-events:
+    none, so it can never be the hit result and is excluded automatically;
+    hovering it (or empty space) just leaves the ball at its default ink color.
+  -->
+  <div class="cursor-lens" id="cursorLens" aria-hidden="true">
+    <div class="cursor-lens__ball" id="cursorBall"></div>
+  </div>
+
+  <a class="back" href="../index.html">← Portfolio</a>
+  <div class="live"><span class="live__dot"></span><span id="clock">LIVE 00:00:00</span></div>
+  <div class="hint">Scroll around</div>
+  <div class="thinking" id="thinkingIndicator" aria-live="polite">sadie is thinking...</div>
+
+  <div class="scroller">
+    <div class="stage">
+      <div class="bg-word" aria-hidden="true">sadie's brain</div>
+      <div class="column" id="column">
+        <div class="empty-state" id="emptyState">No ideas yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal-card">
+      <button class="modal-close" id="modalClose">Close ✕</button>
+      <h2 id="modalTitle"></h2>
+      <p id="modalDescription"></p>
+      <a class="modal-link" id="modalLink" target="_blank" rel="noopener">Open link</a>
+    </div>
+  </div>
+
+<script>
+(function () {
+  var column = document.getElementById('column');
+  var emptyState = document.getElementById('emptyState');
+  var scroller = document.querySelector('.scroller');
+  var known = {};      // id -> idea data (for modal lookup)
+  var rendered = {};   // id -> DOM node (so positions never reset)
+
+  var ACCENTS = ['var(--ink)', 'var(--olive)', 'var(--brown)', 'var(--blue)', 'var(--mauve)'];
+
+  // deterministic pseudo-random from a string id, so an idea's
+  // position/depth never shifts on re-poll or reload
+  function seededRandom(str) {
+    var h = 0;
+    for (var i = 0; i < str.length; i++) {
+      h = (h << 5) - h + str.charCodeAt(i);
+      h |= 0;
+    }
+    return function () {
+      h = (h * 1103515245 + 12345) & 0x7fffffff;
+      return (h % 10000) / 10000;
+    };
+  }
+
+  var RADII = [90, 170, 250]; // near / mid / far — the "3 variations of z-space"
+  var MAX_AGE_DAYS = 30;
+  var COLUMN_TOP_PAD = 8;   // % — unchanged from before
+  var COLUMN_BOTTOM_PAD = 92; // % — unchanged from before
+
+  function ageInDays(idea) {
+    return (Date.now() - new Date(idea.createdAt).getTime()) / 86400000;
+  }
+
+  // Four short lines expanding from a point to form an X, then fading —
+  // fired once at the screen position a brand-new idea just appeared at.
+  function spawnPopBurst(x, y) {
+    var wrap = document.createElement('div');
+    wrap.className = 'pop-burst';
+    wrap.style.left = x + 'px';
+    wrap.style.top = y + 'px';
+    [45, 135, 225, 315].forEach(function (angle) {
+      var line = document.createElement('div');
+      line.className = 'pop-burst__line';
+      line.style.setProperty('--angle', angle + 'deg');
+      wrap.appendChild(line);
+    });
+    document.body.appendChild(wrap);
+    setTimeout(function () { wrap.remove(); }, 550);
+  }
+
+  function placeNode(idea, animate) {
+    var rand = seededRandom(idea.id);
+    var theta = rand() * 360;
+    var radius = RADII[Math.floor(rand() * RADII.length)];
+
+    // Position is driven by AGE, not arrival order or a live rank, so it
+    // never has to shift once placed: brand-new sits near the top pad,
+    // an idea approaching the 30-day cutoff sits near the bottom pad, with
+    // a little random scatter around that point so it doesn't read as a
+    // mechanical list. Same 8%–92% band as before either way.
+    var band = COLUMN_BOTTOM_PAD - COLUMN_TOP_PAD;
+    var age = Math.max(0, Math.min(MAX_AGE_DAYS, ageInDays(idea)));
+    var baseY = COLUMN_TOP_PAD + band * (age / MAX_AGE_DAYS);
+    var jitter = (rand() - 0.5) * (band * 0.18);
+    var yPct = Math.max(COLUMN_TOP_PAD, Math.min(COLUMN_BOTTOM_PAD, baseY + jitter));
+
+    var accent = ACCENTS[Math.floor(rand() * ACCENTS.length)];
+
+    var node = document.createElement('div');
+    node.className = 'idea-node';
+    node.style.color = accent;
+    node.style.top = yPct + '%';
+    node.style.transform = 'translate(-50%, -50%) rotateY(' + theta + 'deg) translateZ(' + radius + 'px)';
+    node.textContent = idea.title;
+    node.addEventListener('click', function () { openModal(idea.id); });
+    column.appendChild(node);
+    rendered[idea.id] = node;
+
+    // Only ideas that arrive WHILE someone is already watching get the
+    // pop treatment — the initial batch on page load just appears normally.
+    // From this point on the node is a normal child of #column, so it
+    // rotates/travels with everything else exactly like any other idea.
+    if (animate) {
+      var rect = node.getBoundingClientRect();
+      spawnPopBurst(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      node.classList.add('idea-node--pop-in');
+    }
+  }
+
+  function openModal(id) {
+    var idea = known[id];
+    if (!idea) return;
+    document.getElementById('modalTitle').textContent = idea.title;
+    var descEl = document.getElementById('modalDescription');
+    if (idea.description) {
+      descEl.textContent = idea.description;
+      descEl.style.display = 'block';
+    } else {
+      descEl.style.display = 'none';
+    }
+    var linkEl = document.getElementById('modalLink');
+    if (idea.link) {
+      linkEl.href = idea.link;
+      linkEl.style.display = 'inline-block';
+    } else {
+      linkEl.style.display = 'none';
+    }
+    document.getElementById('modalBackdrop').classList.add('is-open');
+  }
+
+  function closeModal() {
+    document.getElementById('modalBackdrop').classList.remove('is-open');
+  }
+
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  document.getElementById('modalBackdrop').addEventListener('click', function (e) {
+    if (e.target === this) closeModal();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  var firstMergeDone = false; // the initial batch on load never gets the pop-in treatment
+
+  function mergeIdeas(list) {
+    // Belt-and-suspenders 30-day cutoff: the server archives old ideas out
+    // of what it returns, but this also covers the file:// fallback path
+    // (no server), which serves a fixed bundled list with no archiving.
+    var fresh = list.filter(function (idea) { return ageInDays(idea) <= MAX_AGE_DAYS; });
+
+    fresh.forEach(function (idea) {
+      if (!known[idea.id]) {
+        known[idea.id] = idea;
+        placeNode(idea, firstMergeDone);
+      } else {
+        known[idea.id] = idea; // keep content fresh, position untouched
+      }
+    });
+    emptyState.style.display = fresh.length ? 'none' : 'flex';
+    firstMergeDone = true;
+  }
+
+  // Bundled fallback so the page still shows the cloud when opened directly
+  // as a file:// path (no server to fetch /api/ideas from). When the Python
+  // backend IS running, poll() below fetches the live list and merges in
+  // anything new on top of this — the two never conflict since merge is a
+  // no-op for ideas it already knows about.
+  var FALLBACK_IDEAS = [
+    { id: "test-1", title: "3D printing", description: "Exploring additive manufacturing for small-batch sculptural pieces. Curious about mixing resin and FDM textures in one object.", link: "https://example.com/ideas/3d-printing", createdAt: "2026-09-25T12:00:00.000Z" },
+    { id: "test-2", title: "4D time structures", description: "Sketches for objects that visibly change shape over time, not just space. Thinking shape-memory materials and slow-release mechanisms.", link: "https://example.com/ideas/4d-time-structures", createdAt: "2026-09-25T12:01:00.000Z" },
+    { id: "test-3", title: "knitting", description: "Chunky, hand-knit textures with irregular tension as a deliberate design choice. Could pair with the wheel pottery glaze studies.", link: "https://example.com/ideas/knitting", createdAt: "2026-09-25T12:02:00.000Z" },
+    { id: "test-4", title: "garment rendering", description: "Testing cloth simulation software to visualize garments before cutting real fabric. Want believable drape and weight without a physical sample.", link: "https://example.com/ideas/garment-rendering", createdAt: "2026-09-25T12:03:00.000Z" },
+    { id: "test-5", title: "wheel pottery", description: "Weeknight throwing sessions — small vessels, asymmetric rims, unglazed bases. A slower, tactile counterpart to the digital work.", link: "https://example.com/ideas/wheel-pottery", createdAt: "2026-09-25T12:04:00.000Z" },
+    { id: "test-6", title: "glass blowing", description: "One intro class down and already hooked on the timing and heat. Want to try color-layering technique next.", link: "https://example.com/ideas/glass-blowing", createdAt: "2026-09-25T12:05:00.000Z" },
+    { id: "test-7", title: "oil paint", description: "Returning to oils after years of working only digitally. Studying wet-on-wet blending for skin tones.", link: "https://example.com/ideas/oil-paint", createdAt: "2026-09-25T12:06:00.000Z" },
+    { id: "test-8", title: "Prada fw 26", description: "Runway notes: structured tailoring against soft draping, high-contrast textures throughout. Good reference for the garment rendering test.", link: "https://example.com/ideas/prada-fw-26", createdAt: "2026-09-25T12:07:00.000Z" }
+  ];
+
+  var isFileProtocol = window.location.protocol === 'file:';
+
+  function poll() {
+    fetch('/api/ideas')
+      .then(function (r) { return r.json(); })
+      .then(function (data) { mergeIdeas(data.ideas || []); })
+      .catch(function () { /* offline: keep showing what we have */ });
+  }
+
+  // Live "sadie is thinking..." indicator — polled quickly (not the 2s idea
+  // poll below) so it feels immediate while typing is actually happening.
+  var thinkingEl = document.getElementById('thinkingIndicator');
+  function pollTyping() {
+    fetch('/api/typing')
+      .then(function (r) { return r.json(); })
+      .then(function (data) { thinkingEl.classList.toggle('is-visible', !!data.typing); })
+      .catch(function () { /* offline: leave it as-is */ });
+  }
+
+  if (isFileProtocol) {
+    mergeIdeas(FALLBACK_IDEAS);
+  } else {
+    poll();
+    setInterval(poll, 2000);
+    pollTyping();
+    setInterval(pollTyping, 700);
+  }
+
+  // ---------- scroll-driven orbit (infinite) ----------
+  //
+  // Rotation is driven by scroll DELTA, not absolute scroll position, so it
+  // never runs out of room: whenever the user scrolls near the top or
+  // bottom of the runway, we silently jump scrollTop back to the middle
+  // (an instant, unanimated reassignment) and keep accumulating from there.
+  // Because rotation only ever reads the delta, that jump is invisible —
+  // the column keeps spinning exactly as if the page could scroll forever.
+
+  var DEG_PER_PIXEL = 0.35;    // scroll speed, unchanged from before
+  var IDLE_DEG_PER_SEC = 4;    // slow ambient drift when nobody's scrolling
+  var ACTIVE_WINDOW_MS = 150;  // how recently a scroll event must have fired to count as "scrolling"
+  var EASE_TAU_MS = 500;       // how quickly velocity glides back down to idle after scrolling stops
+
+  var MAX_DEG_PER_SEC = 1200; // hard safety cap — nothing legitimate should ever exceed this
+
+  // Vertical travel: scrolling down carries the column toward its bottom
+  // (oldest ideas); scrolling up carries it back toward the top (newest).
+  // This is a straight scroll-linked position, not velocity/eased like the
+  // rotation — it moves exactly as far as the user scrolls, then clamps.
+  // Once clamped, further scroll in that direction only drives rotation
+  // (handled entirely by the existing velocity system above/below,
+  // untouched by this clamp) instead of continuing to travel.
+  var TRAVEL_PER_PIXEL = 0.6;
+  var TRAVEL_FRACTION = (COLUMN_BOTTOM_PAD - 50) / 100; // distance from center to the bottom pad
+  var columnShift = 0; // px, always <= 0: 0 = top/newest, -travelMax = bottom/oldest
+
+  function travelMax() {
+    return column.offsetHeight * TRAVEL_FRACTION;
+  }
+
+  var angle = 0;
+  var lastY = window.scrollY;
+  var currentVelocity = IDLE_DEG_PER_SEC; // deg/sec, starts idle
+  var hasScrolled = false;                // becomes true only on a real, counted scroll event
+  var lastScrollEventTime = 0;
+  var lastFrameTime = performance.now();
+  var suppressNextScroll = false;         // true while we're moving scrollTop ourselves
+
+  function scrollMax() {
+    return document.documentElement.scrollHeight - window.innerHeight;
+  }
+
+  function programmaticScrollTo(y) {
+    suppressNextScroll = true;
+    window.scrollTo(0, y);
+    lastY = window.scrollY; // resync immediately so this jump can never read as a delta
+  }
+
+  function recenterIfNeeded() {
+    var max = scrollMax();
+    var margin = window.innerHeight * 0.75;
+    if (max <= margin * 2) return; // runway too short to recenter safely
+    if (window.scrollY < margin || window.scrollY > max - margin) {
+      programmaticScrollTo(max / 2);
+    }
+  }
+
+  window.addEventListener('scroll', function () {
+    // ignore the echo from our own scrollTo calls (centering / recentering) —
+    // those are never user input and must never be read as scroll velocity
+    if (suppressNextScroll) {
+      suppressNextScroll = false;
+      lastY = window.scrollY;
+      return;
+    }
+
+    var y = window.scrollY;
+    var now = performance.now();
+
+    if (!hasScrolled) {
+      // first-ever real scroll event: no valid previous timestamp to diff
+      // against, so just establish the baseline instead of guessing a dt
+      hasScrolled = true;
+      lastScrollEventTime = now;
+      lastY = y;
+      return;
+    }
+
+    var dt = Math.max(8, now - lastScrollEventTime);
+    var delta = y - lastY;
+
+    // instant pickup: velocity reflects this scroll's actual speed right away
+    var v = (delta / dt) * 1000 * DEG_PER_PIXEL;
+    currentVelocity = Math.max(-MAX_DEG_PER_SEC, Math.min(MAX_DEG_PER_SEC, v));
+    lastScrollEventTime = now;
+    lastY = y;
+
+    // scrolling down (delta > 0) carries the column toward the bottom
+    // (more negative); clamped, so once it hits bottom the column simply
+    // keeps rotating in place rather than continuing to travel
+    columnShift = Math.max(-travelMax(), Math.min(0, columnShift - delta * TRAVEL_PER_PIXEL));
+
+    recenterIfNeeded();
+  }, { passive: true });
+
+  window.addEventListener('resize', function () {
+    lastY = window.scrollY;
+  });
+
+  function frame(now) {
+    var dt = now - lastFrameTime;
+    lastFrameTime = now;
+
+    var scrolling = hasScrolled && (now - lastScrollEventTime) < ACTIVE_WINDOW_MS;
+    if (!scrolling) {
+      // ease current velocity toward the idle drift speed — smooth, framerate-independent glide
+      var ease = 1 - Math.exp(-dt / EASE_TAU_MS);
+      currentVelocity += (IDLE_DEG_PER_SEC - currentVelocity) * ease;
+    }
+
+    angle += currentVelocity * (dt / 1000);
+    column.style.transform = 'translateY(' + columnShift.toFixed(2) + 'px) rotateY(' + angle + 'deg)';
+
+    requestAnimationFrame(frame);
+  }
+
+  // start centered in the runway so there's room to scroll infinitely
+  // in either direction from the first frame
+  programmaticScrollTo(scrollMax() / 2);
+  requestAnimationFrame(frame);
+
+  // ---------- live EST clock ----------
+
+  function tickClock() {
+    var now = new Date();
+    var parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }).formatToParts(now).reduce(function (acc, p) { acc[p.type] = p.value; return acc; }, {});
+    document.getElementById('clock').textContent =
+      'LIVE ' + parts.hour + ':' + parts.minute + ':' + parts.second + ' EST';
+  }
+
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  // ---------- hovering cursor sphere ----------
+  //
+  // The sphere's on-screen position eases toward the real mouse position
+  // with a ~0.6s time constant (exponential, framerate-independent — same
+  // technique as the idle-rotation glide above), which is what gives it
+  // the slow "catching up" trail rather than tracking the cursor 1:1. The
+  // gentle bob/scale is separate: pure CSS (cursorFloat keyframes) on the
+  // inner ball, layered on top of the JS-driven position.
+  //
+  // Color is intentionally decoupled from that lag: it's read from the
+  // REAL cursor position on every mousemove, with no transition, so it
+  // changes the instant the actual cursor crosses onto/off of a title —
+  // regardless of where the floating ball itself currently lags to. Only
+  // .idea-node titles count — .bg-word ("sadie's brain") has pointer-
+  // events:none, so it can never be the hit result and is excluded
+  // automatically; hovering it (or empty space) leaves the default ink color.
+  // Desktop-only: skipped entirely on coarse/touch pointers.
+
+  if (window.matchMedia('(pointer: fine)').matches) {
+    var lens = document.getElementById('cursorLens');
+    var ball = document.getElementById('cursorBall');
+    var FOLLOW_TAU_MS = 600;
+
+    var targetX = window.innerWidth / 2, targetY = window.innerHeight / 2;
+    var curX = targetX, curY = targetY;
+    var hasMoved = false;
+    var lastFrame = performance.now();
+
+    // Color tracks the REAL cursor position (not the lagged ball position)
+    // and applies with zero transition, so it changes the instant the
+    // cursor crosses onto/off of a title — independent of how far behind
+    // the floating ball itself still is.
+    function updateColor(x, y) {
+      var el = document.elementFromPoint(x, y);
+      var match = el ? el.closest('.idea-node') : null;
+      ball.style.backgroundColor = match ? getComputedStyle(match).color : '';
+    }
+
+    window.addEventListener('mousemove', function (e) {
+      targetX = e.clientX;
+      targetY = e.clientY;
+      if (!hasMoved) {
+        // snap on the very first move instead of drifting in from center
+        curX = targetX;
+        curY = targetY;
+        hasMoved = true;
+      }
+      lens.classList.add('is-active');
+      updateColor(targetX, targetY);
+    }, { passive: true });
+
+    window.addEventListener('mouseleave', function () {
+      lens.classList.remove('is-active');
+    });
+
+    function loop(now) {
+      var dt = now - lastFrame;
+      lastFrame = now;
+      var ease = 1 - Math.exp(-dt / FOLLOW_TAU_MS);
+      curX += (targetX - curX) * ease;
+      curY += (targetY - curY) * ease;
+      lens.style.left = curX + 'px';
+      lens.style.top = curY + 'px';
+      requestAnimationFrame(loop);
+    }
+
+    requestAnimationFrame(loop);
+  }
+})();
+</script>
+
+</body>
+</html>
