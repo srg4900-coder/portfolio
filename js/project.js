@@ -28,6 +28,11 @@
   var data = PROJECTS[slug];
   if (!data) return;
 
+  if (data.year) {
+    var yearEl = document.querySelector('.project-year');
+    if (yearEl) yearEl.textContent = data.year;
+  }
+
   if (data.title) {
     var titleEl = document.querySelector('.project-title');
     if (titleEl) titleEl.textContent = data.title;
@@ -169,3 +174,47 @@
     });
   }
 })();
+
+/*
+  PAGE LOAD-IN (every project page, with or without media)
+  The top of the page eases in like the homepage: the eyebrow, subtitle,
+  first section and first image/video box glide up via .load-rise
+  (staggered --load-delay in project.html, CSS-only), and the title
+  reveals letter by letter with the homepage title's exact timing
+  (js/main.js TITLE_STAGGER_MS / TITLE_LETTER_DURATION_MS: 30ms / 220ms).
+  Runs after the block above, so a project's real title is already in.
+*/
+(function () {
+  var title = document.querySelector('.project-title.letter-reveal');
+  if (!title) return;
+  var STAGGER_MS = 30, DURATION_MS = 220, START_DELAY_MS = 120;
+  var text = title.textContent;
+  title.textContent = '';
+  title.setAttribute('aria-label', text);
+  title.style.setProperty('--letter-duration', DURATION_MS + 'ms');
+  // Letters are grouped per WORD (nowrap) with real spaces between words,
+  // so a long title only ever wraps between words — never mid-word, which
+  // loose per-letter inline-blocks would allow on a narrow phone.
+  var i = 0;
+  text.split(' ').forEach(function (word, w) {
+    if (w > 0) title.appendChild(document.createTextNode(' '));
+    var wordEl = document.createElement('span');
+    wordEl.style.display = 'inline-block';
+    wordEl.style.whiteSpace = 'nowrap';
+    wordEl.setAttribute('aria-hidden', 'true');
+    word.split('').forEach(function (ch) {
+      var span = document.createElement('span');
+      span.className = 'letter';
+      span.textContent = ch;
+      span.style.transitionDelay = (START_DELAY_MS + i * STAGGER_MS) + 'ms';
+      wordEl.appendChild(span);
+      i++;
+    });
+    i++; // the space between words counts as one beat in the stagger
+    title.appendChild(wordEl);
+  });
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () { title.classList.add('is-in'); });
+  });
+})();
+

@@ -11,6 +11,7 @@
 window.PROJECTS = {
   'art-direction': {
     title: 'Grassroots Fall 26',
+    year: 2026, // shown in the "SG PORTFOLIO SITE — YYYY" line at the top
     video: 'assets/video/jacket-love-story.mp4',
     // Homepage thumbnail: a silent 8s, 640x400 cut of the video above,
     // looped (a separate small file so the homepage never loads the 23MB

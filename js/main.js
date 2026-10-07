@@ -65,6 +65,16 @@
     return clamp01((p - start) / (end - start));
   }
 
+  // ---------- easing (paper intro motion) ----------
+  // Every sub-step of the paper motion (rise / rotate / settle) is eased,
+  // never linear: a linear step starts and stops dead, which read as a
+  // harsh "rotate, THEN move" jolt. Eased steps that overlap blend into
+  // one continuous move. Symmetric curves (in-out) also make the reverse
+  // (scrolling back up) feel exactly as smooth as the way in.
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+  function easeInOutSine(t) { return -(Math.cos(Math.PI * t) - 1) / 2; }
+
   // ---------- nav + big logo mark + title + eyebrow: all fade/reveal together at t=0 ----------
   // Sadie Gold, Portfolio, and the eyebrow above them all run on the SAME
   // ~500ms timeline as the nav's own fade-in — fast, synced, one beat,
@@ -176,7 +186,7 @@
     // p is no longer scroll-scrubbed — a single scroll gesture plays the
     // whole sequence over SNAP_DURATION_MS (see SCROLL SNAP below), so p
     // is linear in TIME and these phases map directly to milliseconds.
-    var SNAP_DURATION_MS = 1600;
+    var SNAP_DURATION_MS = 2000; // was 1600 — a touch longer so the eased overlapping steps can breathe
     var CD_DELAY_MS = 200;          // small papers start this long after the big ones
     var CD_START = CD_DELAY_MS / SNAP_DURATION_MS;
     var PHASE_TITLE = [0.00, 0.50]; // title slides up and sticks
@@ -250,8 +260,10 @@
     // for a smoother handoff rather than a visible seam).
     function setRiseAndRotate(papers, p, range) {
       var overall = phase(p, range[0], range[1]);
-      var riseSub = phase(overall, 0, 0.6);
-      var rotateSub = phase(overall, 0.45, 1);
+      // rise decelerates into place; the turn eases in AND out, starting
+      // well before the rise ends so the two blend into one motion
+      var riseSub = easeOutCubic(phase(overall, 0, 0.65));
+      var rotateSub = easeInOutCubic(phase(overall, 0.3, 1));
       papers.forEach(function (el) {
         el.style.setProperty('--rise-y', 1 - riseSub);
         el.style.setProperty('--rotate-mix', rotateSub);
@@ -275,9 +287,15 @@
     var HERO_OVERSHOOT_VH = 10; // how far PAST the resting spot it rises before dropping back down
     function setUpRotateDrop(papers, p, range) {
       var overall = phase(p, range[0], range[1]);
-      var riseSub = phase(overall, 0, 0.35);
-      var rotateSub = phase(overall, 0.30, 0.70);
-      var dropSub = phase(overall, 0.65, 1.0);
+      // Eased + overlapping (was three linear steps that barely touched:
+      // rise 0-.35, rotate .30-.70, drop .65-1 — each starting/stopping
+      // dead, the source of the jolt). Rise decelerates up past rest, the
+      // quarter-turn eases in and out across the middle, and the settle
+      // back down eases gently — each one already under way while the
+      // previous one finishes.
+      var riseSub = easeOutCubic(phase(overall, 0, 0.5));
+      var rotateSub = easeInOutCubic(phase(overall, 0.2, 0.82));
+      var dropSub = easeInOutSine(phase(overall, 0.55, 1.0));
 
       papers.forEach(function (el) {
         var startDeg = parseFloat(el.getAttribute('data-start-deg') || '0');
