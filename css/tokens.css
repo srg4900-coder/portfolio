@@ -20,6 +20,7 @@
   --color-paper-white: #FCFCFC;   /* "paper" fill color, light UI surfaces */
   --color-blue: #557EAA;          /* primary accent + "on light" text color */
   --color-bg-hero: #4672A5;       /* homepage background, confirmed exact */
+  --color-bg-hero-textured: #9CAEC2; /* what --color-bg-hero LOOKS like under the paper texture (measured average at the screen edges) — used where only a flat color is possible, e.g. iPhone Safari's top/bottom strips */
 
   /* ---------- color: still approximated — no exact value given yet ---------- */
   --color-ink: #1D1D1E;           /* near-black, used sparingly for strong contrast */

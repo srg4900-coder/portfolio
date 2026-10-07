@@ -24,16 +24,20 @@
   height: 260vh; /* scroll "runway" for the intro sequence — see js/main.js SCROLL_RANGE */
 }
 
-/* Homepage only (this file): the page's BASE is the hero blue, so iPhone
-   Safari tints the status-bar strip and the toolbar area blue too — full
-   bleed, no white bands top/bottom (Safari colors those from the page
+/* Homepage only (this file): the page's BASE is the hero's textured-blue
+   tone, so iPhone Safari tints the status-bar strip and the toolbar area
+   to match — full bleed, no white or darker bands top/bottom (Safari colors those from the page
    background, and the shared white base made them white). The load order
    is unchanged: .hero-stage below covers the whole screen and starts
    WHITE, fading to blue with the texture; the footer keeps its own white
    background (components.css .site-footer). */
 html,
 body {
-  background: var(--color-surface-hero);
+  /* Safari can only paint its strips a FLAT color, so this is the
+     measured average of the blue + paper texture as it actually appears
+     (tokens.css --color-bg-hero-textured), not the raw blue — the strips
+     then blend into the textured page instead of reading as darker bands. */
+  background: var(--color-bg-hero-textured);
 }
 
 .hero-stage {
