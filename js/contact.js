@@ -58,7 +58,14 @@
 
   var resume = el('a', 'contact-modal__resume', 'Resume');
   resume.href = RESUME_URL;
-  resume.setAttribute('download', 'Sadie-Gold-Resume.pdf'); // the saved file's name
+  if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+    // Phones/tablets: open the PDF in a new tab (the browser's own PDF
+    // viewer, where it can be read, shared or saved) instead of a download.
+    resume.target = '_blank';
+    resume.rel = 'noopener';
+  } else {
+    resume.setAttribute('download', 'Sadie-Gold-Resume.pdf'); // desktop: download, with this file name
+  }
   resume.setAttribute('data-cursor-gesture', 'thumbs-up');
 
   // Dead-link rule: if the PDF isn't actually there yet, the button is
