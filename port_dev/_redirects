@@ -1,6 +1,0 @@
-# Cloudflare Pages redirects. Old Mind Cloud URLs -> new ones.
-/mindcloud/public/mindcloud.html  /mindcloud/      301
-/mindcloud/public/mindcloud       /mindcloud/      301
-/mindcloud/public/add.html        /mindcloud/add   301
-/mindcloud/public/add             /mindcloud/add   301
-/mindcloud/public/*               /mindcloud/      301
