@@ -1,0 +1,843 @@
+/*
+  HOMEPAGE — hero intro sequence + paper collage.
+
+  SCROLL SEQUENCE OVERVIEW (see js/main.js for the actual math):
+    1. Page loads; title fades on letter-by-letter.
+    2. User scrolls through .hero-track (a tall scroll "runway").
+       - Papers 1 & 2 (Art Direction, UI) rise from below with a parallax
+         lag, then rotate into their resting angle.
+       - At the same time, the title block slides up and STICKS near the
+         top, behind the papers (z-index-wise).
+       - Papers 3 & 4 (Motion, About) rise from below BEHIND papers 1 & 2,
+         staggered slightly later.
+    3. Scroll runway ends; everything is now at rest in its final layout
+       and further scrolling has no effect (there's nothing below it —
+       the homepage "loads all at once" per spec, this is just how it
+       gets there).
+
+  All four papers are clickable (see paper.js) and, once active/front,
+  link to their project page via the anchor wrapping each paper.
+*/
+
+.hero-track {
+  position: relative;
+  height: 260vh; /* scroll "runway" for the intro sequence — see js/main.js SCROLL_RANGE */
+}
+
+/* Homepage only (this file): the page's BASE is the hero blue, so iPhone
+   Safari tints the status-bar strip and the toolbar area blue too — full
+   bleed, no white bands top/bottom (Safari colors those from the page
+   background, and the shared white base made them white). The load order
+   is unchanged: .hero-stage below covers the whole screen and starts
+   WHITE, fading to blue with the texture; the footer keeps its own white
+   background (components.css .site-footer). */
+html,
+body {
+  background: var(--color-surface-hero);
+}
+
+.hero-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  /* Load order: white page (html/body) -> this blue AND the paper
+     texture (.hero-bg-paper) fading in TOGETHER, same duration and
+     easing, both triggered by .is-loaded once the texture image has
+     actually loaded (js/main.js) — so they always land as one. */
+  background-color: var(--color-surface-paper);
+  transition: background-color 600ms ease;
+}
+
+.hero-stage.is-loaded {
+  background-color: var(--color-surface-hero);
+}
+
+/* BUG FIX: on first paint the papers sat at their RESTING spots for a
+   beat (their offscreen start positions only exist once js/main.js has
+   set them), so one flashed into view before the intro began. They stay
+   hidden until main.js has positioned them and adds .is-ready. */
+.papers-stage {
+  visibility: hidden;
+}
+
+.papers-stage.is-ready {
+  visibility: visible;
+}
+
+/* ---------- full-bleed background paper ---------- */
+/* Sits directly on top of the --color-bg-hero solid fill, behind every
+   other hero element. Overfills the viewport by 12px on every side (so
+   there's never a sliver of the solid color peeking past a texture edge
+   at any viewport size) per spec.
+   PLACEHOLDER ASSET: Sadie's real background-paper graphic hasn't synced
+   to disk yet (checked repeatedly — see chat) — using an existing paper
+   texture from the archived build as a stand-in. Swap the url() below
+   for the real asset once it lands; nothing else needs to change. */
+
+.hero-bg-paper {
+  position: absolute;
+  inset: -12px;
+  z-index: var(--z-bg-paper);
+  /* WebP (446KB) instead of the original 2.5MB PNG, which is what made
+     phones sit on the plain blue for a beat on reload. Preloaded from
+     index.html's <head>; kept in sync with that URL. */
+  background-image: url('../assets/backgrounds/full_paper_clear.webp'); /* TODO: swap for Sadie's asset */
+  background-size: cover;
+  background-position: center;
+  /* Starts hidden and fades up to 0.7 once the image has actually
+     decoded (.is-loaded, js/main.js) — so a slow connection shows a
+     smooth fade-in rather than the texture popping in abruptly. */
+  opacity: 0;
+  transition: opacity 600ms ease; /* in step with .hero-stage's blue */
+  pointer-events: none;
+}
+
+.hero-bg-paper.is-loaded {
+  opacity: 0.7;
+}
+
+/* ---------- giant background logo watermark ---------- */
+/* Large-scale reuse of the nav's logo-placeholder shape (rounded box,
+   "LO"/"GO" stacked) as a faint background mark — mostly cropped off the
+   bottom-right edge by .hero-stage's own overflow:hidden. Sits behind the
+   paper texture (--z-bg-logo-mark < --z-bg-paper) but in front of the
+   solid --color-bg-hero fill, per spec. */
+
+.hero-bg-logo {
+  position: absolute;
+  width: 48vw;
+  aspect-ratio: 1;
+  right: -26vw;
+  bottom: -32vh;
+  z-index: var(--z-bg-logo-mark);
+  border: 2px solid var(--color-text-on-dark);
+  border-radius: 8%;
+  /* Part of the load sequence (js/main.js): fades in from 0 to its set
+     20%, at the same time as the nav, rather than being visible instantly. */
+  opacity: 0;
+  transition: opacity 500ms ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.2em;
+  padding: 0 4vw;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  text-transform: uppercase; /* all Syne Mono text is uppercase, per spec */
+  font-size: 7vw;
+  line-height: 1;
+  color: var(--color-text-on-dark);
+}
+
+.hero-bg-logo.is-in {
+  opacity: 0.2;
+}
+
+/* ---------- header role line ("I'm a... / [cycling role]") ---------- */
+/* Used to be 4 decorative CSS shapes; now holds the text that used to
+   live small in the nav next to the logo, sized up and split across this
+   same space — "I'm a..." left-justified, the cycling role right-
+   justified (see js/role-cycle.js for the letter-cycle animation).
+   Fades + rises off-screen early in the scroll sequence, same as the
+   original decorative graphic was meant to (--decor-fade/--decor-y set
+   by js/main.js — scrubbed by scroll position, so scrolling back up
+   brings it back exactly like everything else on this page). */
+
+.hero-decor {
+  position: absolute;
+  /* top is set from JS (js/main.js positionHeroDecor) as the nav's own
+     live bottom edge + a fixed gutter, so there's always real breathing
+     room below the nav's bottom line no matter how nav height changes
+     (padding/border tweaks there used to silently close this gap) — this
+     is a fallback only, for the instant before that JS runs. */
+  top: 140px;
+  left: var(--grid-margin);
+  right: var(--grid-margin);
+  --decor-gap-below-nav: 32px; /* read by js/main.js positionHeroDecor */
+  z-index: var(--z-bg-decoration);
+  opacity: var(--decor-fade, 1);
+  transform: translateY(var(--decor-y, 0px));
+}
+
+.hero-decor__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  color: var(--color-text-on-dark);
+}
+
+.hero-decor__im-a,
+.hero-decor__role {
+  white-space: nowrap;
+}
+
+.hero-decor__role {
+  position: relative;
+}
+
+/* BUG FIX: this used to be `display: none` at <=900px, so the whole
+   "I'm a…/[role]" line silently vanished on phones/tablets. At 34pt on
+   one row, "I'm a…" + the longest role ("Creative Problem Solver", 23
+   mono chars) needs ~850px, so instead of hiding it, narrow screens
+   stack the two parts (role on its own line, left-aligned) and scale
+   the type with the viewport so the longest role always fits. */
+@media (max-width: 900px) {
+  .hero-decor__row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  /* on the spans themselves — .text-h1 sets their font-size directly */
+  .hero-decor__row .text-h1 {
+    font-size: clamp(18px, 6vw, 34pt);
+  }
+}
+
+/* Phone: the line fills the viewport width with a 12px gutter on every
+   side (top gap below the nav included — js/main.js reads
+   --decor-gap-below-nav). Sized so the LONGEST role, "Creative Problem
+   Solver", spans exactly 100vw - 24px: it measures ~10.8 x font-size in
+   this font (10.9 below leaves a hair of slack). Change that ratio if
+   the roles in js/role-cycle.js change. */
+@media (max-width: 760px) {
+  .hero-decor {
+    left: 12px;
+    right: 12px;
+    --decor-gap-below-nav: 12px;
+  }
+  .hero-decor__row .text-h1 {
+    font-size: calc((100vw - 24px) / 10.9);
+  }
+}
+
+/* ---------- title block ---------- */
+
+.hero-title-wrap {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  right: var(--grid-margin);
+  z-index: var(--z-title);
+  /* Title now sits IN FRONT of the papers (see --z-title in tokens.css),
+     and this box spans nearly the full stage width — without this it
+     would swallow hover/clicks on any paper underneath it. */
+  pointer-events: none;
+  transform: translateY(var(--title-y, 0));
+  transition: transform 80ms linear; /* smoothing only — the value itself is scroll-scrubbed */
+}
+
+.hero-title-wrap__eyebrow {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 8px;
+  /* Part of the load sequence (js/main.js): starts invisible, fades to
+     90% at the same t=0 as the nav, over the same ~500ms. */
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+
+.hero-title-wrap__eyebrow.is-in {
+  opacity: 0.9;
+}
+
+/* Two segments — "SG PORTFOLIO SITE" then the date — each followed by
+   its own divider line, per the mockup: a long line after the site
+   label, then a short stub after the date. */
+.hero-title-wrap__eyebrow-seg {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  white-space: nowrap;
+}
+
+.hero-title-wrap__eyebrow-seg::after {
+  content: '';
+  width: 160px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.hero-title-wrap__eyebrow-seg--date::after {
+  width: 40px;
+}
+
+/* BUG FIX: on a narrow phone, "SG PORTFOLIO SITE" + its 160px line +
+   the date + ITS line add up to well past the available width — since
+   flex items don't shrink below their own nowrap content by default,
+   the row was silently overflowing past the viewport edge and getting
+   clipped by html/body's overflow-x:clip (the date read as just "10"
+   instead of the full "10.06.2026"). Shrinking both divider stubs down
+   is enough for everything to fit on one line at this width. */
+@media (max-width: 600px) {
+  .hero-title-wrap__eyebrow-seg::after {
+    width: 20px;
+  }
+}
+
+.hero-title {
+  color: var(--color-text-on-dark);
+}
+
+/* Letter-by-letter load-in, reusable anywhere (title lines, the "I'm a…"
+   row) — spans are injected by main.js. Each user sets its own
+   --letter-duration (title: slow + dramatic; "I'm a…": fast, matching
+   the role-cycle text's own motion language) and toggles .is-in on
+   itself once its letters should animate in. */
+.letter-reveal .letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.4em);
+  transition: opacity var(--letter-duration, 400ms) ease, transform var(--letter-duration, 400ms) ease;
+}
+
+.letter-reveal.is-in .letter {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.letter-reveal--fast {
+  --letter-duration: 220ms;
+}
+
+/* ---------- cycling role text (js/role-cycle.js) ---------- */
+/* Each word is a row of per-letter spans, clipped to one line-height so a
+   letter can slide fully out of view instead of just fading in place.
+   Outgoing letters slide up+out; incoming letters slide up+in from
+   below — both staggered left to right (transition-delay set per-letter
+   in JS), so the whole word reads as a quick left-to-right wipe rather
+   than everything moving at once. */
+
+.role-cycle__clip {
+  display: inline-block;
+  overflow: hidden;
+  height: 1.3em;
+  vertical-align: top;
+}
+
+.role-cycle__word {
+  display: inline-block;
+}
+
+.role-cycle__letter {
+  display: inline-block;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.role-cycle__letter.is-out {
+  opacity: 0;
+  transform: translateY(-110%);
+}
+
+.role-cycle__letter.is-in-start {
+  opacity: 0;
+  transform: translateY(110%);
+}
+
+/* The "n" in "I'm an…" (js/role-cycle.js). Its slot opens/closes by width
+   in step with the letter's slide; clip-path (not overflow:hidden, which
+   would shift the baseline) hides the letter while it sits above/below
+   the line, and keeps it hidden horizontally while the slot is closed. */
+.im-a__n {
+  display: inline-block;
+  width: 0;
+  clip-path: inset(0);
+  transition: width 220ms ease;
+}
+
+/* ---------- papers stage ---------- */
+
+.papers-stage {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-paper-front);
+}
+
+/* Each paper's RESTING position/size/rotation is set here as a per-id
+   rule — intentionally not inline styles, so the whole "floor plan" of
+   the collage is readable and editable in one place.
+
+   JS drives two SEPARATE, sequential sub-phases (not one blended value):
+     --rise-y    1 -> 0  as the paper travels up from below the viewport
+     --rotate-mix 0 -> 1 afterward, blending --rotate-start -> --rotate-rest
+   i.e. the paper finishes rising before it starts rotating to rest,
+   matching "come up, THEN rotate (and settle) into place" rather than
+   both happening at once. See PHASE_AB/PHASE_CD sub-split in js/main.js. */
+
+.paper--category,
+.paper--about {
+  width: clamp(220px, 22vw, 320px);
+  aspect-ratio: 3 / 4;
+  /* BUG FIX: 70vh of travel sounds like plenty, but combined with
+     About's own position (top:52%, moved up from its original 60% in an
+     earlier "peek-through" pass) and its own rotated bounding box, it
+     left About's top edge ~12px INSIDE the viewport even at scroll
+     position 0 — visible before any scrolling happened at all. 90vh
+     gives enough clearance to actually fully clear the fold for every
+     paper at this size/position, not just most of them. */
+  transform:
+    translate(-50%, -50%)
+    translateY(calc(var(--rise-y, 0) * 90vh))
+    rotate(calc(var(--rotate-start, 0deg) * (1 - var(--rotate-mix, 0)) + var(--rotate-rest, 0deg) * var(--rotate-mix, 0)));
+}
+
+/* The two big hero papers (Art Direction, UI) are kept toward the LEFT
+   half of the stage and close together on purpose, so their combined
+   footprint — huge once rotated 90° — doesn't span the full width and
+   bury Motion/About entirely. Motion peeks out below-left, About peeks
+   out clearly on the right, both still reachable to hover/click. */
+/* BUG FIX: at left:24%, #paperArtDirection's rotated-90° footprint
+   (width / 0.75, since rotation swaps its dimensions) clips past the
+   LEFT edge of the viewport for almost the entire real-world desktop
+   range — not just small screens. Its width is clamp(500px, 45vw, 760px)
+   (see further down), which stays pinned at its 500px floor until the
+   viewport is ~1111px wide, so a fixed 24% left was only ever safe above
+   ~1389px wide. 38% keeps the whole rotated card on-screen all the way
+   down to the 900px breakpoint below, where a separate, smaller clamp
+   takes over. */
+#paperArtDirection { left: 38%; top: calc(50% + 12px); z-index: var(--z-paper-front); }
+#paperUI           { left: calc(70% - 24px); top: calc(56% + 12px); z-index: var(--z-paper-front); }
+#paperMotion       { left: calc(18% + 48px); top: min(84%, calc(100% - clamp(220px, 22vw, 320px) * 0.6 - 48px)); --rotate-rest: 89deg; z-index: var(--z-paper-back); }
+#paperAbout        { left: calc(86% - 24px); top: calc(42% - 36px); --rotate-rest: 3deg;  z-index: var(--z-paper-back); }
+
+/* Motion's top: never lower than "bottom edge sits 48px above the stage
+   bottom". It rests turned ~90deg, so its on-screen height is its WIDTH
+   (1.2 x the shared clamp(220px, 22vw, 320px)) and its half-height is
+   clamp x 0.6; the calc puts its bottom at 100% - 48px. min() keeps the original 84%
+   whenever that's already higher. Update the clamp here if the shared
+   width rule changes. */
+
+/* BUG FIX: an ID selector (#paperMotion/#paperAbout above) always beats
+   a two-class selector (.paper.is-active) on specificity alone, no
+   matter the source order — so the generic "clicked paper comes to
+   front" rule in components.css was silently losing to these papers'
+   own resting z-index, and clicking one while it sat behind another
+   paper never actually brought it forward. Matching ID+class selectors
+   here win on specificity instead. */
+#paperMotion.is-active,
+#paperAbout.is-active {
+  z-index: var(--z-paper-active);
+}
+
+/* Motion rests turned a quarter (89deg = the old -1deg tilt + 90deg) and
+   starts its rise from -18deg + 90deg, so the rise-then-rotate motion
+   swings the same small amount as before rather than spinning 107deg.
+   Width is 1.2x the shared clamp (desktop; the <=760px phone layout
+   keeps its own 68vw). */
+#paperMotion       { --rotate-start: 72deg; width: calc(clamp(220px, 22vw, 320px) * 1.2); }
+#paperAbout        { --rotate-start: 22deg; }
+
+.paper.is-active {
+  transform:
+    translate(-50%, -50%)
+    translateY(calc(var(--rise-y, 0) * 90vh))
+    rotate(0deg)
+    scale(1.06);
+}
+
+/* ---------- the two "hero" papers (Art Direction, UI) — 4x size, 3-stage motion ---------- */
+/* These two get their own transform entirely (js/main.js sets
+   --paper-y-vh and --paper-rotate directly, already fully blended —
+   see setUpRotateDrop) instead of the --rise-y/--rotate-mix system
+   above: rise up PAST their resting spot, rotate a full 90°, THEN pull
+   down into the actual resting position — three sequential beats, not
+   the simpler two-stage rise-then-rotate the other two papers use. */
+
+#paperArtDirection,
+#paperUI {
+  /* NOTE: a literal 4x of the original clamp(220px, 22vw, 320px) —
+     880-1280px wide — completely whites out the viewport once rotated
+     90°, since rotation swaps the card's on-screen footprint to its
+     (taller) 4:3 landscape dimension (height = width / 0.75). Dialed
+     back to ~2.3x so the rotated footprint still fits on screen; flagged
+     to Sadie to confirm vs. bumping back up. */
+  width: clamp(500px, 45vw, 760px);
+  transform:
+    translate(-50%, -50%)
+    translateY(calc(var(--paper-y-vh, 100) * 1vh))
+    rotate(var(--paper-rotate, 0deg));
+}
+
+#paperArtDirection.is-active,
+#paperUI.is-active {
+  transform:
+    translate(-50%, -50%)
+    translateY(calc(var(--paper-y-vh, 100) * 1vh))
+    rotate(0deg)
+    scale(1.06);
+}
+
+@media (max-width: 900px) {
+  /* BUG FIX: these two papers end up rotated a full 90° at rest, which
+     SWAPS their on-screen footprint — a box this wide (aspect 3:4) is
+     actually (width / 0.75) tall, and once rotated that height becomes
+     the visible on-screen WIDTH. The previous 85vw here only constrained
+     the CSS width pre-rotation, so the rotated footprint was really
+     ~113vw and overflowed the viewport edge to edge. Capping width at
+     48vw (rotated footprint ≈ 64vw) keeps it comfortably inside the
+     viewport instead — left:38% from the base rule above already gives
+     enough horizontal margin at this size, no override needed here. */
+  #paperArtDirection,
+  #paperUI {
+    width: clamp(200px, 48vw, 280px);
+  }
+}
+
+/* UI is 1.2x smaller than Art Direction — same clamps as the shared
+   #paperArtDirection/#paperUI width rules above (desktop + <=900px),
+   divided by 1.2. Keep these in sync if those change. */
+#paperUI { width: calc(clamp(500px, 45vw, 760px) / 1.2); }
+@media (max-width: 900px) {
+  #paperUI { width: calc(clamp(200px, 48vw, 280px) / 1.2); }
+}
+
+.paper__tape--tl { top: -9px; left: 24px; transform: rotate(-8deg); }
+.paper__tape--tr { top: -9px; right: 24px; transform: rotate(6deg); }
+
+/* ---------- real paper textures (assets/papers/ — per Sadie's reference wireframes) ---------- */
+/* Each of the 4 papers gets its OWN distinct texture, per spec ("all
+   should be different") — Art Direction: taped gray paper (the default
+   below), UI: the hole-punched sheet, Motion: the small poloroid/brown
+   piece, About: the blue taped paper (see the --about rule further down).
+   paper_taped.png / paper_blue.png already have tape corners baked in,
+   so the category papers carry no .paper__tape divs at all (removed
+   from index.html — the thumbnail holders are the only thing layered on
+   the texture); About's leftover tape div is hidden below. */
+
+.paper--category .paper__inner {
+  background-image: url('../assets/papers/paper_taped.png');
+  background-size: cover;
+  background-position: center;
+}
+
+#paperUI .paper__inner {
+  background-image: url('../assets/papers/paper_hole_punched.png');
+}
+
+#paperMotion .paper__inner {
+  background-image: url('../assets/papers/paper_poloroid.png');
+}
+
+.paper--about .paper__tape {
+  display: none;
+}
+
+/* ---------- paper contents: thumbnail holders (built by js/paper-thumbs.js) ---------- */
+/* The holders are the ONLY thing layered on each category paper's
+   texture. Empty = a soft placeholder well; .is-filled = a real project
+   thumbnail cropped to fill the holder. */
+
+.paper-grid {
+  position: absolute;
+  inset: 20px 20px 52px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px;
+}
+
+.paper-grid__box {
+  position: relative;
+  overflow: hidden;
+  /* Plain placeholder fill, not a texture — paper_poloroid.png is Motion's
+     own OUTER paper, so reusing it here would blend frame and boxes. */
+  background: rgba(29, 29, 30, 0.08);
+  border: 1px solid rgba(29, 29, 30, 0.15);
+  transition:
+    transform var(--duration-base) var(--ease-smooth),
+    box-shadow var(--duration-base) var(--ease-smooth);
+}
+
+.paper-grid__box--wide {
+  grid-column: 1 / -1;
+}
+
+.paper-grid__box.is-filled {
+  background: none;
+  border-color: transparent;
+}
+
+.paper-grid__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* --thumb-rotate comes from PROJECTS[slug].thumbRotate (js/paper-thumbs.js);
+     --thumb-zoom is the hover zoom below. One transform, two knobs. */
+  transform: rotate(var(--thumb-rotate, 0deg)) scale(var(--thumb-zoom, 1));
+  transition: transform var(--duration-base) var(--ease-smooth);
+}
+
+/* A 90deg/270deg turn swaps the image's footprint, so size it to the
+   holder's height x width (container query units) and center it — it
+   still covers the holder exactly once rotated. */
+.paper-grid__box.is-quarter-turn {
+  container-type: size;
+}
+
+.paper-grid__box.is-quarter-turn .paper-grid__img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100cqh;
+  height: 100cqw;
+  /* BUG FIX: the global img reset caps max-width at 100% of the holder's
+     WIDTH, which silently clamped this pre-rotation width (= holder
+     height) and left the turned image short of the holder's full width. */
+  max-width: none;
+  transform: translate(-50%, -50%) rotate(var(--thumb-rotate, 0deg)) scale(var(--thumb-zoom, 1));
+}
+
+/* Hover lift — ONLY while the paper is at the front (.is-front-ready is
+   set by js/paper.js after the paper has come forward). On a paper
+   that's behind, its boxes never react. */
+.paper.is-front-ready .paper-grid__box:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 8px 18px rgba(29, 29, 30, 0.22);
+}
+
+.paper.is-front-ready .paper-grid__box:hover .paper-grid__img {
+  --thumb-zoom: 1.05;
+}
+
+/* Touch stand-in for that hover lift (js/touch.js): when a tap brings a
+   paper to the front, its holders lift and settle once, staggered. */
+@keyframes thumb-lift {
+  0%, 100% { transform: none; box-shadow: none; }
+  40%      { transform: translateY(-3px) scale(1.03); box-shadow: 0 8px 18px rgba(29, 29, 30, 0.22); }
+}
+
+.paper.is-lift-once .paper-grid__box {
+  animation: thumb-lift 600ms var(--ease-smooth);
+}
+
+.paper.is-lift-once .paper-grid__box:nth-child(2) { animation-delay: 90ms; }
+.paper.is-lift-once .paper-grid__box:nth-child(3) { animation-delay: 180ms; }
+
+/* ---------- about paper: bio card, not a photo grid ---------- */
+
+/* About is JUST the blue-paper graphic (assets/papers/paper_blue.png, 496x357
+   landscape, tape baked in) — shown whole, never cropped, with no
+   backing behind it: no navy fill, no white .paper__inner base, no
+   rectangular box-shadow (the PNG has transparent/torn edges, so a
+   rectangle shadow or fill would show around it). Sized to fit the bio
+   text rather than matching the other papers' 3:4 portrait size. These
+   override the shared .paper--category/.paper--about width+aspect rule
+   above by source order (same specificity, later wins). */
+.paper--about {
+  width: clamp(300px, 27vw, 380px);
+  aspect-ratio: 496 / 357;
+}
+
+.paper--about .paper__inner {
+  background: url('../assets/papers/paper_blue.png') center / 100% 100% no-repeat;
+  /* extra right/top room: the graphic's right edge is a lighter strip
+     with tape over the top-right corner — keep text on the blue. */
+  padding: 26px 44px 24px 28px;
+  color: var(--color-paper-white);
+}
+
+/* ID-level so it also beats components.css's hover/active/hover-front
+   shadow rules (.paper:hover .paper__inner etc. out-specify a plain
+   two-class selector) — no rectangular shadow in ANY state. */
+#paperAbout .paper__inner { box-shadow: none; }
+
+.paper-about__name {
+  font-family: var(--font-mono);
+  text-transform: uppercase; /* all Syne Mono text is uppercase, per spec */
+  font-size: 14pt;
+  margin-bottom: 12px;
+}
+
+.paper-about__list {
+  list-style: none;
+  font-family: var(--font-mono);
+  text-transform: uppercase; /* all Syne Mono text is uppercase, per spec */
+  font-size: 8pt;
+  line-height: 1.8;
+  opacity: 0.9;
+}
+
+.paper-about__link {
+  position: absolute;
+  right: 44px; /* right-justified, matching .paper__inner's right padding (clear of the graphic's light edge strip) */
+  bottom: 26px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  text-transform: uppercase; /* all Syne Mono text is uppercase, per spec */
+  font-size: 9pt;
+  letter-spacing: 0.06em;
+}
+
+/* Hover: the arrow's shaft grows 6px — the link is right-anchored, so
+   that growth pushes the text 6px LEFT on its own (no separate text
+   translate needed) — and the text gains a hairline stroke so it reads
+   bolder. The arrow is drawn in CSS (shaft + chevron) rather than the
+   "→" glyph so its length can actually animate. */
+.paper-about__link {
+  -webkit-text-stroke: 0 currentColor;
+  transition: -webkit-text-stroke-width var(--duration-base) var(--ease-smooth);
+}
+
+.paper-about__arrow {
+  position: relative;
+  display: inline-block;
+  width: 14px;
+  height: 1px;
+  background: currentColor;
+  transition: width var(--duration-base) var(--ease-smooth);
+}
+
+.paper-about__arrow::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.paper-about__link:hover {
+  -webkit-text-stroke-width: 0.5px;
+}
+
+.paper-about__link:hover .paper-about__arrow {
+  width: 20px;
+}
+
+/* no hover on touch: the arrow just stays at its longer length */
+html.is-touch .paper-about__arrow {
+  width: 20px;
+}
+
+@media (max-width: 760px) {
+  /* About on phones: wide enough that the whole bio fits ON the blue
+     graphic (at 68vw the list ran into the link and off the bottom).
+     Tighter padding, and the link joins the normal flow (right-aligned
+     under the list) instead of being pinned to the corner, so the text
+     can never overlap itself. */
+  .paper--about {
+    width: 90vw;
+  }
+  .paper--about .paper__inner {
+    padding: 16px 30px 14px 20px;
+  }
+  .paper-about__link {
+    position: static;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+  /* Phone: ALL FOUR papers read as the same size on screen — 90vw wide.
+     About sits flat (90vw wide, 496:357 -> ~65vw tall). The other three
+     rest turned ~90deg, so their on-screen WIDTH is their height
+     (width x 4/3): a 67.5vw-wide sheet shows as 90vw x 67.5vw.
+     (ID selectors, so they beat the desktop/<=900px ID width rules.) */
+  #paperArtDirection,
+  #paperUI,
+  #paperMotion       { width: 67.5vw; }
+
+  /* Layered down the page, every paper always mostly visible: centers
+     are PAPER_STEP (52vw ~ 78% of a paper's ~67vw on-screen height)
+     apart, so each overlaps the next by only ~22% — none can ever be
+     fully covered, whichever is in front. Spacing is in vw because the
+     paper heights are, so the overlap is identical on every phone.
+     The first paper's center sits at 38svh (first screen); the stage
+     is just tall enough to end 48px below About. js/main.js snaps to the
+     top of this taller stage (trackEndY). */
+  .hero-stage {
+    --paper-top: 38svh;
+    --paper-step: 52vw;
+    height: calc(38vh + 3 * 52vw + 33vw + 48px); /* fallback without svh */
+    height: calc(var(--paper-top) + 3 * var(--paper-step) + 33vw + 48px);
+  }
+  /* keep the title at the bottom of the FIRST screen, not of the taller stage */
+  .hero-title-wrap {
+    bottom: calc(100% - 100svh + 12px);
+  }
+  #paperArtDirection { left: 50%; top: var(--paper-top); }
+  #paperUI           { left: 50%; top: calc(var(--paper-top) + var(--paper-step)); }
+  #paperMotion       { left: 50%; top: calc(var(--paper-top) + 2 * var(--paper-step)); }
+  #paperAbout        { left: 50%; top: calc(var(--paper-top) + 3 * var(--paper-step)); }
+  /* Layering like cards dealt down the page: each lower paper sits ON
+     the one above, so every paper only ever loses its bottom ~22% (Motion
+     used to be covered from both sides). Tapping a paper still brings it
+     to the very front (inline z-index from js/paper.js beats these). */
+  #paperArtDirection { z-index: 21; }
+  #paperUI           { z-index: 22; }
+  #paperMotion       { z-index: 23; }
+  #paperAbout        { z-index: 24; }
+}
+
+/* ---------- in-between sizes (761-1024px): their own collage ---------- */
+/* Between phone and laptop the desktop collage didn't fit: its papers are
+   placed by % but floored at minimum px sizes, so on a narrow window they
+   grew relative to the screen and piled into the title's corner — the
+   white "Sadie Gold Portfolio" (in FRONT of the papers by design, see
+   --z-title) landed on the light papers and broke up.
+
+   Here the title keeps every original rule — slides up and STICKS under
+   the nav (js/main.js measureTitleTravel / PHASE_TITLE), in front of the
+   papers, nav in front of everything — and the papers are laid out to
+   stay CLEAR of it: a staggered 2x2 "dealt cards" collage centered in
+   the space below the pinned title.
+
+     --title-zone  bottom of the pinned title block: nav (~68px) + 24px
+                   gap + eyebrow + two lines of the 9vw title, + margin
+     --s           one paper's on-screen HEIGHT, sized by the smaller of
+                   the window's width and its leftover height (so a short
+                   laptop window still fits), never below 140px
+     --row1/--row2 the two rows' centers; rows overlap by 20% of --s, the
+                   right column sits 15% of --s lower for the stagger.
+   Art Direction / UI / Motion rest turned ~90deg, so their CSS width IS
+   their on-screen height (--s) and they read --s x 4/3 wide; About is
+   flat at the same on-screen width (never under 300px so its bio fits).
+   Each lower paper sits on the one above (z 21-24), like the phone
+   layout, so none is ever fully covered; tapping/hovering still brings
+   any paper to the very front (inline z-index from js/paper.js). */
+@media (min-width: 761px) and (max-width: 1024px) {
+  .papers-stage {
+    --title-zone: calc(140px + 18vw);
+    --avail: calc(100svh - var(--title-zone) - 24px); /* room below the title */
+    /* About can't shrink below 300 x 216 (its bio must fit), so the block
+       height is row1's top half + 0.95s down to About's center + half of
+       About's own height (--k); --s is the largest size that keeps that
+       whole block inside --avail. */
+    --s: max(140px, min(30vw, (var(--avail) - 108px) / 1.45, var(--avail) / 1.93));
+    --k: max(216px, 0.96 * var(--s));
+    --block: calc(1.45 * var(--s) + var(--k) / 2);
+    --row1: calc(var(--title-zone) + (var(--avail) - var(--block)) / 2 + var(--s) / 2);
+    --row2: calc(var(--row1) + 0.8 * var(--s));
+  }
+  #paperArtDirection,
+  #paperUI,
+  #paperMotion       { width: var(--s); }
+  #paperAbout        { width: max(300px, calc(var(--s) * 4 / 3)); }
+
+  #paperArtDirection { left: 32%; top: var(--row1); z-index: 21; }
+  #paperUI           { left: 68%; top: calc(var(--row1) + 0.15 * var(--s)); z-index: 22; }
+  #paperMotion       { left: 32%; top: var(--row2); z-index: 23; }
+  #paperAbout        { left: 68%; top: calc(var(--row2) + 0.15 * var(--s)); z-index: 24; }
+}
+
+/* ---------- no-intro mode (swipe-back arrival / #behind preview) ---------- */
+/* Set by the inline script in index.html's <head>: every transition is
+   off until the page has loaded, so the intro's letter reveals and
+   fades land instantly on their final state. */
+html.no-intro *,
+html.no-intro *::before,
+html.no-intro *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
