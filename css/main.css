@@ -24,6 +24,18 @@
   height: 260vh; /* scroll "runway" for the intro sequence — see js/main.js SCROLL_RANGE */
 }
 
+/* Homepage only (this file): the page's BASE is the hero blue, so iPhone
+   Safari tints the status-bar strip and the toolbar area blue too — full
+   bleed, no white bands top/bottom (Safari colors those from the page
+   background, and the shared white base made them white). The load order
+   is unchanged: .hero-stage below covers the whole screen and starts
+   WHITE, fading to blue with the texture; the footer keeps its own white
+   background (components.css .site-footer). */
+html,
+body {
+  background: var(--color-surface-hero);
+}
+
 .hero-stage {
   position: sticky;
   top: 0;
@@ -271,26 +283,8 @@
   color: var(--color-text-on-dark);
 }
 
-/* Letter-by-letter load-in, reusable anywhere (title lines, the "I'm a…"
-   row) — spans are injected by main.js. Each user sets its own
-   --letter-duration (title: slow + dramatic; "I'm a…": fast, matching
-   the role-cycle text's own motion language) and toggles .is-in on
-   itself once its letters should animate in. */
-.letter-reveal .letter {
-  display: inline-block;
-  opacity: 0;
-  transform: translateY(0.4em);
-  transition: opacity var(--letter-duration, 400ms) ease, transform var(--letter-duration, 400ms) ease;
-}
-
-.letter-reveal.is-in .letter {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.letter-reveal--fast {
-  --letter-duration: 220ms;
-}
+/* Letter-by-letter load-in (.letter-reveal) lives in components.css —
+   shared with the project page title. */
 
 /* ---------- cycling role text (js/role-cycle.js) ---------- */
 /* Each word is a row of per-letter spans, clipped to one line-height so a
@@ -421,12 +415,19 @@
 #paperMotion       { --rotate-start: 72deg; width: calc(clamp(220px, 22vw, 320px) * 1.2); }
 #paperAbout        { --rotate-start: 22deg; }
 
+/* BUG FIX: clicking/tapping a paper (.is-active) used to REPLACE its
+   transform with rotate(0deg) + scale — fine when papers only tilted a few
+   degrees, but the hero papers and Motion rest turned ~90deg, so a click
+   snapped them upright in a single frame ("glitches and turns vertical").
+   Now the active state keeps the paper's rotation and only lifts it,
+   through the separate `scale` property, eased so it grows smoothly. */
+.paper--category,
+.paper--about {
+  transition: scale var(--duration-base) var(--ease-smooth);
+}
+
 .paper.is-active {
-  transform:
-    translate(-50%, -50%)
-    translateY(calc(var(--rise-y, 0) * 90vh))
-    rotate(0deg)
-    scale(1.06);
+  scale: 1.06;
 }
 
 /* ---------- the two "hero" papers (Art Direction, UI) — 4x size, 3-stage motion ---------- */
@@ -452,14 +453,7 @@
     rotate(var(--paper-rotate, 0deg));
 }
 
-#paperArtDirection.is-active,
-#paperUI.is-active {
-  transform:
-    translate(-50%, -50%)
-    translateY(calc(var(--paper-y-vh, 100) * 1vh))
-    rotate(0deg)
-    scale(1.06);
-}
+
 
 @media (max-width: 900px) {
   /* BUG FIX: these two papers end up rotated a full 90° at rest, which

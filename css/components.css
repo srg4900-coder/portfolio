@@ -225,6 +225,50 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   .site-nav { font-size: 16pt; }
 }
 
+/* Letter-by-letter load-in, reusable anywhere (title lines, the "I'm a…"
+   row, the project page title) — spans are injected by main.js /
+   project.js. Each user sets its own
+   --letter-duration (title: slow + dramatic; "I'm a…": fast, matching
+   the role-cycle text's own motion language) and toggles .is-in on
+   itself once its letters should animate in. */
+.letter-reveal .letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.4em);
+  transition: opacity var(--letter-duration, 400ms) ease, transform var(--letter-duration, 400ms) ease;
+}
+
+.letter-reveal.is-in .letter {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.letter-reveal--fast {
+  --letter-duration: 220ms;
+}
+
+/* Page load-in: blocks fade and glide up into place (same motion family
+   as the letter reveals above), staggered by each element's own
+   --load-delay. A CSS animation, so it plays from the very first paint
+   with no flash of the final state; the empty `to` frame means each
+   element lands on its OWN resting opacity/transform (e.g. a body
+   paragraph's 0.85 opacity), not a forced 1. */
+.load-rise {
+  animation: load-rise 900ms var(--ease-smooth) var(--load-delay, 0ms) both;
+}
+
+@keyframes load-rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .load-rise { animation: none; }
+  .letter-reveal .letter { transition: none; }
+}
+
 /* ---------- custom cursor ---------- */
 /*
   The real cursor hides (desktop/pointer:fine only) and this label follows
