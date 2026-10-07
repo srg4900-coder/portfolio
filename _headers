@@ -1,0 +1,11 @@
+# Cloudflare Pages response headers.
+# CSS/JS change on every deploy but keep the same file names, and by
+# default Pages lets browsers reuse them for 4 HOURS without checking —
+# so phones kept old stylesheets after an upload (the "I'm a…" line and
+# the rotated video thumbnail broke on iPhone that way). `no-cache` means
+# "always check first": unchanged files still come from cache via a
+# quick 304, but a new upload shows up on the very next load.
+/css/*
+  Cache-Control: no-cache
+/js/*
+  Cache-Control: no-cache

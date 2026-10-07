@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sadie Gold - Add to Mind Cloud</title>
+<style>
+  :root {
+    --bg: #F7F6EF;
+    --ink: #1D1D1E;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .card {
+    width: min(420px, 100%);
+  }
+
+  .card h1 {
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    margin-bottom: 28px;
+  }
+
+  label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 8px;
+  }
+
+  input, textarea {
+    width: 100%;
+    font-family: inherit;
+    font-size: 15px;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(29, 29, 30, 0.3);
+    padding: 8px 2px;
+    margin-bottom: 26px;
+    outline: none;
+  }
+
+  input:focus, textarea:focus {
+    border-bottom-color: var(--ink);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 60px;
+  }
+
+  button {
+    font-family: inherit;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    padding: 14px 26px;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  button:hover { opacity: 0.85; }
+
+  .status {
+    margin-top: 16px;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    opacity: 0.6;
+    min-height: 16px;
+  }
+
+  #pinGate { display: block; }
+  #ideaForm { display: none; }
+
+  .links {
+    margin-top: 36px;
+    display: flex;
+    gap: 20px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.5;
+  }
+
+  .links a { color: inherit; }
+</style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>Add an idea</h1>
+
+    <form id="pinGate">
+      <label for="pin">PIN</label>
+      <input type="password" id="pin" inputmode="numeric" autocomplete="off" autofocus>
+      <button type="submit">Unlock</button>
+      <div class="status" id="pinStatus"></div>
+    </form>
+
+    <form id="ideaForm">
+      <label for="title">Title</label>
+      <input type="text" id="title" placeholder="knit sweaters" required>
+
+      <label for="description">Description (optional)</label>
+      <textarea id="description" placeholder="a short note..."></textarea>
+
+      <label for="link">Link (optional)</label>
+      <input type="url" id="link" placeholder="https://...">
+
+      <button type="submit">Add to mind cloud</button>
+      <div class="status" id="ideaStatus"></div>
+    </form>
+
+    <div class="links">
+      <a href="/mindcloud/">View mind cloud →</a>
+    </div>
+  </div>
+
+<script>
+(function () {
+  var pinGate = document.getElementById('pinGate');
+  var ideaForm = document.getElementById('ideaForm');
+  var pinStatus = document.getElementById('pinStatus');
+  var ideaStatus = document.getElementById('ideaStatus');
+
+  // Already logged in on this device (30-day cookie)? Skip the PIN.
+  fetch('/api/login', { credentials: 'same-origin' })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.ok) {
+        pinGate.style.display = 'none';
+        ideaForm.style.display = 'block';
+      }
+    })
+    .catch(function () {});
+
+  pinGate.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var pin = document.getElementById('pin').value;
+    pinStatus.textContent = 'checking...';
+    fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ pin: pin })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.ok) {
+          pinGate.style.display = 'none';
+          ideaForm.style.display = 'block';
+          document.getElementById('title').focus();
+        } else {
+          pinStatus.textContent = data.error || 'wrong pin';
+        }
+      })
+      .catch(function () { pinStatus.textContent = 'connection error'; });
+  });
+
+  // Lets viewers on the public mindcloud page see "sadie is thinking..."
+  // live while typing here. Pinged (throttled) on every keystroke in any
+  // field; the server auto-expires a ping after a few seconds of silence,
+  // so closing this tab or just pausing doesn't leave it stuck on.
+  var lastTypingPing = 0;
+  var TYPING_PING_MS = 1200;
+
+  function pingTyping(isTyping) {
+    fetch('/api/typing', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ typing: isTyping })
+    }).catch(function () { /* best-effort — a missed ping just expires naturally */ });
+  }
+
+  ['title', 'description', 'link'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', function () {
+      var now = Date.now();
+      if (now - lastTypingPing > TYPING_PING_MS) {
+        lastTypingPing = now;
+        pingTyping(true);
+      }
+    });
+  });
+
+  ideaForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var title = document.getElementById('title').value.trim();
+    if (!title) return;
+    ideaStatus.textContent = 'adding...';
+    pingTyping(false); // cut the "thinking" indicator right away, ahead of the pop-in
+    fetch('/api/ideas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        title: title,
+        description: document.getElementById('description').value.trim(),
+        link: document.getElementById('link').value.trim()
+      })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.ok) {
+          ideaForm.reset();
+          ideaStatus.textContent = 'added ✓';
+          document.getElementById('title').focus();
+          setTimeout(function () { ideaStatus.textContent = ''; }, 2000);
+        } else {
+          ideaStatus.textContent = data.error || 'something went wrong';
+        }
+      })
+      .catch(function () { ideaStatus.textContent = 'connection error'; });
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sadie Gold - Portfolio</title>
+
+<!--
+  FILE MAP (read this before editing):
+    css/tokens.css      — colors, type scale, grid, motion/z-index tokens. Edit values HERE.
+    css/components.css  — nav, custom cursor, paper component, contact modal (shared w/ project.html)
+    css/main.css        — homepage-only layout (hero, papers-stage, decor)
+    js/cursor.js         — custom cursor-follow + label (shared)
+    js/paper.js          — paper hover-drift + click-to-front (shared)
+    js/contact.js        — contact modal open/close (shared)
+    js/main.js            — homepage scroll sequence + title letter-reveal (homepage-only)
+    js/projects-data.js  — PROJECTS: every case study's media paths (shared)
+    js/paper-thumbs.js   — builds each category paper's thumbnail grid (homepage-only)
+    js/swipe-back.js     — project page: swipe right to slide back to this page (project-only)
+    js/gestures.js       — hand-gesture frames shared by cursor.js + touch.js
+    js/touch.js          — tap stand-ins for hover/cursor fun on phones (shared)
+    ASSETS.md            — map of assets/ (what the site uses; originals live in ~/dev/port_dev_source/)
+
+  CONTENT TODO (flagged for Sadie, not guessed at):
+    - Real photos/content still needed for the UI / Motion project pages
+      (art-direction is the one real case study built out so far — see
+      the PROJECTS object in js/project.js for that pattern).
+    - "Sadie Gold Portfolio" used here (not "Sadie Goldberg") to match the
+      mockup text exactly — flag if that was actually meant to change.
+
+  NOTED FOR LATER (not built yet, requested for a future pass):
+    - A resume tab/page: quick overview + a download button.
+    - Resume PDF: the contact popup's Resume button downloads
+      assets/resume/Sadie-Gold-Resume.pdf (RESUME_URL in js/contact.js).
+-->
+
+<!-- Reload always starts at the top of the landing page: the browser's
+     default scroll restoration would otherwise drop you back mid-way
+     through the scroll-scrubbed intro (papers half-risen, title already
+     pinned), skipping the load sequence. Runs in <head> so it's set
+     before the browser tries to restore anything. -->
+<script>
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  window.scrollTo(0, 0);
+
+  // NO-INTRO MODE: arriving via the project page's swipe-back (flag set
+  // in sessionStorage by js/swipe-back.js), or loaded as the "behind"
+  // preview iframe there (#behind), the landing page appears already
+  // fully revealed — the intro's letter reveals/fades are CSS
+  // transitions, and .no-intro (css/main.css) disables every transition
+  // until the page has loaded and settled, so they all jump to their end.
+  (function () {
+    var skip = location.hash === '#behind';
+    try {
+      if (sessionStorage.getItem('sg-skip-intro')) {
+        skip = true;
+        sessionStorage.removeItem('sg-skip-intro');
+      }
+    } catch (e) {}
+    if (!skip) return;
+    var root = document.documentElement;
+    root.classList.add('no-intro');
+    window.addEventListener('load', function () {
+      setTimeout(function () { root.classList.remove('no-intro'); }, 200);
+    });
+  })();
+</script>
+
+<!-- Fetch the background texture first thing (it's what fills the
+     screen on load), instead of waiting until the CSS asks for it. -->
+<link rel="preload" as="image" href="assets/backgrounds/full_paper_clear.webp" type="image/webp" fetchpriority="high">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne+Mono&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/tokens.css?v=2">
+<link rel="stylesheet" href="css/components.css?v=2">
+<link rel="stylesheet" href="css/main.css?v=2">
+</head>
+<body>
+
+  <header class="site-nav site-nav--fade-in">
+    <div class="nav-left">
+      <!-- A real link to index.html, not a smooth-scroll-to-top button:
+           clicking the logo should reload the whole page and restart the
+           intro animations, from anywhere on the site, including while
+           already on the homepage itself — a same-page link click still
+           triggers a full navigation/reload, same as project.html's logo
+           link back to here. -->
+      <a class="logo-button" href="index.html" aria-label="Back to home">LO/GO</a>
+    </div>
+    <div class="nav-right">
+      <a href="/mindcloud/" data-cursor-solid="white">Mind Cloud</a>
+      <button data-open-contact data-cursor-solid="white">Contact</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="hero-track">
+      <div class="hero-stage">
+
+        <!-- Giant watermark version of the logo placeholder — 20% opacity,
+             tucked mostly off-screen bottom-right, behind the paper
+             texture but in front of the solid blue background. -->
+        <div class="hero-bg-logo" aria-hidden="true">
+          <span>LO</span>
+          <span>GO</span>
+        </div>
+
+        <div class="hero-bg-paper" aria-hidden="true"></div>
+
+        <!-- Was 4 decorative CSS shapes (a "dumbbell" of linked rounded
+             squares) — replaced with the "I'm a.../[role]" line that used
+             to live in the nav, sized up and split left/right across this
+             same space. Fades + rises off-screen early in the scroll
+             sequence (see --decor-fade/--decor-y, set by js/main.js),
+             same as the old shapes were meant to. -->
+        <div class="hero-decor" id="heroDecor">
+          <div class="hero-decor__row">
+            <span class="hero-decor__im-a text-h1 letter-reveal letter-reveal--fast">I'm a&nbsp;…</span>
+            <span class="hero-decor__role text-h1" id="roleCycle" aria-live="off"></span>
+          </div>
+        </div>
+
+        <div class="hero-title-wrap">
+          <p class="hero-title-wrap__eyebrow text-body1">
+            <span class="hero-title-wrap__eyebrow-seg">SG PORTFOLIO SITE</span>
+            <span class="hero-title-wrap__eyebrow-seg hero-title-wrap__eyebrow-seg--date" id="currentDate"></span>
+          </p>
+          <h1 class="hero-title text-title">Sadie Gold
+Portfolio</h1>
+        </div>
+
+        <div class="papers-stage">
+
+          <!-- Papers 3 & 4 rise first in DOM paint order but sit BEHIND
+               papers 1 & 2 (see css/main.css z-index) and start their
+               rise slightly later per js/main.js PHASE_CD. -->
+
+          <a class="paper paper--category" id="paperMotion"
+             href="project.html?project=motion"
+             data-cursor-label="Motion" data-cursor-fill="#557EAA" data-cursor-text="#FCFCFC">
+            <div class="paper__inner">
+              <div class="paper-grid"></div>
+            </div>
+          </a>
+
+          <div class="paper paper--about" id="paperAbout"
+               data-cursor-label="About" data-cursor-fill="#FCFCFC" data-cursor-text="#2F4A68">
+            <div class="paper__inner">
+              <div class="paper__tape paper__tape--tr"></div>
+              <p class="paper-about__name">Sadie Gold</p>
+              <ul class="paper-about__list">
+                <li>Graduate of RIT New Media Design<br>w/ a concentration in Philosophy</li>
+                <li>Creative Problem Solver</li>
+                <li>Technologist</li>
+                <li>Motion-Forward Designer</li>
+                <li>Woman of Taste</li>
+                <li>Connection Lover</li>
+                <li>Artist</li>
+              </ul>
+              <a class="paper-about__link" href="/mindcloud/">
+                See into my mind <span class="paper-about__arrow" aria-hidden="true"></span>
+              </a>
+            </div>
+          </div>
+
+          <a class="paper paper--category" id="paperArtDirection"
+             href="project.html?project=art-direction"
+             data-start-deg="0" data-rest-deg="-90"
+             data-cursor-label="Art Direction" data-cursor-fill="#557EAA" data-cursor-text="#FCFCFC">
+            <div class="paper__inner">
+              <div class="paper-grid"></div>
+            </div>
+          </a>
+
+          <a class="paper paper--category" id="paperUI"
+             href="project.html?project=ui"
+             data-start-deg="0" data-rest-deg="90"
+             data-cursor-label="UI" data-cursor-fill="#557EAA" data-cursor-text="#FCFCFC">
+            <div class="paper__inner">
+              <div class="paper-grid"></div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p class="text-body1">Code &copy; Sadie Gold 2026</p>
+  </footer>
+
+  <!-- contents built by js/contact.js (one copy of the text for every page) -->
+  <div class="contact-modal"></div>
+
+  <script src="js/gestures.js?v=2"></script>
+  <script src="js/cursor.js?v=2"></script>
+  <script src="js/paper.js?v=2"></script>
+  <script src="js/contact.js?v=2"></script>
+  <script src="js/role-cycle.js?v=2"></script>
+  <script src="js/main.js?v=2"></script>
+  <script src="js/projects-data.js?v=2"></script>
+  <script src="js/paper-thumbs.js?v=2"></script>
+  <script src="js/touch.js?v=2"></script>
+  <script>
+    // First click anywhere on the card brings it to the front (handled by
+    // paper.js) and nothing else. Only once it's ALREADY active does a
+    // click specifically on one of its photo-holder boxes navigate to the
+    // project page — clicking the active card anywhere else (its label,
+    // tape, empty margin) just keeps it at front, it doesn't also open it.
+    document.querySelectorAll('a.paper').forEach(function (paperLink) {
+      paperLink.addEventListener('click', function (e) {
+        var hitImageBox = e.target.closest('.paper-grid__box');
+        if (!paperLink.classList.contains('is-active') || !hitImageBox) {
+          e.preventDefault();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

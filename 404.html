@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sadie Gold - Page Not Found</title>
+
+<!--
+  404 page — deliberately minimal: big "404", "Page Not Found", one small
+  line, and a button back to the portfolio; left-justified, always fully
+  on one screen at every size. No nav, no footer.
+
+  Fonts and colors are written out LITERALLY below (not var(--...) from
+  tokens.css), so the page is always Helvetica Neue in the portfolio's
+  whites/blues/blacks even if the shared CSS can't load — e.g. when this
+  file is opened straight from disk, where the /css/... paths don't
+  resolve and everything fell back to the browser's default serif.
+  Values mirror tokens.css: --font-display, --color-paper-white
+  (background), --color-blue (text), --color-ink (button hover).
+
+  Its existence also matters: without a 404.html, Cloudflare Pages
+  answers EVERY missing URL with the homepage and a 200 status, so
+  broken links silently "work" and dead files (like a not-yet-uploaded
+  resume PDF) look like they exist.
+
+  Paths are ABSOLUTE (/css/..., /js/...) because this page is served at
+  whatever URL was missing, at any folder depth. The shared CSS/JS here
+  only add the site's custom cursor (on the live site).
+-->
+
+<link rel="stylesheet" href="/css/tokens.css?v=2">
+<link rel="stylesheet" href="/css/components.css?v=2">
+
+<style>
+  html, body {
+    margin: 0;
+    background: #FCFCFC;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    text-transform: none;
+  }
+
+  /* Left-justified, with generous left + top padding. Everything always
+     fits on one screen: the page is exactly one screen tall, and every
+     size below scales with BOTH the screen's width (vw) and height (svh),
+     whichever is smaller — so a short screen (e.g. a phone turned
+     sideways) shrinks the type too, not just a narrow one. */
+  .not-found {
+    height: 100vh;
+    height: 100svh;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    text-align: left;
+    padding: clamp(40px, min(14vw, 16svh), 180px) 24px 24px clamp(24px, min(12vw, 14svh), 200px);
+    color: #557EAA;
+  }
+
+  .not-found__code,
+  .not-found__title,
+  .not-found__line {
+    margin: 0;
+    font-family: inherit;
+  }
+
+  .not-found__code {
+    font-weight: 700;
+    font-size: clamp(64px, min(26vw, 30svh), 320px);
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+  }
+
+  .not-found__title {
+    margin-top: min(12px, 1.5svh);
+    font-weight: 500;
+    font-size: clamp(22px, min(5vw, 6.5svh), 56px);
+    line-height: 1;
+  }
+
+  .not-found__line {
+    margin-top: min(16px, 2svh);
+    font-weight: 400;
+    font-size: clamp(13px, min(1.4vw, 2.4svh), 19px);
+    opacity: 0.85;
+  }
+
+  .not-found__home {
+    margin-top: clamp(16px, 4.5svh, 36px);
+    padding: 12px 26px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-family: inherit;
+    font-weight: 500;
+    font-size: 15px;
+    color: #557EAA;
+    text-decoration: none;
+    transition: color 200ms ease, transform 120ms ease;
+  }
+
+  .not-found__home:hover {
+    color: #1D1D1E; /* text + outline (currentColor) go black */
+  }
+
+  .not-found__home:active {
+    transform: scale(0.96);
+  }
+</style>
+</head>
+<body>
+
+  <main class="not-found">
+    <p class="not-found__code">404</p>
+    <h1 class="not-found__title">Page Not Found</h1>
+    <p class="not-found__line">This page wandered off, head back!</p>
+    <a class="not-found__home" href="/">Back to the portfolio</a>
+  </main>
+
+  <script>
+    // "/" is the landing page on the live site (and the local server),
+    // from any URL depth. Opened straight from disk (file://), "/" would
+    // mean the root of the hard drive — point at the index.html sitting
+    // next to this file instead.
+    if (location.protocol === 'file:') {
+      document.querySelector('.not-found__home').href = 'index.html';
+    }
+  </script>
+
+  <!-- the site's custom cursor, same as every other page (live site) -->
+  <script>window.HAND_GESTURE_BASE = '/';</script>
+  <script src="/js/gestures.js?v=2"></script>
+  <script src="/js/cursor.js?v=2"></script>
+</body>
+</html>
