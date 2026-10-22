@@ -127,64 +127,69 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .nav-right a:hover,
 .nav-right button:hover { opacity: 0.55; }
 
-/* ---------- light-box: frame + glass ---------- */
+/* ---------- light-box: frame + glass layer ---------- */
 /*
-  Built in CSS (no image) so it resizes cleanly at every breakpoint.
-  Recreates the Figma render: the 20px dark stroke seen through the Glass
-  layer reads as a warm, frosted bevel — light on the outer lip, deepening
-  toward a fine dark inner edge, lit from the top-left (-45deg) so top/left
-  sit lighter than bottom/right. Four mitered edges (like a picture frame),
-  then the glass fill tint + soft inner falloff over the whole surface.
-  Markup: <div class="lightbox"> with four <i> edges (top, right, bottom, left).
+  Figma spec: viewport fill #FDF9F5, 20px inside stroke #100E0C, then a
+  Glass layer over everything (light -45deg 80%, refraction 48, depth 57,
+  dispersion 75, frost 10, splay 20, fill #DEE7F2 @ 20%).
+
+  .lightbox          the dark stroke (a border, so it scales with --frame-width)
+  .lightbox i (x4)   glass edges: top, right, bottom, left. Where Figma's glass
+                     curves at its edge it refracts — js/glass.js gives each
+                     edge a real SVG displacement filter (backdrop-filter, Chromium):
+                     content is bent outward over the stroke, split per color
+                     channel (dispersion) and slightly frosted. Other browsers
+                     get the static look below.
+  .lightbox::after   glass fill tint + -45deg light (highlight top-left, shade bottom-right)
 */
 .lightbox {
   position: fixed;
   inset: 0;
   z-index: var(--z-frame);
   pointer-events: none;
-  --fw: var(--frame-width);
-  /* outer lip -> inner edge */
-  --bevel-lit:   #FCFAF6 0%, #F1E9DF 22%, #E1D4C3 55%, #CBB9A3 82%, #B9A58D 100%;
-  --bevel-shade: #F4EEE6 0%, #E3D7C8 22%, #CDBCA7 55%, #B29F88 82%, #9E8B74 100%;
+  border: var(--frame-width) solid var(--frame-color);
+  --glass-edge: calc(var(--frame-width) + 18px); /* frame + the depth the bevel reaches inward */
 }
 
 .lightbox i {
-  position: absolute;
+  position: fixed;
   display: block;
+  z-index: 1;
+  /* static fallback: light lip on the outer edge, soft frost over the stroke */
+  -webkit-backdrop-filter: blur(1.2px);
+          backdrop-filter: blur(1.2px);
 }
-.lightbox i:nth-child(1) { /* top */
-  top: 0; left: 0; right: 0; height: var(--fw);
-  clip-path: polygon(0 0, 100% 0, calc(100% - var(--fw)) 100%, var(--fw) 100%);
-  background: linear-gradient(to bottom, var(--bevel-lit));
-}
-.lightbox i:nth-child(2) { /* right */
-  top: 0; right: 0; bottom: 0; width: var(--fw);
-  clip-path: polygon(0 var(--fw), 100% 0, 100% 100%, 0 calc(100% - var(--fw)));
-  background: linear-gradient(to left, var(--bevel-shade));
-}
-.lightbox i:nth-child(3) { /* bottom */
-  bottom: 0; left: 0; right: 0; height: var(--fw);
-  clip-path: polygon(var(--fw) 0, calc(100% - var(--fw)) 0, 100% 100%, 0 100%);
-  background: linear-gradient(to top, var(--bevel-shade));
-}
-.lightbox i:nth-child(4) { /* left */
-  top: 0; left: 0; bottom: 0; width: var(--fw);
-  clip-path: polygon(0 0, 100% var(--fw), 100% calc(100% - var(--fw)), 0 100%);
-  background: linear-gradient(to right, var(--bevel-lit));
-}
+.lightbox i:nth-child(1) { top: 0; left: 0; right: 0; height: var(--glass-edge);
+  background: linear-gradient(to bottom, rgba(236, 230, 222, 0.92) 0, rgba(236, 230, 222, 0.55) 4px, rgba(236, 230, 222, 0) 8px); }
+.lightbox i:nth-child(2) { top: var(--glass-edge); bottom: var(--glass-edge); right: 0; width: var(--glass-edge);
+  background: linear-gradient(to left, rgba(222, 214, 203, 0.9) 0, rgba(222, 214, 203, 0.5) 4px, rgba(222, 214, 203, 0) 8px); }
+.lightbox i:nth-child(3) { bottom: 0; left: 0; right: 0; height: var(--glass-edge);
+  background: linear-gradient(to top, rgba(222, 214, 203, 0.9) 0, rgba(222, 214, 203, 0.5) 4px, rgba(222, 214, 203, 0) 8px); }
+.lightbox i:nth-child(4) { top: var(--glass-edge); bottom: var(--glass-edge); left: 0; width: var(--glass-edge);
+  background: linear-gradient(to right, rgba(236, 230, 222, 0.92) 0, rgba(236, 230, 222, 0.55) 4px, rgba(236, 230, 222, 0) 8px); }
 
-/* glass surface: fill tint + the frame's soft refraction falling inward */
+/* real refraction (class set by js/glass.js): the filter does the work, no painted lip */
+/* the glass's own light (80%): a warm wash over the refracted edge, strongest at the lip */
+.lightbox.is-refracting i:nth-child(1) { background: linear-gradient(to bottom, rgba(255, 249, 240, 0.7), rgba(240, 226, 208, 0.5) var(--frame-width), rgba(240, 226, 208, 0) calc(var(--frame-width) + 6px)); }
+.lightbox.is-refracting i:nth-child(2) { background: linear-gradient(to left,   rgba(246, 238, 227, 0.62), rgba(226, 210, 190, 0.45) var(--frame-width), rgba(226, 210, 190, 0) calc(var(--frame-width) + 6px)); }
+.lightbox.is-refracting i:nth-child(3) { background: linear-gradient(to top,    rgba(246, 238, 227, 0.62), rgba(226, 210, 190, 0.45) var(--frame-width), rgba(226, 210, 190, 0) calc(var(--frame-width) + 6px)); }
+.lightbox.is-refracting i:nth-child(4) { background: linear-gradient(to right,  rgba(255, 249, 240, 0.7), rgba(240, 226, 208, 0.5) var(--frame-width), rgba(240, 226, 208, 0) calc(var(--frame-width) + 6px)); }
+.lightbox.is-refracting i:nth-child(1) { -webkit-backdrop-filter: url(#glass-t); backdrop-filter: url(#glass-t); }
+.lightbox.is-refracting i:nth-child(2) { -webkit-backdrop-filter: url(#glass-r); backdrop-filter: url(#glass-r); }
+.lightbox.is-refracting i:nth-child(3) { -webkit-backdrop-filter: url(#glass-b); backdrop-filter: url(#glass-b); }
+.lightbox.is-refracting i:nth-child(4) { -webkit-backdrop-filter: url(#glass-l); backdrop-filter: url(#glass-l); }
+
 .lightbox::after {
   content: '';
-  position: absolute;
-  inset: var(--fw);
+  position: fixed;
+  inset: 0;
+  z-index: 2;
   background: var(--glass-tint);
   box-shadow:
-    inset 0 0 0 1px rgba(110, 92, 72, 0.45),          /* fine dark inner edge */
-    inset 0 0 0 2px rgba(255, 255, 255, 0.55),         /* glass lip highlight */
-    inset 2px 2px 6px 1px rgba(255, 255, 255, 0.7),    /* light catch, top-left */
-    inset -3px -3px 8px rgba(120, 100, 78, 0.22),      /* shade, bottom-right */
-    inset 0 0 calc(var(--fw) * 1.6) rgba(150, 128, 100, 0.16); /* splay into the surface */
+    inset 1px 1px 0 rgba(255, 255, 255, 0.85),                       /* specular lip, top-left */
+    inset calc(var(--frame-width) * 0.6) calc(var(--frame-width) * 0.6) calc(var(--frame-width) * 1.4) calc(var(--frame-width) * -0.4) rgba(255, 255, 255, 0.35),
+    inset -1px -1px 0 rgba(16, 14, 12, 0.18),
+    inset calc(var(--frame-width) * -0.5) calc(var(--frame-width) * -0.5) calc(var(--frame-width) * 1.6) calc(var(--frame-width) * -0.4) rgba(16, 14, 12, 0.14);
 }
 
 @media print { .lightbox { display: none; } }
