@@ -38,6 +38,57 @@
     if (titleEl) titleEl.textContent = data.title;
   }
 
+  // A still (instead of a video) as the first media box: shown WHOLE at its
+  // own proportions (.project-image--natural), not cropped to 16:9.
+  if (data.primaryImage && !data.video) {
+    var primaryBox = document.querySelector('[data-project-media="primary"]');
+    if (primaryBox) {
+      var primaryImg = document.createElement('img');
+      primaryImg.className = 'project-image__img';
+      primaryImg.src = data.primaryImage;
+      primaryImg.alt = '';
+      primaryBox.classList.add('project-image--filled', 'project-image--natural');
+      primaryBox.insertBefore(primaryImg, primaryBox.firstChild);
+      var primaryCap = primaryBox.querySelector('.project-image__caption');
+      if (primaryCap) {
+        if (data.primaryCaption) primaryCap.textContent = data.primaryCaption;
+        else primaryCap.remove();
+      }
+
+      // Optional link out (siteUrl key present, e.g. Boy's Club): hovering
+      // the image shows a square "OPEN SITE" cursor label (js/cursor.js
+      // data-cursor-shape), clicking opens the site in a new tab. An
+      // empty siteUrl is a placeholder: the label shows, the click does
+      // nothing until the address is filled in.
+      if (typeof data.siteUrl === 'string') {
+        primaryBox.classList.add('project-image--link');
+        primaryBox.setAttribute('data-cursor-label', 'Open site');
+        primaryBox.setAttribute('data-cursor-fill', '#FFFFFF');
+        primaryBox.setAttribute('data-cursor-text', '#1D1D1E');
+        primaryBox.setAttribute('data-cursor-shape', 'square');
+        primaryBox.addEventListener('click', function () {
+          if (data.siteUrl) window.open(data.siteUrl, '_blank', 'noopener');
+        });
+
+        // "OPEN SITE" button pinned bottom-right on the image — MOBILE only
+        // (hidden on mouse + wide screens in project.css, where the hover
+        // label above does the job; on phones it's the only cue). Same
+        // square white/black look.
+        var openBtn = document.createElement('a');
+        openBtn.className = 'project-image__open-site';
+        openBtn.textContent = 'Open site';
+        openBtn.href = data.siteUrl || '#';
+        openBtn.target = '_blank';
+        openBtn.rel = 'noopener';
+        openBtn.addEventListener('click', function (e) {
+          e.stopPropagation(); // don't also fire the image's own click
+          if (!data.siteUrl) e.preventDefault(); // placeholder until the site exists
+        });
+        primaryBox.appendChild(openBtn);
+      }
+    }
+  }
+
   if (data.video) {
     var box = document.querySelector('[data-project-media="primary"]');
     if (!box) return;
@@ -155,9 +206,14 @@
 
   if (data.clusterImages && data.clusterImages.length) {
     var inners = document.querySelectorAll('.cluster-box .paper__inner');
-    data.clusterImages.forEach(function (src, i) {
+    data.clusterImages.forEach(function (entry, i) {
       var inner = inners[i];
       if (!inner) return;
+      // an entry is a path, or { src, cutout: true } for a transparent
+      // cut-out (PNG/WebP with alpha): its box drops the white paper fill,
+      // border and shadow so the object sits straight on the page
+      var src = typeof entry === 'string' ? entry : entry.src;
+      if (entry.cutout) inner.parentNode.classList.add('is-cutout');
       var img = document.createElement('img');
       img.className = 'cluster-box__img';
       img.src = src;

@@ -213,11 +213,22 @@ Portfolio</h1>
     // click specifically on one of its photo-holder boxes navigate to the
     // project page — clicking the active card anywhere else (its label,
     // tape, empty margin) just keeps it at front, it doesn't also open it.
+    //
+    // Phone layout (<=760px): scrolling already brings each paper to the
+    // front (js/main.js updatePhoneFront), so a tap on any paper's photo
+    // box opens its project straight away — no "bring to front" tap first.
+    var PHONE_MQ = window.matchMedia('(max-width: 760px)');
     document.querySelectorAll('a.paper').forEach(function (paperLink) {
       paperLink.addEventListener('click', function (e) {
         var hitImageBox = e.target.closest('.paper-grid__box');
-        if (!paperLink.classList.contains('is-active') || !hitImageBox) {
+        var canOpen = hitImageBox && (PHONE_MQ.matches || paperLink.classList.contains('is-active'));
+        if (!canOpen) { e.preventDefault(); return; }
+        // a holder showing ANOTHER project's thumbnail (e.g. Boy's Club in
+        // Art Direction) opens that project instead of the paper's own link
+        var boxHref = hitImageBox.getAttribute('data-href');
+        if (boxHref) {
           e.preventDefault();
+          window.location.href = boxHref;
         }
       });
     });

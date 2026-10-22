@@ -43,7 +43,7 @@
     transition: opacity 0.3s ease;
     z-index: 300;
     transform: translate(-50%, -50%);
-    will-change: left, top;
+    will-change: transform; /* moved via the `translate` property (no layout) */
   }
 
   .cursor-lens.is-active {
@@ -1004,14 +1004,19 @@
       lens.classList.remove('is-active');
     });
 
+    var drawnX = NaN, drawnY = NaN;
     function loop(now) {
       var dt = now - lastFrame;
       lastFrame = now;
       var ease = 1 - Math.exp(-dt / FOLLOW_TAU_MS);
       curX += (targetX - curX) * ease;
       curY += (targetY - curY) * ease;
-      lens.style.left = curX + 'px';
-      lens.style.top = curY + 'px';
+      // PERF: `translate` (GPU-composited) instead of left/top, which
+      // forced a layout every frame; skipped entirely once it has settled.
+      if (Math.abs(curX - drawnX) > 0.05 || Math.abs(curY - drawnY) > 0.05) {
+        drawnX = curX; drawnY = curY;
+        lens.style.translate = curX.toFixed(2) + 'px ' + curY.toFixed(2) + 'px';
+      }
       requestAnimationFrame(loop);
     }
 

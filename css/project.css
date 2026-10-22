@@ -136,6 +136,70 @@ body.project-page {
   object-position: center;
 }
 
+/* A still shown whole, at its own proportions (no 16:9 crop). */
+.project-image--natural {
+  aspect-ratio: auto;
+}
+
+.project-image--natural .project-image__img {
+  height: auto;
+}
+
+/* a main image that opens a site (js/project.js siteUrl) */
+.project-image--link {
+  cursor: pointer;
+}
+
+/* The "OPEN SITE" button on that image (mobile — see the media query
+   below): bottom-right,
+   inset by the page's own grid margin so it lines up with the layout,
+   square white fill + black mono text (matches the hover label). Sized
+   in fixed px so it stays clearly readable even on the smallest phone. */
+.project-image__open-site {
+  position: absolute;
+  right: var(--grid-margin);
+  bottom: var(--grid-margin);
+  z-index: 2;
+  padding: 10px 18px;
+  background: #FFFFFF;
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  text-transform: uppercase; /* all Syne Mono text is uppercase, per spec */
+  font-size: 10pt;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(29, 29, 30, 0.18);
+  transition: background var(--duration-fast) ease, color var(--duration-fast) ease, transform 120ms ease;
+}
+
+.project-image__open-site:hover {
+  background: var(--color-ink);
+  color: #FFFFFF;
+}
+
+.project-image__open-site:active {
+  transform: scale(0.96);
+}
+
+/* RULE: hover available -> no button; no hover -> button. With a real
+   mouse/trackpad (hover + fine pointer) the "OPEN SITE" cursor label
+   (js/cursor.js, which runs on exactly those devices) already shows it,
+   at any window size. Phones and tablets (touch = no hover) get the
+   button instead. */
+@media (hover: hover) and (pointer: fine) {
+  .project-image__open-site { display: none; }
+}
+
+@media (max-width: 600px) {
+  .project-image__open-site {
+    right: 12px;
+    bottom: 12px;
+    padding: 9px 14px;
+    font-size: 9pt;
+  }
+}
+
 .project-image:hover .project-image__caption,
 .project-image.is-caption-shown .project-image__caption { /* tap, on touch (js/touch.js) */
   opacity: 1;
@@ -248,6 +312,22 @@ body.project-page {
   height: auto; /* override the shared .paper__inner's height:100% — this box sizes to its (future) image, not a fixed box */
   min-height: 340px; /* placeholder size until a real image fills it — see .cluster-box__img */
   background: var(--color-paper-white);
+}
+
+/* Transparent cut-outs (js/project.js: clusterImages { cutout: true }):
+   no white paper fill, border or shadow in ANY state (hover, picked up,
+   dragging) — only the object itself, sitting straight on the page.
+   Selector is extra-specific on purpose so it beats the shared .paper
+   hover/active/dragging shadow rules in components.css. */
+.project-cluster .cluster-box.is-cutout {
+  background: none;
+  border: none;
+}
+
+.project-cluster .cluster-box.is-cutout .paper__inner {
+  background: none;
+  box-shadow: none;
+  min-height: 0;
 }
 
 /* For when a real <img class="cluster-box__img" src="..."> is added

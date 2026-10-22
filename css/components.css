@@ -345,6 +345,11 @@ body.custom-cursor-active * {
   mix-blend-mode: normal;
 }
 
+/* data-cursor-shape="square" (js/cursor.js): same label, sharp corners */
+.cursor-label.is-expanded.is-square {
+  border-radius: 0;
+}
+
 /* Hand-gesture cursors (contact modal wave, Resume thumbs-up) — see
    HAND GESTURE CURSORS in js/cursor.js. Figma frames from
    assets/cursor/, all stacked; only .is-current shows. Pops in with the

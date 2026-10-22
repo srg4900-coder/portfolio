@@ -26,8 +26,6 @@
   var root = document.documentElement;
   root.classList.add('is-touch');
 
-  function isTouch(e) { return e.pointerType === 'touch' || e.pointerType === 'pen'; }
-
   // ---------- 1. LABEL FLASH ----------
   var LABEL_MS = 900;
   var flash = document.createElement('div');
@@ -36,8 +34,13 @@
   document.body.appendChild(flash);
   var flashTimer = null;
 
-  document.addEventListener('pointerdown', function (e) {
-    if (!isTouch(e)) return;
+  // BUG FIX: these used to fire on finger-DOWN. iPhone Safari watches
+  // for anything becoming visible during a tap and, if it sees that,
+  // treats the tap as a "hover" and withholds the click — so showing the
+  // label (or the Resume thumbs-up, 6) on finger-down cost the visitor
+  // extra taps before links/buttons responded. They now run on `click`,
+  // i.e. only after the tap has already gone through.
+  document.addEventListener('click', function (e) {
     var target = e.target.closest('[data-cursor-label]');
     // draggables get the drag hint (5) instead of a label
     if (!target || target.closest('[data-draggable]')) return;
@@ -166,8 +169,7 @@
 
     var resume = modal.querySelector('.contact-modal__resume');
     if (resume) {
-      resume.addEventListener('pointerdown', function (e) {
-        if (!isTouch(e)) return;
+      resume.addEventListener('click', function () { // after the tap — see the BUG FIX note in 1
         thumbHand.el.style.left = (resume.offsetLeft + resume.offsetWidth + 8) + 'px';
         thumbHand.el.style.top = (resume.offsetTop + resume.offsetHeight / 2) + 'px';
         if (stopThumb) stopThumb();

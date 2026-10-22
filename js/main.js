@@ -217,19 +217,23 @@
       // fixed position just under the nav — computed from live layout so
       // it's correct at any viewport height, not a guessed pixel value.
       var navHeight = document.querySelector('.site-nav').offsetHeight;
-      var rect = titleWrap.getBoundingClientRect();
       var targetTop = navHeight + 24;
-      // BUG FIX: on resize the title may already be slid up (pinned), and
-      // getBoundingClientRect includes that slide — measuring from there
-      // made the travel far too short, so after sizing a window up (or
-      // rotating a tablet) the title stopped partway instead of sticking
-      // under the nav. Subtract the slide currently applied to get its
-      // true resting position first.
-      var currentSlide = parseFloat(titleWrap.style.getPropertyValue('--title-y')) || 0;
-      TITLE_TRAVEL_PX = (rect.top - currentSlide) - targetTop;
+      // BUG FIX (twice): this used getBoundingClientRect, which includes
+      // the title's CURRENT slide (--title-y) and its 80ms slide
+      // transition. Subtracting --title-y fixed resizes, but on iPhone the
+      // address bar showing/hiding fires resize events constantly (and on
+      // reloads), and any measurement taken mid-transition still came out
+      // short — the title then stopped partway instead of sticking under
+      // the nav. offsetTop is pure LAYOUT (transforms ignored): the title's
+      // resting spot inside .hero-stage, whose top sits at the top of the
+      // screen whenever the title is shown/pinned.
+      TITLE_TRAVEL_PX = titleWrap.offsetTop - targetTop;
     }
     measureTitleTravel();
     window.addEventListener('resize', measureTitleTravel);
+    // the eyebrow's web font can finish loading after this runs and change
+    // the title block's height — measure again once fonts are in
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureTitleTravel);
 
     // Raw scroll position target — what "p" would be with no smoothing.
     function computeTargetP() {
@@ -363,12 +367,14 @@
     function snapTo(state) {
       if (state === snapState) return;
       snapState = state;
+      phoneFront = -1; // re-pick the front paper fresh in the new state
       var now = performance.now();
       tweenFrom = targetP;
       tweenTo = state === 'papers' ? 1 : 0;
       tweenStart = now;
       lockUntil = now + SNAP_DURATION_MS * Math.abs(tweenTo - tweenFrom) + MOMENTUM_LOCK_MS;
       window.scrollTo(0, state === 'papers' ? trackEndY() : 0);
+      if (state === 'papers') updatePhoneFront(); // Art Direction leads right after the snap
     }
 
     function isLocked() { return performance.now() < lockUntil; }
@@ -496,6 +502,44 @@
       else if (snapState === 'papers' && y < end - 2) snapTo('top');
     }, { passive: true });
 
+    // ---------- PHONE: scrolling picks the FRONT paper ----------
+    // On the phone layout the papers are a stack dealt down the page, and
+    // tapping one to bring it forward was awkward (a tap on a front paper's
+    // photo opens the project). So here SCROLL decides who's in front: a
+    // focus point travels from the first paper (Art Direction) to the last
+    // (About) as the visitor scrolls through the papers section, and the
+    // paper nearest it is brought to the front (paper.js bringToFront —
+    // same lift + z-order as a click). Art Direction leads right after the
+    // snap; UI, Motion, then About take over in order going down, and the
+    // reverse going back up. Photo taps then open projects directly (see
+    // the click handler at the bottom of index.html).
+    var PHONE_MQ = window.matchMedia('(max-width: 760px)');
+    var phonePapers = ['paperArtDirection', 'paperUI', 'paperMotion', 'paperAbout']
+      .map(function (id) { return document.getElementById(id); })
+      .filter(Boolean);
+    var phoneFront = -1;
+
+    function updatePhoneFront() {
+      if (!PHONE_MQ.matches || snapState !== 'papers' || !phonePapers.length || !window.PaperInteraction) return;
+      // scroll available INSIDE the (taller-than-the-screen) papers section
+      var range = heroStage.offsetHeight - window.innerHeight;
+      var p = range > 0 ? clamp01((window.scrollY - trackEndY()) / range) : 0;
+      // papers' CSS top = their centers (they're translate(-50%, -50%))
+      var first = phonePapers[0].offsetTop;
+      var last = phonePapers[phonePapers.length - 1].offsetTop;
+      var focus = first + (last - first) * p;
+      var best = 0, bestDist = Infinity;
+      phonePapers.forEach(function (el, i) {
+        var d = Math.abs(el.offsetTop - focus);
+        if (d < bestDist) { bestDist = d; best = i; }
+      });
+      if (best !== phoneFront) {
+        phoneFront = best;
+        window.PaperInteraction.bringToFront(phonePapers[best]);
+      }
+    }
+    window.addEventListener('scroll', updatePhoneFront, { passive: true });
+
     function loop(now) {
       var dt = now - lastFrame;
       lastFrame = now;
@@ -515,10 +559,19 @@
       // leave paper-rotate/etc. perpetually a hair off their exact rest
       // values even once scrolling has long since stopped.
       if (Math.abs(targetP - smoothedP) < 0.0005) smoothedP = targetP;
-      applyAtProgress(smoothedP);
+      // PERF: only touch the DOM when progress actually changed — once the
+      // intro has settled, every frame used to rewrite the same values on
+      // every paper (forcing style recalcs) for nothing.
+      if (smoothedP !== lastAppliedP) {
+        lastAppliedP = smoothedP;
+        applyAtProgress(smoothedP);
+      }
       requestAnimationFrame(loop);
     }
 
+    var lastAppliedP = smoothedP;
+    // a resize changes the title's travel distance -> force one re-apply
+    window.addEventListener('resize', function () { lastAppliedP = NaN; });
     applyAtProgress(smoothedP);
     // papers are now at their real starting spots — safe to show them
     // (hidden until now, see .papers-stage in css/main.css)

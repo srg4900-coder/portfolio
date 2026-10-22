@@ -131,6 +131,9 @@
     label.textContent = text;
     label.style.backgroundColor = el.getAttribute('data-cursor-fill') || '';
     label.style.color = el.getAttribute('data-cursor-text') || '';
+    // optional data-cursor-shape="square": a sharp-cornered rectangle
+    // instead of the default rounded pill (e.g. Boy's Club "OPEN SITE")
+    label.classList.toggle('is-square', el.getAttribute('data-cursor-shape') === 'square');
     label.classList.add('is-expanded');
   }
 
@@ -142,10 +145,13 @@
   // second guard), so the resting cursor is only ever the plain dot.
   function collapse() {
     label.textContent = '';
-    label.classList.remove('is-expanded');
+    label.classList.remove('is-expanded', 'is-square');
     label.style.backgroundColor = '';
     label.style.color = '';
   }
+
+  var drawnX = NaN, drawnY = NaN;          // last position actually written
+  var hitX = NaN, hitY = NaN, lastHitT = 0; // last hit-test position/time
 
   function loop(now) {
     var dt = now - lastFrame;
@@ -153,12 +159,23 @@
     var ease = 1 - Math.exp(-dt / FOLLOW_TAU_MS);
     curX += (targetX - curX) * ease;
     curY += (targetY - curY) * ease;
-    label.style.left = curX + 'px';
-    label.style.top = curY + 'px';
-    gestureEl.style.left = curX + 'px';
-    gestureEl.style.top = curY + 'px';
+    // PERF: position via the `translate` property (GPU-composited, no
+    // layout) instead of left/top, and only when the dot actually moved.
+    // It stacks with the CSS transform's translate(-50%, -50%) centering.
+    var moved = Math.abs(curX - drawnX) > 0.05 || Math.abs(curY - drawnY) > 0.05;
+    if (moved) {
+      drawnX = curX; drawnY = curY;
+      var pos = curX.toFixed(2) + 'px ' + curY.toFixed(2) + 'px';
+      label.style.translate = pos;
+      gestureEl.style.translate = pos;
+    }
 
-    if (hasMoved) {
+    // PERF: hit-test every frame only while the pointer is moving; when
+    // it's still, ~10x/sec is plenty to notice content sliding under it
+    // (papers animating, scrolling) without querying the page 60x/sec.
+    var pointerMoved = targetX !== hitX || targetY !== hitY;
+    if (hasMoved && (pointerMoved || now - lastHitT > 100)) {
+      hitX = targetX; hitY = targetY; lastHitT = now;
       // Hit-test at the REAL pointer position, not the eased/lagging dot
       // position — otherwise the label lingers on a paper for a beat
       // after the mouse has actually left it.
@@ -172,7 +189,6 @@
 
       var gestureTarget = hit ? hit.closest('[data-cursor-gesture]') : null;
       setGesture(gestureTarget ? gestureTarget.getAttribute('data-cursor-gesture') : null);
-      stepGesture(now);
 
       var solidTarget = hit ? hit.closest('[data-cursor-solid]') : null;
       if (solidTarget !== currentSolidTarget) {
@@ -180,6 +196,7 @@
         label.classList.toggle('is-solid-white', !!solidTarget && solidTarget.getAttribute('data-cursor-solid') === 'white');
       }
     }
+    if (hasMoved) stepGesture(now); // hand frames advance every frame regardless
 
     requestAnimationFrame(loop);
   }
