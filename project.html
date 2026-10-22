@@ -74,16 +74,7 @@
         thinking style specifically, in 2–3 sentences maximum.
       </p>
 
-      <!--
-        Two stacks of 3 draggable image boxes (left: --1/--2/--3, right:
-        --4/--5/--6 — see css/project.css for the fan/stack positioning).
-        Each is a .paper (hover-drift + click-to-front from paper.js, here
-        in "random nudge" mode via data-hover-mode) PLUS [data-draggable]
-        (free repositioning from drag.js, confined to this section via
-        [data-drag-bounds] below). Drop a real <img class="cluster-box__img"
-        src="..."> inside a box's .paper__inner to replace its placeholder —
-        it'll fill to the box's width and keep its own natural height.
-      -->
+      <!-- gallery wall: images injected by js/project.js from clusterImages (css/project.css) -->
       <div class="project-cluster">
         <div class="paper cluster-box cluster-box--1">
           <div class="paper__inner"></div>
@@ -142,7 +133,6 @@
   <script src="js/gestures.js?v=6"></script>
   <script src="js/cursor.js?v=6"></script>
   <script src="js/contact.js?v=6"></script>
-  <!-- <script src="js/footer-bounce.js?v=6"></script> -->
   <script src="js/projects-data.js?v=6"></script>
   <script src="js/project.js?v=6"></script>
   <script src="js/swipe-back.js?v=6"></script>
