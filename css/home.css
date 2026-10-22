@@ -1,0 +1,179 @@
+/*
+  HOMEPAGE — hero + printed sheets.
+  The sheets' resting layout is the plain CSS grid below (the "organized"
+  state). js/home.js only adds a transform on top of it: at scroll 0 each
+  sheet is pulled out to a scattered spot on the light box, and it glides
+  back into its grid cell as the hero scrolls away. No JS = clean grid.
+*/
+
+.home main {
+  padding: 0 calc(var(--frame-width) + var(--grid-margin));
+}
+
+/* ---------- hero ---------- */
+
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: calc(var(--frame-width) + var(--nav-height) + clamp(24px, 9vh, 120px));
+  z-index: var(--z-title);
+  pointer-events: none;
+}
+
+.hero__title span {
+  display: block;
+  animation: rise 1100ms var(--ease-smooth) both;
+}
+.hero__title span + span { animation-delay: 90ms; }
+
+.hero__role {
+  margin-top: clamp(28px, 7vh, 72px);
+  font-size: var(--text-small-size);
+  font-weight: 400;
+  color: var(--text-soft);
+  animation: rise 1100ms var(--ease-smooth) 220ms both;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(0.35em); }
+}
+
+/* ---------- sheets: the organized grid ---------- */
+
+.sheets {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: clamp(32px, 7vw, 120px);
+  row-gap: clamp(56px, 10vw, 160px);
+  padding: clamp(16px, 4vh, 48px) clamp(0px, 4vw, 64px) clamp(96px, 16vh, 200px);
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* editorial stagger: right column sits lower, like prints laid out by hand */
+.sheet:nth-child(even) { margin-top: clamp(48px, 12vw, 200px); }
+
+.sheet {
+  --w: 78%;
+  position: relative;
+  width: var(--w);
+  justify-self: start;
+  transform-origin: 0 0;
+  will-change: transform;
+  z-index: var(--z-paper-front);
+}
+.sheet:nth-child(4n + 2),
+.sheet:nth-child(4n + 3) { justify-self: end; }
+.sheet--l { --w: 100%; }
+.sheet--m { --w: 80%; }
+.sheet--s { --w: 58%; }
+
+.sheet__link {
+  display: block;
+  cursor: pointer;
+}
+
+/* the printed paper itself */
+.sheet__paper {
+  position: relative;
+  aspect-ratio: var(--ratio, 4 / 5);
+  background: var(--color-white);
+  overflow: hidden;
+  box-shadow: var(--shadow-paper);
+  transform: rotate(var(--rest-rot, 0deg));
+  transition:
+    transform var(--duration-base) var(--ease-smooth),
+    box-shadow var(--duration-base) ease;
+  animation: deal 1000ms var(--ease-smooth) both;
+  animation-delay: calc(240ms + var(--i, 0) * 70ms);
+}
+
+/* inner printed edge, sits over the image */
+.sheet__paper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: var(--inset-paper);
+  pointer-events: none;
+}
+
+.sheet__paper img,
+.sheet__paper video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--pos, 50% 50%);
+}
+
+/* placeholder / title-card print (no image yet) */
+.sheet__paper--card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-blush);
+}
+.sheet__paper--card span {
+  font-family: var(--font-mono);
+  font-size: var(--text-label-size);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-strong);
+}
+
+.sheet__link:hover .sheet__paper,
+.sheet__link:focus-visible .sheet__paper {
+  transform: translateY(-4px) rotate(calc(var(--rest-rot, 0deg) * -1));
+  box-shadow: var(--shadow-paper-lift);
+}
+
+/* caption: fades in as the sheet lands (--settle set by home.js) */
+.sheet__caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 14px;
+  opacity: var(--settle, 1);
+}
+.sheet__caption .text-label:last-child { color: var(--text-muted); }
+
+@keyframes deal {
+  from { opacity: 0; translate: 12vw 4vh; rotate: 6deg; }
+}
+
+/* ---------- footer ---------- */
+
+.home .site-footer {
+  padding: 0 calc(var(--frame-width) + var(--grid-margin)) calc(var(--frame-width) + 24px);
+  background: none;
+  border: 0;
+}
+
+/* ---------- tablet ---------- */
+@media (max-width: 1024px) {
+  .sheets { column-gap: 40px; padding-left: 0; padding-right: 0; }
+}
+
+/* ---------- phone: one column, every sheet full width ---------- */
+@media (max-width: 640px) {
+  .hero { min-height: 92svh; }
+  .sheets {
+    grid-template-columns: 1fr;
+    row-gap: 56px;
+  }
+  .sheet:nth-child(even) { margin-top: 0; }
+  .sheet,
+  .sheet--l,
+  .sheet--m { --w: 100%; }
+  .sheet--s { --w: 72%; }
+  .sheet:nth-child(odd) { justify-self: start; }
+  .sheet:nth-child(even) { justify-self: end; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__title span, .hero__role, .sheet__paper { animation: none; }
+  .sheet { transform: none !important; }
+}

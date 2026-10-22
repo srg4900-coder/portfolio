@@ -1,87 +1,41 @@
 /*
-  SHARED COMPONENTS — used on both index.html and project.html.
-  Depends on tokens.css being loaded first.
+  SHARED COMPONENTS — base, type, nav, light-box frame + glass, cursor,
+  paper, contact modal. Used by every page. Needs tokens.css first.
 */
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
-  /* The true page is WHITE. The homepage's blue is its own layer on
-     .hero-stage (css/main.css) that fades in over this, with the paper
-     texture fading in over the blue — so a slow load reads as
-     white -> blue -> texture, never a bare flash of blue. */
-  background: var(--color-surface-paper);
-  /* `clip` not `hidden`: setting overflow-x alone to `hidden` forces the
-     browser to compute overflow-y as `auto` too (a CSS 2.1 rule — only one
-     axis may be `visible`, so the other axis gets promoted), which quietly
-     turns html/body into their OWN scroll containers. That breaks every
-     position:sticky element on the page (a sticky element's nearest
-     scrolling ancestor becomes ambiguous between html and body instead of
-     the viewport). `overflow-x: clip` prevents horizontal scroll without
-     that side effect, since clip never implies a scroll container. */
+  background: var(--color-paper);
+  /* clip (not hidden) so html/body never become scroll containers — keeps position:sticky working */
   overflow-x: clip;
 }
 
 body {
-  font-family: var(--font-mono);
-  /* NOT text-transform:uppercase here — this is just the page-wide
-     DEFAULT font, not every element using it. Since text-transform
-     inherits, putting it here would force uppercase onto every piece of
-     text on the page (including ones that override to a different font,
-     like the hero title) unless THEY also explicitly set it back to
-     none. Every element that should actually be uppercase mono text
-     (nav, labels, captions, etc.) sets text-transform: uppercase itself,
-     right alongside its own font-family: var(--font-mono) — see
-     components.css/main.css/project.css. */
-  color: var(--color-text-on-dark);
+  font-family: var(--font-display);
+  font-weight: 300;
+  color: var(--text-strong);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 a { color: inherit; text-decoration: none; }
-img { display: block; max-width: 100%; }
-
-/* TEXT RULE (site-wide): lines of running text stay ~50 characters max
-   and never end a paragraph on a widow (a last line of only 1-2 words).
-   `pretty` makes the browser pull words down to avoid widows; `balance`
-   evens out short multi-line headings. Body-copy classes also cap their
-   width at 50ch (see .text-project-body). Where a design calls for
-   different line lengths, set explicit lines instead (e.g. the contact
-   modal in js/contact.js) and note it there. */
+img, video { display: block; max-width: 100%; }
 p, li, blockquote, figcaption { text-wrap: pretty; }
-h1, h2, h3, h4 { text-wrap: balance; }
-
-/* RULE: every button on this site inherits text-transform from its
-   context, full stop. `font: inherit` below only carries family / size /
-   weight / style / line-height — text-transform isn't part of the font
-   shorthand, and buttons (unlike plain text) don't inherit it from an
-   ancestor by default, so a button sitting inside an uppercase Syne Mono
-   context (nav, footer, etc.) would otherwise render in whatever case it
-   was typed in HTML. This is what silently broke the nav's "Contact"
-   button. Fixing it once here means no button anywhere on the site can
-   slip through un-uppercased, instead of re-declaring text-transform on
-   every individual button. */
+h1, h2, h3, h4 { text-wrap: balance; font-weight: inherit; }
+/* buttons don't inherit text-transform by default — force it so they match their context */
 button { font: inherit; color: inherit; background: none; border: none; cursor: inherit; text-transform: inherit; }
+:focus-visible { outline: 1px solid var(--color-ink); outline-offset: 4px; }
 
-/* ---------- type utility classes (map 1:1 to the tokens) ---------- */
+/* ---------- type ---------- */
 
 .text-title {
   font-family: var(--font-display);
   font-weight: var(--text-title-weight);
-  /* 98pt (--text-title-size) is the mockup's desktop value, not a fixed
-     size for every screen — clamp() uses it as the ceiling and scales
-     down on narrower viewports so it can never overflow/overlap the nav
-     the way an un-clamped 98pt does below ~1200px wide. */
-  font-size: clamp(42px, 9vw, var(--text-title-size));
+  font-size: var(--text-title-size);
   line-height: var(--text-title-line-height);
-  /* NOT using text-transform:capitalize here on purpose: the hero title's
-     letters are each split into their own `display: inline-block` span
-     for the letter-by-letter animation (see js/main.js), and that breaks
-     the word-boundary detection capitalize relies on — every isolated
-     letter-box reads as "start of a word," capitalizing ALL of them
-     instead of just the first letter per word (this is what caused the
-     accidental all-caps look). Simplest fix: just type titles in the
-     case you want in the HTML — it's a title, not user input, so there's
-     nothing to sanitize here anyway. */
+  letter-spacing: var(--text-title-tracking);
+  color: var(--text-strong);
 }
 
 .text-h1 {
@@ -89,21 +43,24 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   font-weight: var(--text-h1-weight);
   font-size: var(--text-h1-size);
   line-height: var(--text-h1-line-height);
+  letter-spacing: -0.01em;
 }
 
-.text-h2 {
+/* Cutive Mono has one thin weight: keep it uppercase, tracked, >=13px, near full opacity */
+.text-h2,
+.text-subheader,
+.text-body1,
+.text-label {
   font-family: var(--font-mono);
-  text-transform: uppercase; /* all Syne Mono text is uppercase, per spec */
-  font-weight: var(--text-h2-weight);
-  font-size: var(--text-h2-size);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: var(--text-label-tracking);
+  color: var(--text-strong);
 }
-
-.text-subheader {
-  font-family: var(--font-mono);
-  text-transform: uppercase; /* all Syne Mono text is uppercase, per spec */
-  font-weight: var(--text-subheader-weight);
-  font-size: var(--text-subheader-size);
-}
+.text-h2 { font-size: var(--text-h2-size); }
+.text-subheader { font-size: var(--text-subheader-size); }
+.text-body1,
+.text-label { font-size: var(--text-label-size); }
 
 .text-subheader-section {
   font-family: var(--font-display);
@@ -113,117 +70,115 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   letter-spacing: var(--text-subheader-section-tracking);
 }
 
-.text-body1 {
-  font-family: var(--font-mono);
-  text-transform: uppercase; /* all Syne Mono text is uppercase, per spec */
-  font-weight: var(--text-body1-weight);
-  font-size: var(--text-body1-size);
-}
-
 .text-project-body {
   font-family: var(--font-display);
   font-weight: var(--text-project-body-weight);
   font-size: var(--text-project-body-size);
   line-height: var(--text-project-body-line-height);
-  max-width: 50ch; /* TEXT RULE (top of file) */
+  color: var(--text-soft);
+  max-width: 50ch;
 }
-
-.on-light { color: var(--color-text-on-light); }
-.on-dark  { color: var(--color-text-on-dark); }
 
 /* ---------- nav (identical on every page) ---------- */
 
 .site-nav {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
+  top: var(--frame-width);
+  left: var(--frame-width);
+  right: var(--frame-width);
   z-index: var(--z-nav);
+  height: var(--nav-height);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px var(--grid-margin);
-  /* border-top sits flush with the viewport edge (top:0 + no outer
-     margin); border-bottom closes the nav off as its own bordered strip,
-     per the mockup. currentColor so it adapts automatically to whichever
-     page's text color is active (white on the hero, blue on light pages) —
-     same trick as .site-footer's divider below. */
-  border-top: 1px solid currentColor;
-  border-bottom: 1px solid currentColor;
-  font-family: var(--font-mono);
-  text-transform: uppercase; /* all Syne Mono text is uppercase, per spec */
-  font-size: var(--text-nav1-size);
-  pointer-events: none; /* re-enabled on the interactive children below */
+  padding: 0 var(--grid-margin);
+  font-size: var(--text-small-size);
+  /* soft paper fade so content scrolling underneath never collides with the links */
+  background: linear-gradient(to bottom, var(--color-paper) 45%, rgba(253, 249, 245, 0));
+  pointer-events: none; /* re-enabled on the links */
 }
-
 .site-nav * { pointer-events: auto; }
 
-/* Homepage-only load-in (see js/main.js) — a modifier, not the base
-   .site-nav rule, so project.html's nav (no load sequence) is unaffected
-   and just renders normally at full opacity from the start. */
-.site-nav--fade-in {
-  opacity: 0;
-  transition: opacity 500ms ease;
-}
+.site-nav--fade-in { opacity: 0; transition: opacity 600ms ease; }
+.site-nav--fade-in.is-in { opacity: 1; }
 
-.site-nav--fade-in.is-in {
-  opacity: 0.9;
-}
+.nav-left { display: flex; align-items: center; }
 
-.nav-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-/* Logo placeholder: a round-cornered mark standing in for a real logo
-   later. A real <a href="index.html"> on every page (including the
-   homepage itself) — clicking it always does a genuine page reload, so
-   it also resets the homepage's intro animations, not just a scroll. */
 .logo-button {
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
-  background: rgba(252, 252, 252, 0.15);
-  border: 1px solid rgba(252, 252, 252, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10pt;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  transition: background var(--duration-fast) var(--ease-smooth);
+  font-size: var(--text-small-size);
+  font-weight: 400;
+  color: var(--text-strong);
+  transition: opacity var(--duration-fast) ease;
 }
-
-.logo-button:hover {
-  background: rgba(252, 252, 252, 0.28);
-}
+.logo-button:hover { opacity: 0.6; }
 
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 28px;
-  font-size: 14pt;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  gap: clamp(20px, 2.6vw, 36px);
+  font-weight: 400;
 }
-
 .nav-right a,
 .nav-right button {
   cursor: pointer;
-  opacity: 0.85;
-  transition: opacity var(--duration-fast) ease, color var(--duration-fast) ease;
+  color: var(--text-strong);
+  transition: opacity var(--duration-fast) ease;
 }
-
 .nav-right a:hover,
-.nav-right button:hover {
-  opacity: 1;
-  color: var(--color-ink);
+.nav-right button:hover { opacity: 0.55; }
+
+/* ---------- light-box: dark frame + glass overlay ---------- */
+/*
+  Built in CSS (no image) so it resizes cleanly at every breakpoint.
+  Figma spec: viewport fill #FDF9F5, 20px inside stroke #100E0C, then a
+  Glass layer on top (light -45deg 80%, refraction 48, depth 57,
+  dispersion 75, frost 10, splay 20, fill #DEE7F2 @ 20%).
+    .lightbox            fixed frame ring (pointer-events: none)
+    .lightbox::before    the glass rim: refracted light pulled over the dark
+                         stroke, lit from the top-left (-45deg), with a faint
+                         warm/cool split along the inner edge (dispersion)
+    .lightbox::after     glass fill tint + inner falloff over the whole surface
+*/
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-frame);
+  pointer-events: none;
+  border: var(--frame-width) solid var(--frame-color);
 }
 
-@media (max-width: 760px) {
-  .site-nav { font-size: 16pt; }
+.lightbox::before {
+  content: '';
+  position: absolute;
+  inset: calc(var(--frame-width) * -1);
+  padding: var(--frame-width);
+  /* refracted light: brightest top-left, falling to warm stone, darkest bottom-right */
+  background:
+    linear-gradient(135deg, rgba(255, 253, 249, 0.95) 0%, rgba(236, 228, 217, 0.92) 35%, rgba(214, 203, 189, 0.9) 70%, rgba(184, 171, 155, 0.92) 100%);
+  /* paint only the ring, not the middle */
+  -webkit-mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.9),        /* outer specular */
+    inset -1px -1px 0 rgba(16, 14, 12, 0.25);
 }
+
+.lightbox::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--glass-tint);
+  box-shadow:
+    inset 0 0 0 1px rgba(16, 14, 12, 0.28),           /* inner bevel edge (depth) */
+    inset 1px 1px 0 1px rgba(255, 196, 150, 0.22),    /* dispersion: warm fringe */
+    inset -1px -1px 0 1px rgba(102, 124, 146, 0.22),  /* dispersion: cool fringe */
+    inset 3px 3px 6px rgba(255, 255, 255, 0.55),      /* light catch, top-left */
+    inset -4px -4px 10px rgba(16, 14, 12, 0.14),      /* shade, bottom-right */
+    inset 0 0 calc(var(--frame-width) * 3) rgba(16, 14, 12, 0.07); /* splay: soft falloff into the surface */
+}
+
+@media print { .lightbox { display: none; } }
 
 /* Letter-by-letter load-in, reusable anywhere (title lines, the "I'm a…"
    row, the project page title) — spans are injected by main.js /
@@ -516,7 +471,7 @@ html.is-touch .contact-modal__resume:active {
   width: 100%;
   height: 100%;
   background: var(--color-paper-white);
-  box-shadow: 0 20px 48px rgba(29, 29, 30, 0.22);
+  box-shadow: var(--shadow-paper), var(--inset-paper);
   transform: translate(var(--drift-x), var(--drift-y)) rotate(var(--drift-rot));
   transition:
     transform var(--duration-base) var(--ease-smooth),
@@ -525,7 +480,7 @@ html.is-touch .contact-modal__resume:active {
 }
 
 .paper:hover .paper__inner {
-  box-shadow: 0 28px 64px rgba(29, 29, 30, 0.3);
+  box-shadow: var(--shadow-paper-lift), var(--inset-paper);
 }
 
 .paper.is-active {
@@ -552,7 +507,7 @@ html.is-touch .contact-modal__resume:active {
 }
 
 .paper.is-active .paper__inner {
-  box-shadow: 0 36px 80px rgba(29, 29, 30, 0.38);
+  box-shadow: var(--shadow-paper-lift), var(--inset-paper);
 }
 
 /* Homepage papers only (js/paper.js's hover-to-front rule) — a smooth
@@ -562,7 +517,7 @@ html.is-touch .contact-modal__resume:active {
    per spec. */
 .paper.is-hover-front .paper__inner {
   transform: translate(var(--drift-x), var(--drift-y)) scale(1.03);
-  box-shadow: 0 32px 72px rgba(29, 29, 30, 0.34);
+  box-shadow: var(--shadow-paper-lift), var(--inset-paper);
 }
 
 .paper__tape {
@@ -599,7 +554,7 @@ html.is-touch .contact-modal__resume:active {
 
 .contact-modal__paper {
   position: absolute;
-  inset: 12px;
+  inset: var(--frame-width);
   background: var(--color-paper-white);
   display: flex;
   align-items: flex-start;   /* content sits high, not centered */

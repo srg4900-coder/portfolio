@@ -1,16 +1,34 @@
 /*
-  PROJECT DATA — the single source of truth for every case study's media.
-  Shared by BOTH pages, so an image path only ever lives here:
-    - project.html (js/project.js) injects the video + draggable cluster
-      images for ?project=<slug>
-    - index.html (js/paper-thumbs.js) shows each project's homepage paper
-      thumbnail = thumbVideo if set, else the FIRST clusterImages entry
-  Add a slug here as each case study's real assets are ready; a slug
-  with no entry just shows the plain template / empty thumbnail holders.
+  PROJECT DATA — the single source of truth for every project.
+  Shared by both pages, so a path or title only ever lives here:
+    - index.html (js/home.js) lays out one printed "sheet" per entry in
+      HOME_ORDER, using each project's `home` block
+    - project.html (js/project.js) builds the case study for ?project=<slug>
+
+  HOME SHEET FIELDS (all optional except title):
+    title       sheet caption + project page title
+    role        small mono line under the caption (e.g. 'Art Direction')
+    home.image  cover image (jpg/webp, ~1600px on the long side max)
+    home.video  short silent loop instead of an image (mp4, <2MB)
+    home.ratio  sheet proportion, width / height (default 4 / 5)
+    home.size   'l' | 'm' | 's' — sheet width within its column (default 'm')
+    home.position  object-position crop, e.g. '30% 50%'
+  A project with no image/video prints as a plain title card.
 */
+window.HOME_ORDER = [
+  'art-direction',
+  'boys-club',
+  'project-03',
+  'project-04',
+  'project-05',
+  'project-06'
+];
+
 window.PROJECTS = {
   'art-direction': {
     title: 'Grassroots Fall 26',
+    role: 'Art Direction',
+    home: { video: 'assets/video/jacket-love-story-thumb.mp4', image: 'assets/case-studies/art-direction/ad-07.jpg', ratio: 4 / 5, size: 'l' },
     year: 2026, // shown in the "SG PORTFOLIO SITE — YYYY" line at the top
     video: 'assets/video/jacket-love-story.mp4',
     // Homepage thumbnail: a silent 8s, 640x400 cut of the video above,
@@ -46,6 +64,8 @@ window.PROJECTS = {
   // still (bc-02, the titled campaign frame).
   'boys-club': {
     title: 'Boy\u2019s Club',
+    role: 'Brand Identity',
+    home: { image: 'assets/case-studies/boys-club/bc-02.jpg', ratio: 16 / 10, size: 'm' },
     category: 'art-direction',
     primaryImage: 'assets/case-studies/boys-club/bc-02.jpg',
     // The main image opens the live Boy's Club site: hovering it shows a
@@ -67,5 +87,11 @@ window.PROJECTS = {
       slot: 2,
       position: '29% 50%'
     }
-  }
+  },
+
+  // ---------- placeholders — TODO(Sadie): replace with real projects ----------
+  'project-03': { title: 'Project Three', role: 'Category', home: { ratio: 3 / 2, size: 's' } },
+  'project-04': { title: 'Project Four', role: 'Category', home: { ratio: 4 / 5, size: 'm' } },
+  'project-05': { title: 'Project Five', role: 'Category', home: { ratio: 1, size: 'm' } },
+  'project-06': { title: 'Project Six', role: 'Category', home: { ratio: 3 / 4, size: 'l' } }
 };
