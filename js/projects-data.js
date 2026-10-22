@@ -31,13 +31,6 @@ window.PROJECTS = {
     home: { video: 'assets/video/jacket-love-story-thumb.mp4', image: 'assets/case-studies/art-direction/ad-07.jpg', ratio: 4 / 5, size: 'l' },
     year: 2026, // shown in the "SG PORTFOLIO SITE — YYYY" line at the top
     video: 'assets/video/jacket-love-story.mp4',
-    // Homepage thumbnail: a silent 8s, 640x400 cut of the video above,
-    // looped (a separate small file so the homepage never loads the 23MB
-    // full video). Without thumbVideo, the first clusterImages entry is used.
-    thumbVideo: 'assets/video/jacket-love-story-thumb.mp4',
-    // Homepage thumbnail rotation (deg). The Art Direction paper rests
-    // rotated -90deg, so +90 turns the image back upright on screen.
-    thumbRotate: 90,
     // 6 images for the 6 Failures & Setbacks boxes — filled in document
     // order, left stack then right.
     clusterImages: [
@@ -55,13 +48,6 @@ window.PROJECTS = {
   },
 
   // ---------- Boy's Club (Art Direction) ----------
-  // Lives in the Art Direction category: its homeThumb shows in the Art
-  // Direction paper's tall right-hand box on the homepage (slot 2 — the
-  // wide bottom holder, which reads as a tall right column once that
-  // paper rests turned -90deg), cropped via `position` (object-position:
-  // which part of the photo the tall box keeps — the dog and Sadie, plant
-  // mostly out of frame). The project page's main image is a separate
-  // still (bc-02, the titled campaign frame).
   'boys-club': {
     title: 'Boy\u2019s Club',
     role: 'Brand Identity',
@@ -81,12 +67,7 @@ window.PROJECTS = {
       { src: 'assets/case-studies/boys-club/bc-06-cutout.webp', cutout: true },
       { src: 'assets/case-studies/boys-club/bc-07-cutout.webp', cutout: true },
       'assets/case-studies/boys-club/bc-08.jpg'
-    ],
-    homeThumb: {
-      image: 'assets/case-studies/boys-club/bc-01.jpg',
-      slot: 2,
-      position: '29% 50%'
-    }
+    ]
   },
 
   // ---------- placeholders — TODO(Sadie): replace with real projects ----------
