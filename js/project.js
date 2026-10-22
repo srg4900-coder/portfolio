@@ -108,33 +108,23 @@
     muteBtn.className = 'project-video__mute';
     muteBtn.setAttribute('data-cursor-solid', 'white');
 
-    // SOUND ON BY DEFAULT, with the button showing. Button states (CSS in
-    // css/project.css):
+    // MUTED BY DEFAULT. Sound only ever turns on from the visitor's own
+    // click on the button. Button states (CSS in css/project.css):
     //   .is-sound-on   playing with sound — button visible, says MUTE
-    //   (none)         muted by the visitor — button fades away; hovering
-    //                  the video (mouse) or tapping it (touch) brings it
-    //                  back, saying UNMUTE
-    //   .is-awaiting-sound  see below — button visible, says UNMUTE
-    //
-    // Browsers only allow autoplay WITH sound after the visitor has
-    // interacted with the page (Safari/iPhone essentially never on a fresh
-    // load; Chrome sometimes for sites you visit often). So: try playing
-    // with sound; if the browser refuses, play muted instead and switch
-    // the sound on at the visitor's very first tap/click/keypress anywhere.
+    //   (none)         muted — button hidden until hover (mouse) or tap (touch), says UNMUTE
+    video.muted = true;
+    video.defaultMuted = true;
+
     function setMuted(muted) {
       video.muted = muted;
       box.classList.toggle('is-sound-on', !muted);
-      box.classList.remove('is-awaiting-sound');
       muteBtn.textContent = muted ? 'UNMUTE' : 'MUTE';
       muteBtn.setAttribute('aria-label', muted ? 'Unmute video' : 'Mute video');
     }
 
     muteBtn.addEventListener('click', function (e) {
       e.stopPropagation(); // don't let this bubble into any click-to-front/drag handling
-      removeGestureListeners();
       setMuted(!video.muted);
-      // a real click is a user gesture, so playing with sound is allowed
-      // here — resuming explicitly covers browsers that pause on the change
       video.play().catch(function () {});
     });
 
@@ -147,42 +137,10 @@
       peekTimer = setTimeout(function () { box.classList.remove('is-peek'); }, PEEK_MS);
     }, { passive: true });
 
-    // Which events count as a "real" interaction differs by device (a
-    // touch only counts on lift, a mouse on press), so listen for all of
-    // them and simply TRY: if the browser still refuses, go back to muted
-    // and keep waiting for the next one.
-    var GESTURES = ['pointerdown', 'pointerup', 'touchend', 'keydown'];
-    function unmuteOnFirstGesture(e) {
-      if (e.target === muteBtn) return; // the button handles itself
-      video.muted = false;
-      video.play().then(function () {
-        removeGestureListeners();
-        setMuted(false);
-      }).catch(function () {
-        video.muted = true;
-        video.play().catch(function () {});
-      });
-    }
-    function removeGestureListeners() {
-      GESTURES.forEach(function (t) {
-        document.removeEventListener(t, unmuteOnFirstGesture, true);
-      });
-    }
-
-    setMuted(false);
+    setMuted(true);
     box.appendChild(video);
     box.appendChild(muteBtn);
-
-    // Play from 0s, instantly, WITH sound if the browser allows it.
-    video.play().catch(function () {
-      // Sound refused: play muted now, turn sound on at the first gesture.
-      setMuted(true);
-      box.classList.add('is-awaiting-sound');
-      GESTURES.forEach(function (t) {
-        document.addEventListener(t, unmuteOnFirstGesture, true);
-      });
-      video.play().catch(function () {});
-    });
+    video.play().catch(function () {});
   }
 
   // Full-width closing image: fills the original wide 16:9 box, cropped
