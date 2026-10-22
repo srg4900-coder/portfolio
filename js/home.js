@@ -24,9 +24,8 @@
     var num = String(i + 1).padStart(2, '0');
 
     var sheet = document.createElement('article');
-    sheet.className = 'sheet sheet--' + (home.size || 'm');
+    sheet.className = 'sheet';
     sheet.style.setProperty('--i', i);
-    sheet.style.setProperty('--ratio', home.ratio || 0.8);
     sheet.style.setProperty('--rest-rot', (i % 2 ? 0.6 : -0.5) + 'deg');
     if (home.position) sheet.style.setProperty('--pos', home.position);
 
@@ -73,12 +72,12 @@
   // ---------- scatter layout ----------
   // x, y: top-left as a fraction of the viewport; r: tilt (deg); s: scale vs. resting size
   var SCATTER_WIDE = [
-    { x: 0.50, y: 0.20, r: -2.5, s: 0.42 },
-    { x: 0.76, y: 0.24, r: 1.8,  s: 0.50 },
-    { x: 0.58, y: 0.66, r: 4,    s: 0.42 },
-    { x: 0.86, y: 0.62, r: -5,   s: 0.36 },
-    { x: 0.68, y: 0.10, r: 3,    s: 0.30 },
-    { x: 0.92, y: 0.04, r: -2,   s: 0.36 }
+    { x: 0.47, y: 0.20, r: -2.5, s: 0.62 },
+    { x: 0.72, y: 0.26, r: 1.8,  s: 0.56 },
+    { x: 0.55, y: 0.62, r: 3.5,  s: 0.42 },
+    { x: 0.84, y: 0.64, r: -4,   s: 0.40 },
+    { x: 0.66, y: 0.08, r: 2.5,  s: 0.36 },
+    { x: 0.90, y: 0.06, r: -2,   s: 0.40 }
   ];
   var SCATTER_PHONE = [
     { x: 0.10, y: 0.56, r: -3,   s: 0.40 },
@@ -110,11 +109,22 @@
   function ease(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
   function clamp01(t) { return t < 0 ? 0 : t > 1 ? 1 : t; }
 
-  var ticking = false;
+  // Smoothing: the motion chases the scroll position instead of snapping
+  // to it, so wheel steps and trackpad flicks read as one continuous glide.
+  var SMOOTH = 0.14;   // 0..1 per frame; lower = floatier
+  var current = 0, running = false;
+
   function render() {
-    ticking = false;
-    var y = window.scrollY;
+    var target = window.scrollY;
+    current += (target - current) * SMOOTH;
+    if (Math.abs(target - current) < 0.5) current = target;
+    var y = current;
     var progress = clamp01(y / span);
+
+    // hero floats up faster than the page and fades, clearing the stage for the prints
+    hero.style.transform = 'translate3d(0,' + (-y * 0.45).toFixed(1) + 'px,0)';
+    hero.style.opacity = Math.max(0, 1 - progress * 1.5).toFixed(3);
+
     var list = phone.matches ? SCATTER_PHONE : SCATTER_WIDE;
     var n = sheets.length;
 
@@ -132,7 +142,8 @@
       }
       // scatter target is viewport-fixed: sheets hold their pile while the hero text scrolls off
       var tx = (s.x * vw - c.x) * k;
-      var ty = (s.y * vh + y - c.y) * k;
+      // window.scrollY (not the smoothed y) keeps the target pinned to the real viewport
+      var ty = (s.y * vh + window.scrollY - c.y) * k;
       var sc = s.s + (1 - s.s) * t;
       el.style.transform = 'translate3d(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px,0) rotate(' + (s.r * k).toFixed(2) + 'deg) scale(' + sc.toFixed(3) + ')';
       el.style.setProperty('--settle', Math.max(0, t * 1.6 - 0.6).toFixed(2));
@@ -140,11 +151,16 @@
     });
   }
 
+  function loop() {
+    render();
+    if (current !== window.scrollY) requestAnimationFrame(loop);
+    else running = false;
+  }
   function request() {
-    if (!ticking) { ticking = true; requestAnimationFrame(render); }
+    if (!running) { running = true; requestAnimationFrame(loop); }
   }
 
-  function relayout() { measure(); render(); }
+  function relayout() { measure(); request(); }
 
   window.addEventListener('scroll', request, { passive: true });
   window.addEventListener('resize', relayout);

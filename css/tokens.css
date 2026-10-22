@@ -17,7 +17,7 @@
 
   /* light-box frame + glass (Figma: inside stroke 20px, Glass fill #DEE7F2 @ 20%) */
   --frame-color: #100E0C;
-  --frame-width: clamp(8px, 1.4vw, 20px);
+  --frame-width: clamp(10px, 2vw, 20px);
   --glass-tint: rgba(222, 231, 242, 0.2);
 
   /* text opacity: all text sits at 80–90% so it reads as printed, not pixel-black */

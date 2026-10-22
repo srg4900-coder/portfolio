@@ -10,9 +10,8 @@
     role        small mono line under the caption (e.g. 'Art Direction')
     home.image  cover image (jpg/webp, ~1600px on the long side max)
     home.video  short silent loop instead of an image (mp4, <2MB)
-    home.ratio  sheet proportion, width / height (default 4 / 5)
-    home.size   'l' | 'm' | 's' — sheet width within its column (default 'm')
-    home.position  object-position crop, e.g. '30% 50%'
+    home.position  which part of the image the crop keeps, e.g. '30% 50%'
+  Every print crops to the same gallery size, so any image works.
   A project with no image/video prints as a plain title card.
 */
 window.HOME_ORDER = [
@@ -28,7 +27,7 @@ window.PROJECTS = {
   'art-direction': {
     title: 'Grassroots Fall 26',
     role: 'Art Direction',
-    home: { video: 'assets/video/jacket-love-story-thumb.mp4', image: 'assets/case-studies/art-direction/ad-07.jpg', ratio: 4 / 5, size: 'l' },
+    home: { video: 'assets/video/jacket-love-story-thumb.mp4', image: 'assets/case-studies/art-direction/ad-07.jpg' },
     year: 2026, // shown in the "SG PORTFOLIO SITE — YYYY" line at the top
     video: 'assets/video/jacket-love-story.mp4',
     // 6 images for the 6 Failures & Setbacks boxes — filled in document
@@ -51,7 +50,7 @@ window.PROJECTS = {
   'boys-club': {
     title: 'Boy\u2019s Club',
     role: 'Brand Identity',
-    home: { image: 'assets/case-studies/boys-club/bc-02.jpg', ratio: 16 / 10, size: 'm' },
+    home: { image: 'assets/case-studies/boys-club/bc-02.jpg' },
     category: 'art-direction',
     primaryImage: 'assets/case-studies/boys-club/bc-02.jpg',
     // The main image opens the live Boy's Club site: hovering it shows a
@@ -71,8 +70,8 @@ window.PROJECTS = {
   },
 
   // ---------- placeholders — TODO(Sadie): replace with real projects ----------
-  'project-03': { title: 'Project Three', role: 'Category', home: { ratio: 3 / 2, size: 's' } },
-  'project-04': { title: 'Project Four', role: 'Category', home: { ratio: 4 / 5, size: 'm' } },
-  'project-05': { title: 'Project Five', role: 'Category', home: { ratio: 1, size: 'm' } },
-  'project-06': { title: 'Project Six', role: 'Category', home: { ratio: 3 / 4, size: 'l' } }
+  'project-03': { title: 'Project Three', role: 'Category', home: {} },
+  'project-04': { title: 'Project Four', role: 'Category', home: {} },
+  'project-05': { title: 'Project Five', role: 'Category', home: {} },
+  'project-06': { title: 'Project Six', role: 'Category', home: {} }
 };

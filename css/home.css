@@ -42,35 +42,33 @@
 }
 
 /* ---------- sheets: the organized grid ---------- */
-
+/*
+  Gallery wall: two columns, left a little narrower than right, every
+  print in a row the same height. Images crop to fit (object-fit: cover),
+  so any source image lands uniform. Left prints are 4:3; right prints'
+  ratio is derived so both columns share one height.
+*/
 .sheets {
+  --ratio-l: 4 / 3;
+  --ratio-r: 1.569; /* (4 / 3) / 0.85: same height as the left column */
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: clamp(32px, 7vw, 120px);
-  row-gap: clamp(56px, 10vw, 160px);
-  padding: clamp(16px, 4vh, 48px) clamp(0px, 4vw, 64px) clamp(96px, 16vh, 200px);
-  max-width: 1440px;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+  column-gap: clamp(32px, 9vw, 120px);
+  row-gap: clamp(48px, 8vw, 104px);
+  padding: clamp(24px, 6vh, 64px) clamp(0px, 3vw, 48px) clamp(96px, 16vh, 200px);
+  max-width: 1320px;
   margin: 0 auto;
 }
 
-/* editorial stagger: right column sits lower, like prints laid out by hand */
-.sheet:nth-child(even) { margin-top: clamp(48px, 12vw, 200px); }
-
 .sheet {
-  --w: 78%;
   position: relative;
-  width: var(--w);
-  justify-self: start;
   transform-origin: 0 0;
   will-change: transform;
   z-index: var(--z-paper-front);
+  --ratio: var(--ratio-l);
 }
-.sheet:nth-child(4n + 2),
-.sheet:nth-child(4n + 3) { justify-self: end; }
-.sheet--l { --w: 100%; }
-.sheet--m { --w: 80%; }
-.sheet--s { --w: 58%; }
+.sheet:nth-child(even) { --ratio: var(--ratio-r); }
 
 .sheet__link {
   display: block;
@@ -80,7 +78,7 @@
 /* the printed paper itself */
 .sheet__paper {
   position: relative;
-  aspect-ratio: var(--ratio, 4 / 5);
+  aspect-ratio: var(--ratio);
   background: var(--color-white);
   overflow: hidden;
   box-shadow: var(--shadow-paper);
@@ -157,20 +155,15 @@
   .sheets { column-gap: 40px; padding-left: 0; padding-right: 0; }
 }
 
-/* ---------- phone: one column, every sheet full width ---------- */
+/* ---------- phone: one column, every print 4:3 ---------- */
 @media (max-width: 640px) {
   .hero { min-height: 92svh; }
   .sheets {
     grid-template-columns: 1fr;
-    row-gap: 56px;
+    row-gap: 48px;
   }
-  .sheet:nth-child(even) { margin-top: 0; }
   .sheet,
-  .sheet--l,
-  .sheet--m { --w: 100%; }
-  .sheet--s { --w: 72%; }
-  .sheet:nth-child(odd) { justify-self: start; }
-  .sheet:nth-child(even) { justify-self: end; }
+  .sheet:nth-child(even) { --ratio: 4 / 3; }
 }
 
 @media (prefers-reduced-motion: reduce) {

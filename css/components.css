@@ -127,55 +127,64 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .nav-right a:hover,
 .nav-right button:hover { opacity: 0.55; }
 
-/* ---------- light-box: dark frame + glass overlay ---------- */
+/* ---------- light-box: frame + glass ---------- */
 /*
   Built in CSS (no image) so it resizes cleanly at every breakpoint.
-  Figma spec: viewport fill #FDF9F5, 20px inside stroke #100E0C, then a
-  Glass layer on top (light -45deg 80%, refraction 48, depth 57,
-  dispersion 75, frost 10, splay 20, fill #DEE7F2 @ 20%).
-    .lightbox            fixed frame ring (pointer-events: none)
-    .lightbox::before    the glass rim: refracted light pulled over the dark
-                         stroke, lit from the top-left (-45deg), with a faint
-                         warm/cool split along the inner edge (dispersion)
-    .lightbox::after     glass fill tint + inner falloff over the whole surface
+  Recreates the Figma render: the 20px dark stroke seen through the Glass
+  layer reads as a warm, frosted bevel — light on the outer lip, deepening
+  toward a fine dark inner edge, lit from the top-left (-45deg) so top/left
+  sit lighter than bottom/right. Four mitered edges (like a picture frame),
+  then the glass fill tint + soft inner falloff over the whole surface.
+  Markup: <div class="lightbox"> with four <i> edges (top, right, bottom, left).
 */
 .lightbox {
   position: fixed;
   inset: 0;
   z-index: var(--z-frame);
   pointer-events: none;
-  border: var(--frame-width) solid var(--frame-color);
+  --fw: var(--frame-width);
+  /* outer lip -> inner edge */
+  --bevel-lit:   #FCFAF6 0%, #F1E9DF 22%, #E1D4C3 55%, #CBB9A3 82%, #B9A58D 100%;
+  --bevel-shade: #F4EEE6 0%, #E3D7C8 22%, #CDBCA7 55%, #B29F88 82%, #9E8B74 100%;
 }
 
-.lightbox::before {
-  content: '';
+.lightbox i {
   position: absolute;
-  inset: calc(var(--frame-width) * -1);
-  padding: var(--frame-width);
-  /* refracted light: brightest top-left, falling to warm stone, darkest bottom-right */
-  background:
-    linear-gradient(135deg, rgba(255, 253, 249, 0.95) 0%, rgba(236, 228, 217, 0.92) 35%, rgba(214, 203, 189, 0.9) 70%, rgba(184, 171, 155, 0.92) 100%);
-  /* paint only the ring, not the middle */
-  -webkit-mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-          mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  box-shadow:
-    inset 1px 1px 0 rgba(255, 255, 255, 0.9),        /* outer specular */
-    inset -1px -1px 0 rgba(16, 14, 12, 0.25);
+  display: block;
+}
+.lightbox i:nth-child(1) { /* top */
+  top: 0; left: 0; right: 0; height: var(--fw);
+  clip-path: polygon(0 0, 100% 0, calc(100% - var(--fw)) 100%, var(--fw) 100%);
+  background: linear-gradient(to bottom, var(--bevel-lit));
+}
+.lightbox i:nth-child(2) { /* right */
+  top: 0; right: 0; bottom: 0; width: var(--fw);
+  clip-path: polygon(0 var(--fw), 100% 0, 100% 100%, 0 calc(100% - var(--fw)));
+  background: linear-gradient(to left, var(--bevel-shade));
+}
+.lightbox i:nth-child(3) { /* bottom */
+  bottom: 0; left: 0; right: 0; height: var(--fw);
+  clip-path: polygon(var(--fw) 0, calc(100% - var(--fw)) 0, 100% 100%, 0 100%);
+  background: linear-gradient(to top, var(--bevel-shade));
+}
+.lightbox i:nth-child(4) { /* left */
+  top: 0; left: 0; bottom: 0; width: var(--fw);
+  clip-path: polygon(0 0, 100% var(--fw), 100% calc(100% - var(--fw)), 0 100%);
+  background: linear-gradient(to right, var(--bevel-lit));
 }
 
+/* glass surface: fill tint + the frame's soft refraction falling inward */
 .lightbox::after {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: var(--fw);
   background: var(--glass-tint);
   box-shadow:
-    inset 0 0 0 1px rgba(16, 14, 12, 0.28),           /* inner bevel edge (depth) */
-    inset 1px 1px 0 1px rgba(255, 196, 150, 0.22),    /* dispersion: warm fringe */
-    inset -1px -1px 0 1px rgba(102, 124, 146, 0.22),  /* dispersion: cool fringe */
-    inset 3px 3px 6px rgba(255, 255, 255, 0.55),      /* light catch, top-left */
-    inset -4px -4px 10px rgba(16, 14, 12, 0.14),      /* shade, bottom-right */
-    inset 0 0 calc(var(--frame-width) * 3) rgba(16, 14, 12, 0.07); /* splay: soft falloff into the surface */
+    inset 0 0 0 1px rgba(110, 92, 72, 0.45),          /* fine dark inner edge */
+    inset 0 0 0 2px rgba(255, 255, 255, 0.55),         /* glass lip highlight */
+    inset 2px 2px 6px 1px rgba(255, 255, 255, 0.7),    /* light catch, top-left */
+    inset -3px -3px 8px rgba(120, 100, 78, 0.22),      /* shade, bottom-right */
+    inset 0 0 calc(var(--fw) * 1.6) rgba(150, 128, 100, 0.16); /* splay into the surface */
 }
 
 @media print { .lightbox { display: none; } }
