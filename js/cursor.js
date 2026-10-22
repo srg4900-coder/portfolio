@@ -150,7 +150,7 @@
     label.style.color = '';
   }
 
-  var drawnX = NaN, drawnY = NaN;          // last position actually written
+  var drawnX = -1e4, drawnY = -1e4;        // last position written (a number, not NaN: NaN never compares as "moved")
   var hitX = NaN, hitY = NaN, lastHitT = 0; // last hit-test position/time
 
   function loop(now) {

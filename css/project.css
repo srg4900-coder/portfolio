@@ -257,126 +257,36 @@ body.project-page {
   }
 }
 
-/* ---------- the draggable image-box cluster (Failures & Setbacks) ---------- */
-/*
-  Two centered stacks of 3 boxes each (left: --1/--2/--3, right:
-  --4/--5/--6). Each box's resting spot is its stack's horizontal center
-  (--stack-x) plus a small per-box "fan" offset/rotation so the stack
-  reads as a loose pile of real paper, not a neat grid — both are JUST
-  the STARTING point: js/drag.js is what makes them freely draggable
-  anywhere within this section (it owns [data-drag-bounds] below), and
-  the first real drag converts a box from this centered/fanned transform
-  system to plain pixel left/top with no transform, permanently, until
-  the next full page load resets everything back to this CSS layout.
-*/
-
+/* ---------- gallery wall (Failures & Setbacks) ---------- */
+/* Uniform prints in a simple grid: every image crops to the same 4:5 frame. */
 .project-cluster {
   grid-column: 1 / -1;
-  position: relative;
-  overflow: hidden; /* safety net: nothing can visually escape the section, even mid-clamp */
-  /* Tall enough for a ~420px-wide portrait image (the case-study photos
-     run up to ~1.5:1 height:width, i.e. ~630px tall at full box width)
-     plus breathing room above/below, not just the old empty-placeholder
-     height. */
-  min-height: 856px; /* 760 + 48px extra room top AND bottom (boxes are centered at top:50%) */
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(20px, 3vw, 48px);
+  margin-top: clamp(32px, 5vw, 64px);
 }
 
-/* BUG FIX: without this, a finger on a box makes iOS/Android scroll the
-   page and cancel the pointer stream, so drag.js never got a drag on
-   phones. `none` hands every touch on a box to the drag instead. */
-.cluster-box {
-  touch-action: none;
-}
-
-.cluster-box {
-  /* Target 420px wide (scaled down from the original 512px spec so more
-     of the stack is visible at once), scaling down fluidly on narrower
-     viewports rather than a fixed media-query breakpoint — height is
-     intentionally NOT constrained (no aspect-ratio), so images of any
-     proportion all render at this same width and keep their own natural
-     height (see .cluster-box__img below), instead of being cropped to
-     fit a fixed box. */
-  width: clamp(220px, 32vw, 420px);
-  height: auto;
-  background: var(--color-paper-white);
-  border: 1px solid rgba(85, 126, 170, 0.25);
-  left: var(--stack-x, 50%);
-  top: 50%;
-  transform:
-    translate(-50%, -50%)
-    translate(var(--fan-x, 0px), var(--fan-y, 0px))
-    rotate(var(--fan-rot, 0deg));
-}
+.cluster-box { position: relative; }
 
 .cluster-box .paper__inner {
-  height: auto; /* override the shared .paper__inner's height:100% — this box sizes to its (future) image, not a fixed box */
-  min-height: 340px; /* placeholder size until a real image fills it — see .cluster-box__img */
-  background: var(--color-paper-white);
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  transform: none;
 }
 
-/* Transparent cut-outs (js/project.js: clusterImages { cutout: true }):
-   no white paper fill, border or shadow in ANY state (hover, picked up,
-   dragging) — only the object itself, sitting straight on the page.
-   Selector is extra-specific on purpose so it beats the shared .paper
-   hover/active/dragging shadow rules in components.css. */
-.project-cluster .cluster-box.is-cutout {
-  background: none;
-  border: none;
-}
-
-.project-cluster .cluster-box.is-cutout .paper__inner {
-  background: none;
-  box-shadow: none;
-  min-height: 0;
-}
-
-/* For when a real <img class="cluster-box__img" src="..."> is added
-   inside .paper__inner: fills the box's width exactly (so every image
-   lines up at a uniform 512px-ish width regardless of its own native
-   size) and lets height follow the image's own aspect ratio. */
 .cluster-box__img {
-  display: block;
   width: 100%;
-  height: auto;
-  /* Belt-and-suspenders alongside img.draggable=false in project.js —
-     Safari in particular can still initiate its own image-drag from CSS
-     user-drag alone, which hijacked js/drag.js's pointer-based dragging. */
-  -webkit-user-drag: none;
-  user-select: none;
-  -webkit-user-select: none;
+  height: 100%;
+  object-fit: cover;
 }
 
-/* left stack */
-.cluster-box--1 { --stack-x: 35%; --fan-x: 0px;   --fan-y: 0px;   --fan-rot: -2deg; z-index: 3; }
-.cluster-box--2 { --stack-x: 35%; --fan-x: 14px;  --fan-y: 10px;  --fan-rot: 3deg;  z-index: 2; }
-.cluster-box--3 { --stack-x: 35%; --fan-x: -10px; --fan-y: 20px;  --fan-rot: -4deg; z-index: 1; }
+/* transparent cut-outs sit whole on a plain print instead of being cropped */
+.cluster-box.is-cutout .paper__inner { background: var(--color-blush); }
+.cluster-box.is-cutout .cluster-box__img { object-fit: contain; padding: 10%; }
 
-/* right stack */
-.cluster-box--4 { --stack-x: 65%; --fan-x: 0px;   --fan-y: 0px;   --fan-rot: 2deg;  z-index: 3; }
-.cluster-box--5 { --stack-x: 65%; --fan-x: -12px; --fan-y: 12px;  --fan-rot: -3deg; z-index: 2; }
-.cluster-box--6 { --stack-x: 65%; --fan-x: 10px;  --fan-y: 22px;  --fan-rot: 4deg;  z-index: 1; }
-
-@media (max-width: 600px) {
-  /* Phone: one loose COLLAGE, not two piles. The old two-stacks-of-three
-     buried boxes 2/3 and 5/6 completely (the newest photo, ad-06, was
-     invisible at the bottom of a pile). Now all six sit in a staggered
-     2-column x 3-row scatter, neighbours overlapping at the corners like
-     prints tossed on a table — every photo shows, and each is still
-     freely draggable. Positions are px from the cluster's top (box
-     centers), so the 48px top/bottom breathing room holds exactly. */
-  .cluster-box {
-    width: 46vw;
-    --fan-x: 0px;
-    --fan-y: 0px;
-  }
-  .cluster-box .paper__inner { min-height: 0; }
-  .cluster-box--1 { --stack-x: 30%; top: 190px; }
-  .cluster-box--2 { --stack-x: 70%; top: 270px; }
-  .cluster-box--3 { --stack-x: 31%; top: 480px; }
-  .cluster-box--4 { --stack-x: 69%; top: 560px; }
-  .cluster-box--5 { --stack-x: 30%; top: 770px; }
-  .cluster-box--6 { --stack-x: 70%; top: 850px; }
-  .project-cluster { min-height: 1040px; }
+@media (max-width: 760px) {
+  .project-cluster { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* ---------- footer ---------- */

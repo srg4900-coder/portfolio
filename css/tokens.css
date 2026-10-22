@@ -15,10 +15,10 @@
   --color-white: #FFFFFF;       /* tertiary */
   --color-blush: #F9F0E8;       /* tertiary */
 
-  /* light-box frame + glass (Figma: inside stroke 20px, Glass fill #DEE7F2 @ 20%) */
+  /* light-box frame + glass layer (homepage) */
   --frame-color: #100E0C;
   --frame-width: clamp(10px, 2vw, 20px);
-  --glass-tint: rgba(222, 231, 242, 0.2);
+  --glass-tint: rgba(220, 230, 240, 0.2); /* sampled from the 'glass top' layer */
 
   /* text opacity: all text sits at 80–90% so it reads as printed, not pixel-black */
   --text-strong: rgba(29, 27, 24, 0.9);

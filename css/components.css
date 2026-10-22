@@ -127,20 +127,11 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .nav-right a:hover,
 .nav-right button:hover { opacity: 0.55; }
 
-/* ---------- light-box: frame + glass layer ---------- */
+/* ---------- light-box: frame + glass layer (homepage only) ---------- */
 /*
-  Figma spec: viewport fill #FDF9F5, 20px inside stroke #100E0C, then a
-  Glass layer over everything (light -45deg 80%, refraction 48, depth 57,
-  dispersion 75, frost 10, splay 20, fill #DEE7F2 @ 20%).
-
-  .lightbox          the dark stroke (a border, so it scales with --frame-width)
-  .lightbox i (x4)   glass edges: top, right, bottom, left. Where Figma's glass
-                     curves at its edge it refracts — js/glass.js gives each
-                     edge a real SVG displacement filter (backdrop-filter, Chromium):
-                     content is bent outward over the stroke, split per color
-                     channel (dispersion) and slightly frosted. Other browsers
-                     get the static look below.
-  .lightbox::after   glass fill tint + -45deg light (highlight top-left, shade bottom-right)
+  Matches Sadie's two Figma layers exactly, built in CSS so it scales:
+    color background layer  viewport fill #FDF9F5 + 20px inside stroke #100E0C
+    glass top               flat fill rgb(220 230 240) @ 20% over everything
 */
 .lightbox {
   position: fixed;
@@ -148,49 +139,16 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   z-index: var(--z-frame);
   pointer-events: none;
   border: var(--frame-width) solid var(--frame-color);
-  --glass-edge: calc(var(--frame-width) + 18px); /* frame + the depth the bevel reaches inward */
 }
-
-.lightbox i {
-  position: fixed;
-  display: block;
-  z-index: 1;
-  /* static fallback: light lip on the outer edge, soft frost over the stroke */
-  -webkit-backdrop-filter: blur(1.2px);
-          backdrop-filter: blur(1.2px);
-}
-.lightbox i:nth-child(1) { top: 0; left: 0; right: 0; height: var(--glass-edge);
-  background: linear-gradient(to bottom, rgba(236, 230, 222, 0.92) 0, rgba(236, 230, 222, 0.55) 4px, rgba(236, 230, 222, 0) 8px); }
-.lightbox i:nth-child(2) { top: var(--glass-edge); bottom: var(--glass-edge); right: 0; width: var(--glass-edge);
-  background: linear-gradient(to left, rgba(222, 214, 203, 0.9) 0, rgba(222, 214, 203, 0.5) 4px, rgba(222, 214, 203, 0) 8px); }
-.lightbox i:nth-child(3) { bottom: 0; left: 0; right: 0; height: var(--glass-edge);
-  background: linear-gradient(to top, rgba(222, 214, 203, 0.9) 0, rgba(222, 214, 203, 0.5) 4px, rgba(222, 214, 203, 0) 8px); }
-.lightbox i:nth-child(4) { top: var(--glass-edge); bottom: var(--glass-edge); left: 0; width: var(--glass-edge);
-  background: linear-gradient(to right, rgba(236, 230, 222, 0.92) 0, rgba(236, 230, 222, 0.55) 4px, rgba(236, 230, 222, 0) 8px); }
-
-/* real refraction (class set by js/glass.js): the filter does the work, no painted lip */
-/* the glass's own light (80%): a warm wash over the refracted edge, strongest at the lip */
-.lightbox.is-refracting i:nth-child(1) { background: linear-gradient(to bottom, rgba(255, 249, 240, 0.7), rgba(240, 226, 208, 0.5) var(--frame-width), rgba(240, 226, 208, 0) calc(var(--frame-width) + 6px)); }
-.lightbox.is-refracting i:nth-child(2) { background: linear-gradient(to left,   rgba(246, 238, 227, 0.62), rgba(226, 210, 190, 0.45) var(--frame-width), rgba(226, 210, 190, 0) calc(var(--frame-width) + 6px)); }
-.lightbox.is-refracting i:nth-child(3) { background: linear-gradient(to top,    rgba(246, 238, 227, 0.62), rgba(226, 210, 190, 0.45) var(--frame-width), rgba(226, 210, 190, 0) calc(var(--frame-width) + 6px)); }
-.lightbox.is-refracting i:nth-child(4) { background: linear-gradient(to right,  rgba(255, 249, 240, 0.7), rgba(240, 226, 208, 0.5) var(--frame-width), rgba(240, 226, 208, 0) calc(var(--frame-width) + 6px)); }
-.lightbox.is-refracting i:nth-child(1) { -webkit-backdrop-filter: url(#glass-t); backdrop-filter: url(#glass-t); }
-.lightbox.is-refracting i:nth-child(2) { -webkit-backdrop-filter: url(#glass-r); backdrop-filter: url(#glass-r); }
-.lightbox.is-refracting i:nth-child(3) { -webkit-backdrop-filter: url(#glass-b); backdrop-filter: url(#glass-b); }
-.lightbox.is-refracting i:nth-child(4) { -webkit-backdrop-filter: url(#glass-l); backdrop-filter: url(#glass-l); }
-
 .lightbox::after {
   content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 2;
+  position: absolute;
+  inset: calc(var(--frame-width) * -1);
   background: var(--glass-tint);
-  box-shadow:
-    inset 1px 1px 0 rgba(255, 255, 255, 0.85),                       /* specular lip, top-left */
-    inset calc(var(--frame-width) * 0.6) calc(var(--frame-width) * 0.6) calc(var(--frame-width) * 1.4) calc(var(--frame-width) * -0.4) rgba(255, 255, 255, 0.35),
-    inset -1px -1px 0 rgba(16, 14, 12, 0.18),
-    inset calc(var(--frame-width) * -0.5) calc(var(--frame-width) * -0.5) calc(var(--frame-width) * 1.6) calc(var(--frame-width) * -0.4) rgba(16, 14, 12, 0.14);
 }
+
+/* pages without the light box (project pages): no frame offset */
+body:not(.home) { --frame-width: 0px; }
 
 @media print { .lightbox { display: none; } }
 
@@ -568,8 +526,8 @@ html.is-touch .contact-modal__resume:active {
 
 .contact-modal__paper {
   position: absolute;
-  inset: var(--frame-width);
-  background: var(--color-paper-white);
+  inset: 0;
+  background: var(--color-paper);
   display: flex;
   align-items: flex-start;   /* content sits high, not centered */
   justify-content: flex-start; /* left-justified */
