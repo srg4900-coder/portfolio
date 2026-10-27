@@ -1,0 +1,106 @@
+/*
+  SIMPLE PAGES — About (about.html) and Studio (studio.html).
+  Studio's image tiles reuse the case-study figure (.cs-fig in project.css).
+*/
+
+.page__main {
+  padding: calc(var(--nav-height) + clamp(24px, 5vw, 56px)) var(--grid-margin) 0;
+  min-height: 70vh;
+}
+
+.page__eyebrow {
+  color: var(--text-muted);
+  margin-bottom: clamp(12px, 2vw, 20px);
+}
+
+.page__head .text-title { font-size: min(var(--text-title-size), 15vw); }
+
+.page__lede {
+  margin-top: clamp(14px, 2vw, 24px);
+  max-width: 34ch;
+  font-size: var(--text-h1-size);
+  font-weight: 300;
+  line-height: 1.15;
+  color: var(--text-soft);
+}
+.page__lede:empty { display: none; }
+
+/* ---------- about ---------- */
+
+.about {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 40px var(--grid-gutter);
+  margin-top: clamp(48px, 7vw, 96px);
+  padding-bottom: clamp(64px, 10vw, 140px);
+}
+
+.about__bio { max-width: 52ch; }
+
+.about__facts {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.about__facts dt { color: var(--text-muted); }
+.about__facts dd {
+  margin-top: 6px;
+  font-size: var(--text-small-size);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.about__links {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px clamp(24px, 4vw, 48px);
+}
+/* the email reads in full, not shouted in caps */
+.about__links [data-about-email] { text-transform: none; letter-spacing: 0.02em; }
+
+/* ---------- studio ---------- */
+
+.studio__group {
+  margin-top: clamp(56px, 8vw, 112px);
+}
+
+.studio__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(28px, 4vw, 48px) var(--grid-gutter);
+  margin-top: clamp(24px, 3vw, 40px);
+}
+
+.studio__caption {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+}
+.studio__name {
+  font-size: var(--text-small-size);
+  font-weight: 400;
+}
+.studio__details { color: var(--text-muted); }
+.studio__award { color: var(--text-strong); }
+.studio__award::before { content: '\2605  '; }
+
+.studio__empty {
+  margin-top: clamp(48px, 7vw, 96px);
+  color: var(--text-muted);
+}
+
+.page__more {
+  display: flex;
+  gap: clamp(24px, 4vw, 48px);
+  padding: clamp(72px, 10vw, 140px) 0 clamp(48px, 6vw, 80px);
+}
+
+@media (max-width: 1024px) {
+  .studio__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .about { grid-template-columns: 1fr; }
+}

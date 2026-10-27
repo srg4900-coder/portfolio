@@ -1,205 +1,359 @@
 /*
-  PROJECT PAGE — page-specific init.
+  CASE STUDY — builds the whole page for ?project=<slug> from that
+  project's entry in js/projects-data.js (field reference at the top of
+  that file). project.html only holds an empty <main>.
 
-  Reads ?project= and, for any slug with an entry in PROJECTS
-  (js/projects-data.js — shared with the homepage thumbnails),
-  injects that project's media into the page (right now: a video into
-  the first [data-project-media="primary"] box). Title/subtitle/body copy
-  are left as the placeholder text for every slug, including the ones
-  with real media — that copy is Sadie's to write, not something to
-  invent here. Add a new slug's entry to PROJECTS as each case study's
-  real assets are ready; a slug with no entry just shows the plain
-  template, same as before.
+  Page order:
+    HERO      counter (from HOME_ORDER), title, hook, full-bleed image or
+              video, meta row (Role + whichever optional fields exist),
+              optional action button
+    STEPS     "01 Idea / 02 Friction / 03 Work" progress strip: sticky on
+              desktop, slides in on scroll-up on phones (css/project.css)
+    01 Idea, 02 Friction, 03 Work
+              any section with no data is skipped entirely (and left out
+              of the strip); Status "In Progress" drops Friction and
+              renames Work to "Work So Far"
+    NEXT      next project's title + hero (loops last -> first), All Work,
+              Contact
 
-  cursor.js / paper.js / drag.js all auto-init on their own (they run at
-  script-load time and query the DOM directly), so nothing else needs to
-  happen here for the hover-label, click-to-front, or drag behavior.
+  Every case-study image opens in the shared viewer (js/viewer.js); each
+  section is its own set for the arrow keys.
 */
-
 (function () {
-  var PROJECTS = window.PROJECTS || {}; // js/projects-data.js
+  var PROJECTS = window.PROJECTS || {};
+  var ORDER = (window.HOME_ORDER || []).filter(function (s) { return PROJECTS[s]; });
 
-  var params = new URLSearchParams(window.location.search);
-  var slug = params.get('project');
-  if (!slug) return;
+  var main = document.getElementById('case-study');
+  if (!main) return;
 
+  var slug = new URLSearchParams(window.location.search).get('project');
+  var data = slug && PROJECTS[slug];
+
+  // ---------- helpers ----------
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text) node.textContent = text;
+    return node;
+  }
+  // a field can be a string or a list; either way, '' when empty
+  function text(v) {
+    if (Array.isArray(v)) return v.filter(Boolean).join(', ');
+    return v ? String(v).trim() : '';
+  }
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function projectUrl(s) { return 'project.html?project=' + encodeURIComponent(s); }
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // img, or a muted loop when the entry has `video` (src becomes the poster)
+  function media(item, cls, eager) {
+    var node;
+    if (item.video) {
+      node = document.createElement('video');
+      node.src = item.video;
+      if (item.src) node.poster = item.src;
+      node.muted = true;
+      node.defaultMuted = true;
+      node.loop = true;
+      node.playsInline = true;
+      node.autoplay = !reduceMotion;
+      node.preload = eager ? 'auto' : 'metadata';
+      node.setAttribute('role', 'img');
+      node.setAttribute('aria-label', item.alt || '');
+    } else {
+      node = document.createElement('img');
+      node.src = item.src;
+      node.alt = item.alt || '';
+      node.loading = eager ? 'eager' : 'lazy';
+      node.decoding = 'async';
+    }
+    node.className = cls;
+    if (item.position) node.style.objectPosition = item.position;
+    return node;
+  }
+
+  // one labeled image that opens in the viewer
+  function figure(item) {
+    var fig = el('figure', 'cs-fig' + (item.large ? ' cs-fig--large' : '') + (item.cutout ? ' cs-fig--cutout' : ''));
+    var open = el('button', 'cs-fig__open');
+    open.type = 'button';
+    open.setAttribute('data-viewer', '');
+    open.setAttribute('data-src', item.src || '');
+    if (item.video) open.setAttribute('data-video', item.video);
+    open.setAttribute('data-alt', item.alt || '');
+    open.setAttribute('data-label', item.label || '');
+    open.setAttribute('aria-label', 'View larger: ' + (item.alt || item.label || 'image'));
+    open.setAttribute('data-cursor-label', 'View');
+    open.appendChild(media(item, 'cs-fig__media'));
+    var icon = el('span', 'cs-fig__icon', '+');
+    icon.setAttribute('aria-hidden', 'true');
+    open.appendChild(icon);
+    fig.appendChild(open);
+    if (item.label) fig.appendChild(el('figcaption', 'cs-fig__label text-label', item.label));
+    return fig;
+  }
+
+  function figures(list, cls) {
+    var wrap = el('div', cls);
+    wrap.setAttribute('data-viewer-group', '');
+    list.forEach(function (item) { if (item && item.src) wrap.appendChild(figure(item)); });
+    return wrap;
+  }
+
+  // ---------- no such project ----------
+  if (!data) {
+    document.title = 'Project not found | Sadie Gold';
+    var missing = el('section', 'cs-missing');
+    missing.appendChild(el('h1', 'text-h1', 'Project not found'));
+    var back = el('a', 'cs-link text-label', 'See all work →');
+    back.href = 'index.html#work';
+    missing.appendChild(back);
+    main.appendChild(missing);
+    return;
+  }
+
+  document.title = data.title + ' | Sadie Gold';
   document.body.setAttribute('data-project', slug);
+  var inProgress = data.status === 'In Progress';
+  var position = ORDER.indexOf(slug); // -1 for a draft
 
-  var data = PROJECTS[slug];
-  if (!data) return;
-
-  if (data.year) {
-    var yearEl = document.querySelector('.project-year');
-    if (yearEl) yearEl.textContent = data.year;
+  // ---------- HERO ----------
+  var hero = el('header', 'cs-hero');
+  var head = el('div', 'cs-hero__head');
+  if (position > -1) {
+    var count = el('p', 'cs-hero__count text-label load-rise', pad(position + 1) + ' / ' + pad(ORDER.length));
+    count.setAttribute('aria-label', 'Project ' + (position + 1) + ' of ' + ORDER.length);
+    head.appendChild(count);
   }
-
-  if (data.title) {
-    var titleEl = document.querySelector('.project-title');
-    if (titleEl) titleEl.textContent = data.title;
+  head.appendChild(el('h1', 'cs-hero__title text-title letter-reveal', data.title));
+  if (text(data.hook)) {
+    var hook = el('p', 'cs-hero__hook load-rise', text(data.hook));
+    hook.style.setProperty('--load-delay', '300ms');
+    head.appendChild(hook);
   }
+  hero.appendChild(head);
 
-  // A still (instead of a video) as the first media box: shown WHOLE at its
-  // own proportions (.project-image--natural), not cropped to 16:9.
-  if (data.primaryImage && !data.video) {
-    var primaryBox = document.querySelector('[data-project-media="primary"]');
-    if (primaryBox) {
-      var primaryImg = document.createElement('img');
-      primaryImg.className = 'project-image__img';
-      primaryImg.src = data.primaryImage;
-      primaryImg.alt = '';
-      primaryBox.classList.add('project-image--filled', 'project-image--natural');
-      primaryBox.insertBefore(primaryImg, primaryBox.firstChild);
-      var primaryCap = primaryBox.querySelector('.project-image__caption');
-      if (primaryCap) {
-        if (data.primaryCaption) primaryCap.textContent = data.primaryCaption;
-        else primaryCap.remove();
-      }
-
-      // Optional link out (siteUrl key present, e.g. Boy's Club): hovering
-      // the image shows a square "OPEN SITE" cursor label (js/cursor.js
-      // data-cursor-shape), clicking opens the site in a new tab. An
-      // empty siteUrl is a placeholder: the label shows, the click does
-      // nothing until the address is filled in.
-      if (typeof data.siteUrl === 'string') {
-        primaryBox.classList.add('project-image--link');
-        primaryBox.setAttribute('data-cursor-label', 'Open site');
-        primaryBox.setAttribute('data-cursor-fill', '#FFFFFF');
-        primaryBox.setAttribute('data-cursor-text', '#1D1D1E');
-        primaryBox.setAttribute('data-cursor-shape', 'square');
-        primaryBox.addEventListener('click', function () {
-          if (data.siteUrl) window.open(data.siteUrl, '_blank', 'noopener');
-        });
-
-        // "OPEN SITE" button pinned bottom-right on the image — MOBILE only
-        // (hidden on mouse + wide screens in project.css, where the hover
-        // label above does the job; on phones it's the only cue). Same
-        // square white/black look.
-        var openBtn = document.createElement('a');
-        openBtn.className = 'project-image__open-site';
-        openBtn.textContent = 'Open site';
-        openBtn.href = data.siteUrl || '#';
-        openBtn.target = '_blank';
-        openBtn.rel = 'noopener';
-        openBtn.addEventListener('click', function (e) {
-          e.stopPropagation(); // don't also fire the image's own click
-          if (!data.siteUrl) e.preventDefault(); // placeholder until the site exists
-        });
-        primaryBox.appendChild(openBtn);
-      }
+  if (data.hero && data.hero.src) {
+    var heroFig = el('figure', 'cs-hero__media load-rise');
+    heroFig.style.setProperty('--load-delay', '420ms');
+    var heroMedia = media(data.hero, 'cs-hero__img', true);
+    heroFig.appendChild(heroMedia);
+    // moving hero: muted by default, sound only from this button
+    if (data.hero.video) {
+      var mute = el('button', 'cs-hero__mute text-label', 'Unmute');
+      mute.type = 'button';
+      mute.setAttribute('data-cursor-solid', 'white');
+      mute.addEventListener('click', function () {
+        heroMedia.muted = !heroMedia.muted;
+        mute.textContent = heroMedia.muted ? 'Unmute' : 'Mute';
+        heroMedia.play().catch(function () {});
+      });
+      heroFig.appendChild(mute);
+      if (reduceMotion) heroMedia.controls = true;
+      else heroMedia.play().catch(function () {});
     }
+    hero.appendChild(heroFig);
   }
 
-  if (data.video) {
-    var box = document.querySelector('[data-project-media="primary"]');
-    if (!box) return;
+  var info = el('div', 'cs-hero__info');
+  var meta = el('dl', 'cs-meta');
+  function metaRow(name, value, isTag) {
+    if (!value) return;
+    var row = el('div', 'cs-meta__row');
+    row.appendChild(el('dt', 'text-label', name));
+    var dd = el('dd');
+    if (isTag) dd.appendChild(el('span', 'cs-tag text-label', value));
+    else dd.textContent = value;
+    row.appendChild(dd);
+    meta.appendChild(row);
+  }
+  metaRow('Role', text(data.role));
+  metaRow('Disciplines', text(data.disciplines));
+  metaRow('Duration', text(data.duration));
+  metaRow('Status', text(data.status), true);
+  metaRow('Collaborators', text(data.collaborators));
+  metaRow('Tools', text(data.tools));
+  if (meta.children.length) info.appendChild(meta);
 
-    box.classList.add('project-image--video');
-    box.innerHTML = '';
-
-    var video = document.createElement('video');
-    video.className = 'project-video';
-    video.src = data.video;
-    video.autoplay = true;
-    video.loop = true;
-    video.playsInline = true;
-    video.preload = 'auto';
-
-    var muteBtn = document.createElement('button');
-    muteBtn.className = 'project-video__mute';
-    muteBtn.setAttribute('data-cursor-solid', 'white');
-
-    // MUTED BY DEFAULT. Sound only ever turns on from the visitor's own
-    // click on the button. Button states (CSS in css/project.css):
-    //   .is-sound-on   playing with sound — button visible, says MUTE
-    //   (none)         muted — button hidden until hover (mouse) or tap (touch), says UNMUTE
-    video.muted = true;
-    video.defaultMuted = true;
-
-    function setMuted(muted) {
-      video.muted = muted;
-      box.classList.toggle('is-sound-on', !muted);
-      muteBtn.textContent = muted ? 'UNMUTE' : 'MUTE';
-      muteBtn.setAttribute('aria-label', muted ? 'Unmute video' : 'Mute video');
+  if (data.action && data.action.url && data.action.label) {
+    var action = el('a', 'cs-action text-label', data.action.label);
+    action.href = data.action.url;
+    if (/^https?:/.test(data.action.url)) {
+      action.target = '_blank';
+      action.rel = 'noopener';
+      action.appendChild(el('span', 'cs-action__arrow', ' ↗'));
+      action.setAttribute('aria-label', data.action.label + ' (opens in a new tab)');
     }
+    action.setAttribute('data-cursor-solid', 'white');
+    info.appendChild(action);
+  }
+  if (info.children.length) hero.appendChild(info);
+  main.appendChild(hero);
 
-    muteBtn.addEventListener('click', function (e) {
-      e.stopPropagation(); // don't let this bubble into any click-to-front/drag handling
-      setMuted(!video.muted);
-      video.play().catch(function () {});
+  // ---------- SECTIONS ----------
+  function section(id, num, name) {
+    var sec = el('section', 'cs-section');
+    sec.id = id;
+    sec.setAttribute('aria-labelledby', id + '-title');
+    var h = el('h2', 'cs-section__title text-h2');
+    h.id = id + '-title';
+    h.appendChild(el('span', 'cs-section__num', num));
+    h.appendChild(document.createTextNode(name));
+    sec.appendChild(h);
+    return sec;
+  }
+
+  var sections = [];
+
+  var idea = data.idea || {};
+  var ideaImages = (idea.images || []).filter(function (i) { return i && i.src; });
+  if (text(idea.copy) || ideaImages.length) {
+    var ideaSec = section('idea', '01', 'Idea');
+    if (text(idea.copy)) ideaSec.appendChild(el('p', 'cs-section__copy text-project-body', text(idea.copy)));
+    if (ideaImages.length) ideaSec.appendChild(figures(ideaImages, 'cs-figs cs-figs--' + ideaImages.length));
+    sections.push({ node: ideaSec, num: '01', name: 'Idea' });
+  }
+
+  var friction = data.friction || {};
+  var beats = [['Problem', text(friction.problem)], ['Response', text(friction.response)], ['Result', text(friction.result)]]
+    .filter(function (b) { return b[1]; });
+  var frictionImages = (friction.images || []).filter(function (i) { return i && i.src; });
+  if (!inProgress && (beats.length || frictionImages.length)) {
+    var frictionSec = section('friction', '02', 'Friction');
+    if (beats.length) {
+      var dl = el('dl', 'cs-beats');
+      beats.forEach(function (b) {
+        var row = el('div', 'cs-beats__row');
+        row.appendChild(el('dt', 'cs-beats__label', b[0]));
+        row.appendChild(el('dd', 'cs-beats__text', b[1]));
+        dl.appendChild(row);
+      });
+      frictionSec.appendChild(dl);
+    }
+    if (frictionImages.length) frictionSec.appendChild(figures(frictionImages, 'cs-figs cs-figs--' + frictionImages.length));
+    sections.push({ node: frictionSec, num: '02', name: 'Friction' });
+  }
+
+  var work = data.work || {};
+  var workImages = (work.images || []).filter(function (i) { return i && i.src; });
+  if (workImages.length || text(work.outcome)) {
+    var workName = inProgress ? 'Work So Far' : 'Work';
+    var workSec = section('work', '03', workName);
+    if (workImages.length) workSec.appendChild(figures(workImages, 'cs-grid'));
+    if (text(work.outcome)) workSec.appendChild(el('p', 'cs-outcome', text(work.outcome)));
+    sections.push({ node: workSec, num: '03', name: workName });
+  }
+
+  if (sections.length) {
+    var bodyWrap = el('div', 'cs-body');
+
+    // STEPS: the slim progress strip
+    var steps = el('nav', 'cs-steps');
+    steps.setAttribute('aria-label', 'Sections');
+    var stepList = el('ol', 'cs-steps__list');
+    var links = sections.map(function (s) {
+      var li = el('li');
+      var a = el('a', 'cs-steps__link text-label');
+      a.href = '#' + s.node.id;
+      a.appendChild(el('span', 'cs-steps__num', s.num));
+      a.appendChild(document.createTextNode(s.name));
+      li.appendChild(a);
+      stepList.appendChild(li);
+      return a;
     });
+    steps.appendChild(stepList);
+    bodyWrap.appendChild(steps);
+    sections.forEach(function (s) { bodyWrap.appendChild(s.node); });
+    main.appendChild(bodyWrap);
 
-    // Touch screens have no hover: a tap on the video shows the button
-    // for a few seconds instead.
-    var PEEK_MS = 3000, peekTimer = null;
-    box.addEventListener('touchstart', function () {
-      box.classList.add('is-peek');
-      clearTimeout(peekTimer);
-      peekTimer = setTimeout(function () { box.classList.remove('is-peek'); }, PEEK_MS);
+    // highlight the section crossing the middle of the screen
+    if ('IntersectionObserver' in window) {
+      var spy = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          links.forEach(function (a) {
+            var on = a.getAttribute('href') === '#' + e.target.id;
+            a.classList.toggle('is-current', on);
+            if (on) a.setAttribute('aria-current', 'location');
+            else a.removeAttribute('aria-current');
+          });
+        });
+      }, { rootMargin: '-45% 0px -50% 0px' });
+      sections.forEach(function (s) { spy.observe(s.node); });
+    }
+
+    // phones: the strip hides while scrolling down, slides in on scroll-up
+    // (only once past the hero; css/project.css decides when this applies)
+    var lastY = window.scrollY, ticking = false;
+    function onScroll() {
+      ticking = false;
+      var y = window.scrollY;
+      var pastHero = bodyWrap.getBoundingClientRect().top < 0;
+      if (!pastHero || y > lastY + 4) steps.classList.remove('is-shown');
+      else if (y < lastY - 4) steps.classList.add('is-shown');
+      if (Math.abs(y - lastY) > 4) lastY = y;
+    }
+    window.addEventListener('scroll', function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
     }, { passive: true });
-
-    setMuted(true);
-    box.appendChild(video);
-    box.appendChild(muteBtn);
-    video.play().catch(function () {});
+    // following a step link (or Tab-ing into the strip) keeps it visible
+    steps.addEventListener('focusin', function () { steps.classList.add('is-shown'); });
   }
 
-  // Full-width closing image: fills the original wide 16:9 box, cropped
-  // to fit (.project-image--filled / .project-image__img in project.css).
-  if (data.finalImage) {
-    var finalBox = document.querySelector('[data-project-media="final"]');
-    if (finalBox) {
-      var finalImg = document.createElement('img');
-      finalImg.className = 'project-image__img';
-      finalImg.src = data.finalImage;
-      finalImg.alt = '';
-      finalImg.loading = 'lazy';
-      finalBox.classList.add('project-image--filled');
-      finalBox.insertBefore(finalImg, finalBox.firstChild);
-      // Stills keep their hover caption (tap to show on touch, js/touch.js):
-      // a quick one-line detail from finalCaption.
-      var cap = finalBox.querySelector('.project-image__caption');
-      if (cap && data.finalCaption) cap.textContent = data.finalCaption;
+  // ---------- NEXT ----------
+  var next = el('nav', 'cs-next');
+  next.setAttribute('aria-label', 'More work');
+  var nextSlug = position > -1 ? ORDER[(position + 1) % ORDER.length] : ORDER[0];
+  var nextData = nextSlug && nextSlug !== slug ? PROJECTS[nextSlug] : null;
+  if (nextData) {
+    var card = el('a', 'cs-next__card');
+    card.href = projectUrl(nextSlug);
+    card.setAttribute('data-cursor-label', 'Next');
+    var cardText = el('div', 'cs-next__text');
+    var nextPos = ORDER.indexOf(nextSlug);
+    cardText.appendChild(el('span', 'text-label', 'Next project · ' + pad(nextPos + 1) + ' / ' + pad(ORDER.length)));
+    cardText.appendChild(el('span', 'cs-next__title text-h1', nextData.title));
+    if (text(nextData.role)) cardText.appendChild(el('span', 'cs-next__role text-label', text(nextData.role)));
+    card.appendChild(cardText);
+    var nextImg = (nextData.hero && nextData.hero.src) || (nextData.home && nextData.home.image);
+    if (nextImg) {
+      var cardMedia = el('div', 'cs-next__media');
+      // decorative here: the title right beside it already names the link
+      cardMedia.appendChild(media({ src: nextImg, alt: '', position: nextData.hero && nextData.hero.position }, 'cs-next__img'));
+      card.appendChild(cardMedia);
     }
+    next.appendChild(card);
   }
+  var nextLinks = el('div', 'cs-next__links');
+  var all = el('a', 'cs-link text-label', 'All work');
+  all.href = 'index.html#work';
+  var contact = el('button', 'cs-link text-label', 'Contact');
+  contact.type = 'button';
+  contact.setAttribute('data-open-contact', '');
+  [all, contact].forEach(function (n) { n.setAttribute('data-cursor-solid', 'white'); nextLinks.appendChild(n); });
+  next.appendChild(nextLinks);
+  main.appendChild(next);
 
-  if (data.clusterImages && data.clusterImages.length) {
-    var inners = document.querySelectorAll('.cluster-box .paper__inner');
-    data.clusterImages.forEach(function (entry, i) {
-      var inner = inners[i];
-      if (!inner) return;
-      // an entry is a path, or { src, cutout: true } for a transparent
-      // cut-out (PNG/WebP with alpha): its box drops the white paper fill,
-      // border and shadow so the object sits straight on the page
-      var src = typeof entry === 'string' ? entry : entry.src;
-      if (entry.cutout) inner.parentNode.classList.add('is-cutout');
-      var img = document.createElement('img');
-      img.className = 'cluster-box__img';
-      img.src = src;
-      img.alt = '';
-      img.loading = 'lazy';
-      // BUG FIX: browsers give <img> elements their own native "drag the
-      // image out" gesture, which hijacks the pointerdown/move sequence
-      // drag.js relies on — this is exactly why dragging broke only on
-      // THIS project page (the only one with real <img> content so far;
-      // the others are still empty placeholder divs with nothing to hijack
-      // the gesture). draggable=false disables that native behavior.
-      img.draggable = false;
-      inner.appendChild(img);
+  // ---------- reminders for Sadie (console only) ----------
+  var todo = [];
+  if (!text(data.role)) todo.push('role');
+  if (data.hero && /^\[|^$/.test(data.hero.alt || '')) todo.push('hero alt text');
+  [ideaImages, frictionImages, workImages].forEach(function (list) {
+    list.forEach(function (i) {
+      if (/^\[|^$/.test(i.alt || '') || /^\[|^$/.test(i.label || '')) todo.push(i.src + ' (alt/label)');
     });
-  }
+  });
+  if (todo.length) console.info('[case study] still to fill in for "' + slug + '":\n  ' + todo.join('\n  '));
 })();
 
 /*
-  PAGE LOAD-IN (every project page, with or without media)
-  The top of the page eases in like the homepage: the eyebrow, subtitle,
-  first section and first image/video box glide up via .load-rise
-  (staggered --load-delay in project.html, CSS-only), and the title
-  reveals letter by letter with the homepage title's exact timing
-  (js/main.js TITLE_STAGGER_MS / TITLE_LETTER_DURATION_MS: 30ms / 220ms).
-  Runs after the block above, so a project's real title is already in.
+  PAGE LOAD-IN
+  The counter, hook and hero glide up via .load-rise (CSS-only), and the
+  title reveals letter by letter with the homepage title's timing
+  (30ms stagger / 220ms per letter).
 */
 (function () {
-  var title = document.querySelector('.project-title.letter-reveal');
+  var title = document.querySelector('.cs-hero__title.letter-reveal');
   if (!title) return;
   var STAGGER_MS = 30, DURATION_MS = 220, START_DELAY_MS = 120;
   var text = title.textContent;
@@ -207,8 +361,7 @@
   title.setAttribute('aria-label', text);
   title.style.setProperty('--letter-duration', DURATION_MS + 'ms');
   // Letters are grouped per WORD (nowrap) with real spaces between words,
-  // so a long title only ever wraps between words — never mid-word, which
-  // loose per-letter inline-blocks would allow on a narrow phone.
+  // so a long title only ever wraps between words, never mid-word.
   var i = 0;
   text.split(' ').forEach(function (word, w) {
     if (w > 0) title.appendChild(document.createTextNode(' '));
@@ -231,4 +384,3 @@
     requestAnimationFrame(function () { title.classList.add('is-in'); });
   });
 })();
-

@@ -1,380 +1,432 @@
 /*
-  PROJECT PAGE — single shared template (content branches on ?project=
-  later; see the TODO at the top of project.html).
-
-  "On light" context: --color-blue text on the near-white body background,
-  per the mockup's second color/type pairing.
+  CASE STUDY — every project page (markup built by js/project.js).
+  Order: hero, section strip, 01 Idea / 02 Friction / 03 Work, Next.
+  Uses tokens only; the 8-column rhythm matches the .grid helper.
 */
 
 body.project-page {
-  background: var(--color-paper-white);
-  color: var(--color-blue);
+  background: var(--color-paper);
+  color: var(--text-strong);
+  --steps-height: 48px;
 }
 
-.project-wrap {
-  padding-top: 120px;
-  padding-bottom: 80px;
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
 }
 
-.project-header {
-  margin-bottom: 64px;
+.cs {
+  padding-top: calc(var(--nav-height) + clamp(24px, 5vw, 56px));
 }
 
-.project-header__eyebrow {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  opacity: 0.6;
-  margin-bottom: 16px;
+/* ---------- hero ---------- */
+
+.cs-hero__head {
+  padding: 0 var(--grid-margin);
 }
 
-.project-header__eyebrow::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: currentColor;
-  opacity: 0.4;
+.cs-hero__count {
+  color: var(--text-muted);
+  margin-bottom: clamp(12px, 2vw, 20px);
 }
 
-.project-title {
-  grid-column: 1 / 7;
-  color: var(--color-blue);
+.cs-hero__title {
+  font-size: min(var(--text-title-size), 13vw);
+  max-width: 14ch;
 }
 
-.project-subtitle {
-  grid-column: 1 / 7;
-  margin-top: 8px;
-  opacity: 0.7;
-  text-transform: uppercase;
-  font-size: 10pt;
-  letter-spacing: 0.04em;
+.cs-hero__hook {
+  margin-top: clamp(14px, 2vw, 24px);
+  max-width: 34ch;
+  font-size: var(--text-h1-size);
+  font-weight: 300;
+  line-height: 1.15;
+  color: var(--text-soft);
 }
 
-/* ---------- a standalone section: label + body copy + one image ---------- */
-
-.project-section {
-  margin-bottom: 96px;
-}
-
-.project-section__label {
-  grid-column: 1 / 3;
-  color: var(--color-blue);
-}
-
-.project-section__body {
-  grid-column: 3 / 7;
-  opacity: 0.85;
-  margin-bottom: 32px;
-}
-
-/* BUG FIX: the label (2 columns) and body (4 columns) side-by-side
-   layout above was never adapted for narrow viewports — at phone widths
-   each of those 2 label columns is only ~20px wide, far narrower than
-   even one word of "FINAL PRODUCT"/"THOUGHT PROCESS"/etc., so the label
-   text overflowed its own grid column and visually overlapped the body
-   text sitting right next to it. Stack label above body, both full
-   width, instead of side-by-side once there's not enough room for that
-   to read comfortably. */
-@media (max-width: 700px) {
-  .project-title,
-  .project-subtitle,
-  .project-section__label,
-  .project-section__body {
-    grid-column: 1 / -1;
-  }
-
-  /* stacked headers: half size (was the full 24pt H2, as big as the
-     body text), left-aligned with the paragraph below */
-  .project-section__label {
-    margin-bottom: 12px;
-    font-size: calc(var(--text-h2-size) / 2);
-    text-align: left;
-  }
-}
-
-.project-image {
-  grid-column: 1 / -1;
+/* full-bleed: edge to edge, no side margin */
+.cs-hero__media {
   position: relative;
+  width: 100%;
   aspect-ratio: 16 / 9;
-  background: rgba(85, 126, 170, 0.06);
-  border: 1px solid rgba(85, 126, 170, 0.2);
+  max-height: 82svh;
+  margin-top: clamp(32px, 5vw, 64px);
   overflow: hidden;
-  cursor: pointer;
+  background: var(--color-blush);
 }
 
-.project-image__caption {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: flex-end;
-  padding: 20px;
-  background: linear-gradient(0deg, rgba(85, 126, 170, 0.85), transparent 60%);
-  color: var(--color-paper-white);
-  font-family: var(--font-mono);
-  text-transform: uppercase; /* all Syne Mono text is uppercase, per spec */
-  font-size: 9pt;
-  letter-spacing: 0.05em;
-  opacity: 0;
-  transition: opacity var(--duration-base) ease;
-}
-
-/* A real photo (js/project.js): keeps the original wide 16:9 box and
-   fills it edge to edge — cropped as needed (object-fit: cover, centered),
-   no placeholder tint or border. */
-.project-image--filled {
-  background: none;
-  border: none;
-  cursor: default;
-}
-
-.project-image__img {
-  display: block;
+.cs-hero__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
 }
 
-/* A still shown whole, at its own proportions (no 16:9 crop). */
-.project-image--natural {
-  aspect-ratio: auto;
-}
-
-.project-image--natural .project-image__img {
-  height: auto;
-}
-
-/* a main image that opens a site (js/project.js siteUrl) */
-.project-image--link {
-  cursor: pointer;
-}
-
-/* The "OPEN SITE" button on that image (mobile — see the media query
-   below): bottom-right,
-   inset by the page's own grid margin so it lines up with the layout,
-   square white fill + black mono text (matches the hover label). Sized
-   in fixed px so it stays clearly readable even on the smallest phone. */
-.project-image__open-site {
+.cs-hero__mute {
   position: absolute;
   right: var(--grid-margin);
   bottom: var(--grid-margin);
-  z-index: 2;
-  padding: 10px 18px;
-  background: #FFFFFF;
-  color: var(--color-ink);
-  font-family: var(--font-mono);
-  text-transform: uppercase; /* all Syne Mono text is uppercase, per spec */
-  font-size: 10pt;
-  letter-spacing: 0.08em;
-  line-height: 1;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: rgba(29, 27, 24, 0.55);
+  color: var(--color-paper);
+  cursor: pointer;
+  transition: background var(--duration-fast) ease;
+}
+.cs-hero__mute:hover { background: rgba(29, 27, 24, 0.85); }
+
+.cs-hero__info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px 48px;
+  padding: clamp(24px, 3vw, 36px) var(--grid-margin) 0;
+}
+
+.cs-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px clamp(28px, 4vw, 56px);
+}
+
+.cs-meta dt { color: var(--text-muted); }
+
+.cs-meta dd {
+  margin-top: 6px;
+  font-size: var(--text-small-size);
+  font-weight: 400;
+  line-height: 1.4;
+  max-width: 28ch;
+}
+
+.cs-tag {
+  display: inline-block;
+  padding: 3px 9px 2px;
+  border: 1px solid currentColor;
+}
+
+.cs-action {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 22px;
+  border: 1px solid var(--color-ink);
+  border-radius: 999px;
   white-space: nowrap;
-  box-shadow: 0 4px 14px rgba(29, 29, 30, 0.18);
-  transition: background var(--duration-fast) ease, color var(--duration-fast) ease, transform 120ms ease;
+  cursor: pointer;
+  transition: background var(--duration-fast) ease, color var(--duration-fast) ease;
 }
-
-.project-image__open-site:hover {
+.cs-action:hover,
+.cs-action:focus-visible {
   background: var(--color-ink);
-  color: #FFFFFF;
+  color: var(--color-paper);
 }
 
-.project-image__open-site:active {
-  transform: scale(0.96);
+/* ---------- section strip (01 Idea / 02 Friction / 03 Work) ---------- */
+
+.cs-body {
+  position: relative;
+  margin-top: clamp(56px, 8vw, 112px);
 }
 
-/* RULE: hover available -> no button; no hover -> button. With a real
-   mouse/trackpad (hover + fine pointer) the "OPEN SITE" cursor label
-   (js/cursor.js, which runs on exactly those devices) already shows it,
-   at any window size. Phones and tablets (touch = no hover) get the
-   button instead. */
-@media (hover: hover) and (pointer: fine) {
-  .project-image__open-site { display: none; }
-}
-
-@media (max-width: 600px) {
-  .project-image__open-site {
-    right: 12px;
-    bottom: 12px;
-    padding: 9px 14px;
-    font-size: 9pt;
-  }
-}
-
-.project-image:hover .project-image__caption,
-.project-image.is-caption-shown .project-image__caption { /* tap, on touch (js/touch.js) */
-  opacity: 1;
-}
-
-/* ---------- video case-study box (js/project.js injects the <video>) ---------- */
-
-.project-video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.project-video__mute {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 2;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+/* desktop: sticks under the site nav for the whole case study */
+.cs-steps {
+  position: sticky;
+  top: var(--nav-height);
+  z-index: calc(var(--z-nav) - 1);
+  height: var(--steps-height);
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: rgba(29, 29, 30, 0.55);
-  color: var(--color-paper-white);
-  font-family: var(--font-mono);
-  text-transform: uppercase; /* all Syne Mono text is uppercase, per spec */
-  font-size: 8pt;
-  letter-spacing: 0.04em;
-  opacity: 0;
-  transition: opacity var(--duration-base) ease, background var(--duration-fast) ease;
+  padding: 0 var(--grid-margin);
+  background: var(--color-paper);
+  border-bottom: 1px solid rgba(29, 27, 24, 0.12);
 }
 
-.project-video__mute:hover {
-  background: rgba(29, 29, 30, 0.8);
+.cs-steps__list {
+  display: flex;
+  gap: clamp(20px, 3vw, 40px);
+  list-style: none;
 }
 
-/* Visible while the sound is on (or waiting for the first tap to turn
-   it on). Once the visitor mutes, it fades away and only comes back on
-   hover (mouse) or a tap on the video (.is-peek, touch) — see the state
-   notes in js/project.js. */
-.project-image--video.is-sound-on .project-video__mute,
-.project-image--video.is-awaiting-sound .project-video__mute,
-.project-image--video.is-peek .project-video__mute {
-  opacity: 1;
+.cs-steps__link {
+  display: inline-block;
+  padding: 4px 0 3px;
+  color: var(--text-muted);
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+  transition: color var(--duration-fast) ease, border-color var(--duration-fast) ease;
+}
+.cs-steps__link:hover { color: var(--text-strong); }
+.cs-steps__link.is-current {
+  color: var(--text-strong);
+  border-color: currentColor;
 }
 
-/* hover only on real hover devices, so a tap doesn't leave it "stuck" on */
-@media (hover: hover) {
-  .project-image--video:hover .project-video__mute {
+.cs-steps__num { margin-right: 8px; }
+
+/* phones: out of the way while reading, slides in on scroll-up (js/project.js) */
+@media (max-width: 760px) {
+  .cs-steps {
+    position: fixed;
+    left: 0;
+    right: 0;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-100%);
+    transition: transform var(--duration-base) var(--ease-smooth), opacity var(--duration-fast) ease, visibility 0s linear var(--duration-base);
+  }
+  .cs-steps.is-shown {
+    visibility: visible;
     opacity: 1;
+    transform: none;
+    transition: transform var(--duration-base) var(--ease-smooth), opacity var(--duration-fast) ease, visibility 0s;
   }
 }
 
-/* ---------- gallery wall (Failures & Setbacks) ---------- */
-/* Uniform prints in a simple grid: every image crops to the same 4:5 frame. */
-.project-cluster {
-  grid-column: 1 / -1;
+/* ---------- sections ---------- */
+
+.cs-section {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(20px, 3vw, 48px);
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  padding: clamp(56px, 8vw, 112px) var(--grid-margin) 0;
+  scroll-margin-top: calc(var(--nav-height) + var(--steps-height));
+}
+
+.cs-section__title {
+  grid-column: 1 / 3;
+  align-self: start;
+}
+
+.cs-section__num {
+  margin-right: 12px;
+  color: var(--text-muted);
+}
+
+.cs-section__copy,
+.cs-beats,
+.cs-outcome {
+  grid-column: 3 / 8;
+}
+
+.cs-figs,
+.cs-grid {
+  grid-column: 1 / -1;
   margin-top: clamp(32px, 5vw, 64px);
 }
 
-.cluster-box { position: relative; }
+/* ---------- labeled images (Idea / Friction / Work) ---------- */
 
-.cluster-box .paper__inner {
-  aspect-ratio: 4 / 5;
-  overflow: hidden;
-  transform: none;
+.cs-figs {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
+  gap: clamp(20px, 3vw, 40px) var(--grid-gutter);
+}
+.cs-figs--1 { --cols: 1; max-width: 880px; }
+.cs-figs--3 { --cols: 3; }
+.cs-figs--4 { --cols: 4; }
+
+.cs-fig {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
-.cluster-box__img {
+.cs-fig__open {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--color-blush);
+  cursor: zoom-in;
+}
+.cs-figs--1 .cs-fig__open { aspect-ratio: 3 / 2; }
+
+.cs-fig__media {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform var(--duration-slow) var(--ease-smooth);
 }
 
 /* transparent cut-outs sit whole on a plain print instead of being cropped */
-.cluster-box.is-cutout .paper__inner { background: var(--color-blush); }
-.cluster-box.is-cutout .cluster-box__img { object-fit: contain; padding: 10%; }
-
-@media (max-width: 760px) {
-  .project-cluster { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cs-fig--cutout .cs-fig__media {
+  object-fit: contain;
+  padding: 10%;
 }
 
-/* ---------- footer ---------- */
-/*
-  "Questions?" is commented out in project.html for now (Sadie found the
-  bounce — js/footer-bounce.js — confusing), so this is shrunk back down
-  to a compact strip instead of the tall bounded box the bounce needed
-  for room to move. That taller height is the FIRST line below,
-  commented out rather than deleted — restore it (and uncomment the
-  height.footer-bounce.js, bounce <script> and the button in
-  project.html) to bring the bounce back exactly as it was.
-*/
-
-.project-footer {
-  grid-column: 1 / -1;
-  margin-top: 120px;
-  position: relative;
-  /* height: clamp(180px, 26vw, 260px); */ /* the bounce's room-to-move height — see note above */
-  padding: 40px 0;
-  /* no top/bottom border lines (removed per Sadie) — the strip keeps
-     its size, so "Next Project" stays exactly where it was */
-  font-family: var(--font-mono);
-  text-transform: uppercase; /* all Syne Mono text is uppercase, per spec */
-  font-size: 9pt;
-  letter-spacing: 0.05em;
-}
-
-.project-footer__next {
+/* "opens larger" affordance: a small + in the corner on hover / focus
+   (the custom cursor also reads VIEW); always shown, quietly, on touch */
+.cs-fig__icon {
   position: absolute;
-  right: var(--grid-margin);
-  top: 50%;
-  transform: translateY(-50%);
-  font-family: var(--font-display);
-  font-size: 18pt;
-  text-transform: none;
-  letter-spacing: normal;
-  color: var(--color-blue);
-}
-
-.project-footer__questions {
-  position: absolute;
-  left: 0;
-  top: 0;
-  /* 2x the original 9pt (inherited from .project-footer before) */
-  font-size: 18pt;
-  opacity: 0.75;
-  cursor: pointer;
-  white-space: nowrap;
-  will-change: transform; /* js/footer-bounce.js drives this every frame */
-}
-
-/* Drag hint (touch only — js/touch.js adds it): a quiet mono caption in
-   the site's own voice at the top-left of the photo collage, its arrows
-   nudging side to side. Fades out at the first direct touch inside the
-   section (not on scroll). */
-.drag-hint {
-  position: absolute;
-  top: 14px;
-  left: 0;
-  z-index: 50;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: var(--color-blue);
-  opacity: 0.75;
-  font-family: var(--font-mono);
-  text-transform: uppercase; /* all Syne Mono text is uppercase, per spec */
-  font-size: 9pt;
-  letter-spacing: 0.08em;
-  pointer-events: none;
-  transition: opacity var(--duration-base) ease;
-}
-
-.drag-hint__arrows {
-  display: inline-block;
-  animation: drag-hint-nudge 1.6s var(--ease-smooth) infinite;
-}
-
-@keyframes drag-hint-nudge {
-  0%, 100% { transform: translateX(0); }
-  30%      { transform: translateX(-4px); }
-  60%      { transform: translateX(4px); }
-}
-
-.drag-hint.is-gone {
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-size: 18px;
+  line-height: 1;
   opacity: 0;
+  transform: scale(0.8);
+  transition: opacity var(--duration-fast) ease, transform var(--duration-base) var(--ease-bounce);
+}
+.cs-fig__open:hover .cs-fig__icon,
+.cs-fig__open:focus-visible .cs-fig__icon {
+  opacity: 0.95;
+  transform: none;
+}
+.cs-fig__open:hover .cs-fig__media { transform: scale(1.02); }
+
+@media (hover: none) {
+  .cs-fig__icon { opacity: 0.8; transform: none; }
+}
+
+.cs-fig__label {
+  margin-top: 10px;
+  color: var(--text-soft);
+}
+
+/* ---------- 03 Work grid: varied scale via `large` ---------- */
+
+.cs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-flow: dense;
+  gap: clamp(28px, 4vw, 48px) var(--grid-gutter);
+}
+
+/* desktop: a large final takes a 2 x 2 block; its image fills whatever
+   height the neighbouring rows give it */
+.cs-fig--large {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+.cs-fig--large .cs-fig__open {
+  aspect-ratio: auto;
+  flex: 1;
+  min-height: 240px;
+}
+.cs-fig--large .cs-fig__media {
+  position: absolute;
+  inset: 0;
+}
+
+.cs-outcome {
+  margin-top: clamp(40px, 6vw, 72px);
+  max-width: 40ch;
+  font-size: var(--text-h2-size);
+  font-weight: 300;
+  line-height: 1.3;
+  color: var(--text-strong);
+}
+
+/* ---------- 02 Friction beats ---------- */
+
+.cs-beats__row {
+  display: grid;
+  grid-template-columns: 7.5em minmax(0, 1fr);
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid rgba(29, 27, 24, 0.12);
+  font-size: var(--text-body-size);
+  line-height: var(--text-body-line-height);
+}
+.cs-beats__row:last-child { border-bottom: 1px solid rgba(29, 27, 24, 0.12); }
+
+.cs-beats__label { font-weight: 500; }
+.cs-beats__text { color: var(--text-soft); }
+
+/* ---------- next project + links (never a dead end) ---------- */
+
+.cs-next {
+  margin-top: clamp(96px, 14vw, 180px);
+  padding: 0 var(--grid-margin) clamp(48px, 6vw, 80px);
+}
+
+.cs-next__card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  gap: var(--grid-gutter);
+  align-items: end;
+  padding-top: 24px;
+  border-top: 1px solid var(--text-strong);
+  cursor: pointer;
+}
+
+.cs-next__text {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 4px;
+}
+.cs-next__text .text-label:first-child { color: var(--text-muted); }
+.cs-next__role { color: var(--text-muted); }
+
+.cs-next__title { transition: opacity var(--duration-fast) ease; }
+
+.cs-next__media {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--color-blush);
+}
+
+.cs-next__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-slow) var(--ease-smooth);
+}
+.cs-next__card:hover .cs-next__img,
+.cs-next__card:focus-visible .cs-next__img { transform: scale(1.03); }
+
+.cs-next__links {
+  display: flex;
+  gap: clamp(24px, 4vw, 48px);
+  margin-top: clamp(32px, 5vw, 56px);
+}
+
+.cs-missing {
+  min-height: 50vh;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 0 var(--grid-margin);
+}
+
+/* ---------- tablet ---------- */
+@media (max-width: 1024px) {
+  .cs-figs--3,
+  .cs-figs--4,
+  .cs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* two columns: a large final runs full width as one wide print */
+  .cs-fig--large { grid-row: auto; }
+  .cs-fig--large .cs-fig__open { aspect-ratio: 3 / 2; flex: none; min-height: 0; }
+}
+
+/* ---------- phone ---------- */
+@media (max-width: 760px) {
+  .cs-section__title,
+  .cs-section__copy,
+  .cs-beats,
+  .cs-outcome { grid-column: 1 / -1; }
+  .cs-section__copy,
+  .cs-beats { margin-top: 20px; }
+
+  .cs-hero__media { aspect-ratio: 4 / 3; }
+
+  .cs-beats__row { grid-template-columns: 1fr; gap: 4px; }
+
+  .cs-next__card { grid-template-columns: 1fr; }
+  .cs-next__media { order: -1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .drag-hint__arrows { animation: none; }
+  .cs-fig__media, .cs-next__img, .cs-steps { transition: none; }
+  .cs-fig__open:hover .cs-fig__media,
+  .cs-next__card:hover .cs-next__img { transform: none; }
 }

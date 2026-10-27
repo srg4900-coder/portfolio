@@ -111,6 +111,12 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   transition: opacity var(--duration-fast) ease;
 }
 .logo-button:hover { opacity: 0.6; }
+/* "SG" on phones, the full name once there's room (js/nav.js) */
+.logo-button__name { display: none; }
+@media (min-width: 640px) {
+  .logo-button span:first-child { display: none; }
+  .logo-button__name { display: inline; }
+}
 
 .nav-right {
   display: flex;
@@ -126,6 +132,21 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 }
 .nav-right a:hover,
 .nav-right button:hover { opacity: 0.55; }
+.nav-right [aria-current="page"] {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+}
+
+/* underlined mono link (case-study footer, About, Studio) */
+.cs-link {
+  display: inline-block;
+  padding-bottom: 3px;
+  border-bottom: 1px solid currentColor;
+  cursor: pointer;
+  transition: opacity var(--duration-fast) ease;
+}
+.cs-link:hover { opacity: 0.55; }
 
 /* ---------- light-box: frame + glass layer (homepage only) ---------- */
 /*
@@ -630,6 +651,11 @@ html.is-touch .contact-modal__resume:active {
 /* ---------- site footer (identical on every page) ---------- */
 
 .site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px 24px;
   padding: 24px var(--grid-margin) 32px;
   border-top: 1px solid currentColor;
   /* blue type on the white page, on every page */
@@ -637,9 +663,94 @@ html.is-touch .contact-modal__resume:active {
   color: var(--color-blue);
 }
 
-.site-footer p {
+.site-footer p,
+.site-footer a {
   opacity: 0.6;
   letter-spacing: 0.06em;
+  transition: opacity var(--duration-fast) ease;
+}
+.site-footer a:hover { opacity: 1; }
+
+/* ---------- image viewer (js/viewer.js; case studies + Studio) ---------- */
+
+html.is-viewer-open { overflow: hidden; }
+
+.viewer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 72px;
+  grid-template-rows: 64px minmax(0, 1fr) auto;
+  background: rgba(16, 14, 12, 0.94);
+  color: var(--color-paper);
+  opacity: 0;
+  transition: opacity var(--duration-fast) ease;
+}
+.viewer[hidden] { display: none; }
+.viewer.is-open { opacity: 1; }
+
+.viewer__close {
+  position: absolute;
+  top: 22px;
+  right: 24px;
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-size: var(--text-label-size);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.viewer__stage {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.viewer__media {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.viewer__step {
+  grid-row: 2;
+  align-self: center;
+  justify-self: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 22px;
+  cursor: pointer;
+  transition: background var(--duration-fast) ease;
+}
+.viewer__step--prev { grid-column: 1; }
+.viewer__step--next { grid-column: 3; }
+.viewer__step:hover { background: rgba(253, 249, 245, 0.12); }
+.viewer__step[hidden] { display: none; }
+
+.viewer__caption {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 16px 24px 24px;
+  color: var(--color-paper);
+}
+.viewer__count { opacity: 0.6; }
+
+.viewer :focus-visible { outline-color: var(--color-paper); }
+
+@media (max-width: 640px) {
+  .viewer { grid-template-columns: 44px minmax(0, 1fr) 44px; }
+  .viewer__close { right: 16px; }
+  .viewer__step { width: 40px; height: 40px; font-size: 18px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

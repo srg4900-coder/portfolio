@@ -59,6 +59,7 @@
   padding: clamp(24px, 6vh, 64px) clamp(0px, 3vw, 48px) clamp(96px, 16vh, 200px);
   max-width: 1320px;
   margin: 0 auto;
+  scroll-margin-top: calc(var(--frame-width) + var(--nav-height));
 }
 
 .sheet {

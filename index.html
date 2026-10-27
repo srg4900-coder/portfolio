@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#100E0C">
-<meta name="description" content="Sadie Gold — brand designer. Selected work.">
-<title>Sadie Gold — Brand Designer</title>
+<meta name="description" content="Sadie Gold, brand designer. Selected work.">
+<title>Sadie Gold | Brand Designer</title>
 
 <!--
   FILE MAP
@@ -14,35 +14,31 @@
     css/home.css         homepage: hero + sheets (scatter -> grid)
     js/projects-data.js  every project's title, cover, media (shared) + HOME_ORDER
     js/home.js           builds the sheets, scroll-driven scatter -> grid
-    js/cursor.js, touch.js, gestures.js, contact.js (shared)
+    js/nav.js            the header links on every page (Work / About / Contact)
+    js/cursor.js, touch.js, gestures.js, contact.js, viewer.js (shared)
 -->
 
 <script>
-  // reload always starts at the top so the scatter -> grid sequence plays from the start
+  // reload always starts at the top so the scatter -> grid sequence plays from the start;
+  // arriving from a Work link (#work) skips straight to the settled grid (js/home.js)
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-  window.scrollTo(0, 0);
+  if (location.hash !== '#work') window.scrollTo(0, 0);
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500&family=Cutive+Mono&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/tokens.css?v=6">
-<link rel="stylesheet" href="css/components.css?v=6">
-<link rel="stylesheet" href="css/home.css?v=6">
+<link rel="stylesheet" href="css/tokens.css?v=7">
+<link rel="stylesheet" href="css/components.css?v=7">
+<link rel="stylesheet" href="css/home.css?v=7">
 </head>
 <body class="home">
 
   <div class="lightbox" aria-hidden="true"></div>
 
   <header class="site-nav site-nav--fade-in">
-    <div class="nav-left">
-      <a class="logo-button" href="index.html" aria-label="Sadie Gold — home">SG</a>
-    </div>
-    <nav class="nav-right">
-      <a href="/mindcloud/">MindCloud</a>
-      <button data-open-contact>Contact</button>
-    </nav>
+    <a class="logo-button" href="index.html">SG</a>
   </header>
 
   <main>
@@ -51,23 +47,25 @@
       <p class="hero__role">Brand Designer</p>
     </section>
 
-    <section class="sheets" id="sheets" aria-label="Selected work">
+    <section class="sheets" id="work" aria-label="Selected work">
       <!-- one .sheet per HOME_ORDER entry, built by js/home.js -->
     </section>
   </main>
 
   <footer class="site-footer">
     <p class="text-label">&copy; Sadie Gold 2026</p>
+    <a class="text-label" href="/mindcloud/">MindCloud</a>
   </footer>
 
   <!-- contents built by js/contact.js -->
   <div class="contact-modal"></div>
 
-  <script src="js/gestures.js?v=6"></script>
-  <script src="js/cursor.js?v=6"></script>
-  <script src="js/contact.js?v=6"></script>
-  <script src="js/projects-data.js?v=6"></script>
-  <script src="js/home.js?v=6"></script>
-  <script src="js/touch.js?v=6"></script>
+  <script src="js/nav.js?v=7"></script>
+  <script src="js/gestures.js?v=7"></script>
+  <script src="js/cursor.js?v=7"></script>
+  <script src="js/contact.js?v=7"></script>
+  <script src="js/projects-data.js?v=7"></script>
+  <script src="js/home.js?v=7"></script>
+  <script src="js/touch.js?v=7"></script>
 </body>
 </html>

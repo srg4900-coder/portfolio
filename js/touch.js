@@ -12,10 +12,7 @@
                         when a tap brings it to the front (homepage)
     3. SCROLL DRIFT     papers drift slightly as they scroll through the
                         screen (homepage; no motion permission — see 3)
-    4. CAPTION ON TAP   tap a project image to show its caption (project)
-    5. DRAG HINT        quiet "drag the photos around" caption over the
-                        cluster, fading at the first direct touch (project)
-    6. CONTACT HANDS    popup opens -> the wave plays in its corner; tapping
+    4. CONTACT HANDS    popup opens -> the wave plays in its corner; tapping
                         Resume -> the thumbs-up plays beside it
 
   Tap feedback for links/buttons (and the always-long About arrow) is
@@ -37,13 +34,13 @@
   // BUG FIX: these used to fire on finger-DOWN. iPhone Safari watches
   // for anything becoming visible during a tap and, if it sees that,
   // treats the tap as a "hover" and withholds the click — so showing the
-  // label (or the Resume thumbs-up, 6) on finger-down cost the visitor
+  // label (or the Resume thumbs-up, 4) on finger-down cost the visitor
   // extra taps before links/buttons responded. They now run on `click`,
   // i.e. only after the tap has already gone through.
   document.addEventListener('click', function (e) {
     var target = e.target.closest('[data-cursor-label]');
-    // draggables get the drag hint (5) instead of a label
-    if (!target || target.closest('[data-draggable]')) return;
+    // viewer images open straight into the viewer, no label needed
+    if (!target || target.hasAttribute('data-viewer')) return;
     flash.textContent = target.getAttribute('data-cursor-label');
     flash.style.backgroundColor = target.getAttribute('data-cursor-fill') || '';
     flash.style.color = target.getAttribute('data-cursor-text') || '';
@@ -95,35 +92,7 @@
     }, { passive: true });
   }
 
-  // ---------- 4. CAPTION ON TAP ----------
-  document.addEventListener('click', function (e) {
-    var img = e.target.closest('.project-image');
-    document.querySelectorAll('.project-image.is-caption-shown').forEach(function (el) {
-      if (el !== img) el.classList.remove('is-caption-shown');
-    });
-    if (img && img.querySelector('.project-image__caption')) img.classList.toggle('is-caption-shown');
-  });
-
-  // ---------- 5. DRAG HINT ----------
-  var cluster = document.querySelector('.project-cluster');
-  if (cluster) {
-    var hint = document.createElement('div');
-    hint.className = 'drag-hint';
-    hint.setAttribute('aria-hidden', 'true');
-    var arrows = document.createElement('span');
-    arrows.className = 'drag-hint__arrows';
-    arrows.textContent = '\u2194'; // left-right arrow
-    hint.appendChild(arrows);
-    hint.appendChild(document.createTextNode('Drag the photos around'));
-    cluster.appendChild(hint);
-    // only a direct touch inside the section counts — scrolling past doesn't
-    cluster.addEventListener('pointerdown', function hide() {
-      hint.classList.add('is-gone');
-      cluster.removeEventListener('pointerdown', hide);
-    });
-  }
-
-  // ---------- 6. CONTACT HANDS ----------
+  // ---------- 4. CONTACT HANDS ----------
   var modal = document.querySelector('.contact-modal');
   var G = window.HandGestures;
   if (modal && G) {

@@ -30,6 +30,9 @@
     'and won\u2019t stop until it\u2019s solved. She likes to think holistically.'
   ];
 
+  // shared with the About page (about.html), so the bio has one copy
+  window.SITE_COPY = { email: CONTACT_EMAIL, resume: RESUME_URL, meta: META_LINES, bio: BIO_LINES };
+
   var modal = document.querySelector('.contact-modal');
   if (!modal) return;
 
@@ -49,6 +52,7 @@
 
   var paper = el('div', 'contact-modal__paper');
   var closeBtn = el('button', 'contact-modal__close', 'Close \u2715');
+  closeBtn.type = 'button';
   var content = el('div', 'contact-modal__content');
 
   var emailLink = el('a', 'contact-modal__email', CONTACT_EMAIL);
@@ -92,14 +96,34 @@
   paper.appendChild(content);
   modal.appendChild(paper);
 
-  function open() { modal.classList.add('is-open'); }
-  function close() { modal.classList.remove('is-open'); }
+  // Closed = inert: nothing inside can be tabbed to or read out while it's
+  // invisible. Open = focus moves in; close = focus goes back to the
+  // button that opened it.
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-label', 'Contact');
+  modal.inert = true;
+  var opener = null;
 
-  document.querySelectorAll('[data-open-contact]').forEach(function (trigger) {
-    trigger.addEventListener('click', function (e) {
-      e.preventDefault();
-      open();
-    });
+  function open(trigger) {
+    opener = trigger || null;
+    modal.inert = false;
+    modal.classList.add('is-open');
+    closeBtn.focus();
+  }
+  function close() {
+    if (!modal.classList.contains('is-open')) return;
+    modal.classList.remove('is-open');
+    modal.inert = true;
+    if (opener) opener.focus();
+  }
+
+  // delegated, so Contact buttons built later (nav.js, project.js) work too
+  document.addEventListener('click', function (e) {
+    var trigger = e.target.closest('[data-open-contact]');
+    if (!trigger) return;
+    e.preventDefault();
+    open(trigger);
   });
 
   closeBtn.addEventListener('click', close);

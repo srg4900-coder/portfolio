@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Studio: paintings, sketches and sewing by Sadie Gold.">
+<title>Studio | Sadie Gold</title>
+
+<!--
+  STUDIO. Supplemental work, not case studies. Everything inside
+  #studio is built by js/studio.js from js/studio-data.js.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500&family=Cutive+Mono&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/tokens.css?v=7">
+<link rel="stylesheet" href="css/components.css?v=7">
+<link rel="stylesheet" href="css/project.css?v=7">
+<link rel="stylesheet" href="css/pages.css?v=7">
+</head>
+<body class="page" data-page="studio">
+
+  <header class="site-nav">
+    <a class="logo-button" href="index.html">SG</a>
+  </header>
+
+  <main class="page__main">
+    <header class="page__head">
+      <p class="page__eyebrow text-label load-rise">Paintings / Sketches / Sewing</p>
+      <h1 class="text-title load-rise" style="--load-delay: 80ms;">Studio</h1>
+      <p class="page__lede load-rise" style="--load-delay: 160ms;"></p>
+    </header>
+
+    <div class="studio" id="studio"></div>
+
+    <nav class="page__more" aria-label="More">
+      <a class="cs-link text-label" href="index.html#work">All work</a>
+      <button class="cs-link text-label" type="button" data-open-contact data-cursor-solid="white">Contact</button>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <p class="text-label">&copy; Sadie Gold 2026</p>
+    <a class="text-label" href="/mindcloud/">MindCloud</a>
+  </footer>
+
+  <div class="contact-modal"></div>
+
+  <script src="js/nav.js?v=7"></script>
+  <script src="js/gestures.js?v=7"></script>
+  <script src="js/cursor.js?v=7"></script>
+  <script src="js/contact.js?v=7"></script>
+  <script src="js/studio-data.js?v=7"></script>
+  <script src="js/studio.js?v=7"></script>
+  <script src="js/viewer.js?v=7"></script>
+  <script src="js/touch.js?v=7"></script>
+</body>
+</html>

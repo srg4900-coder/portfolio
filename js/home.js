@@ -12,7 +12,7 @@
 (function () {
   var data = window.PROJECTS || {};
   var order = window.HOME_ORDER || Object.keys(data);
-  var root = document.getElementById('sheets');
+  var root = document.getElementById('work');
   var hero = document.getElementById('hero');
   if (!root) return;
 
@@ -20,7 +20,11 @@
   order.forEach(function (slug, i) {
     var p = data[slug];
     if (!p) return;
+    // cover: the project's own homepage override, else its case-study hero
+    var hero = p.hero || {};
     var home = p.home || {};
+    var image = home.image || hero.src;
+    var video = home.video;
     var num = String(i + 1).padStart(2, '0');
 
     var sheet = document.createElement('article');
@@ -30,11 +34,11 @@
     if (home.position) sheet.style.setProperty('--pos', home.position);
 
     var media, isCard = false;
-    if (home.video) {
-      media = '<video src="' + home.video + '"' + (home.image ? ' poster="' + home.image + '"' : '') +
+    if (video) {
+      media = '<video src="' + video + '"' + (image ? ' poster="' + image + '"' : '') +
         ' muted loop playsinline preload="metadata" aria-hidden="true"></video>';
-    } else if (home.image) {
-      media = '<img src="' + home.image + '" alt="' + p.title + '" loading="' + (i < 3 ? 'eager' : 'lazy') + '" decoding="async">';
+    } else if (image) {
+      media = '<img src="' + image + '" alt="' + (home.alt || hero.alt || '').replace(/"/g, '&quot;') + '" loading="' + (i < 3 ? 'eager' : 'lazy') + '" decoding="async">';
     } else {
       media = '<span>' + p.title + '</span>';
       isCard = true;
@@ -67,7 +71,28 @@
   var nav = document.querySelector('.site-nav--fade-in');
   if (nav) requestAnimationFrame(function () { nav.classList.add('is-in'); });
 
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  // ---------- Work links (#work) ----------
+  // Arriving from a Work link, or clicking Work while here, lands on the
+  // settled grid: the scatter motion below reads scrollY, so jumping past
+  // the hero means every sheet is already in its cell. onJump lets the
+  // smoothing skip its catch-up glide.
+  var onJump = function () {};
+  function jumpToWork() {
+    root.scrollIntoView({ block: 'start', behavior: 'instant' });
+    onJump();
+  }
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest('a[href="index.html#work"]');
+    if (!link) return;
+    e.preventDefault();
+    history.replaceState(null, '', '#work');
+    jumpToWork();
+  });
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (location.hash === '#work') jumpToWork();
+    return;
+  }
 
   // ---------- scatter layout ----------
   // x, y: top-left as a fraction of the viewport; r: tilt (deg); s: scale vs. resting size
@@ -162,6 +187,8 @@
 
   function relayout() { measure(); request(); }
 
+  onJump = function () { current = window.scrollY; relayout(); };
+
   window.addEventListener('scroll', request, { passive: true });
   window.addEventListener('resize', relayout);
   phone.addEventListener('change', relayout);
@@ -169,4 +196,5 @@
   window.addEventListener('load', relayout);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(relayout);
   relayout();
+  if (location.hash === '#work') jumpToWork();
 })();

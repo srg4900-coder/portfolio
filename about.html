@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="About Sadie Gold, brand designer.">
+<title>About | Sadie Gold</title>
+
+<!--
+  ABOUT. The bio, location line, email and resume path come from
+  js/contact.js (window.SITE_COPY), so they stay identical to the contact
+  popup: edit them there, not here.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500&family=Cutive+Mono&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/tokens.css?v=7">
+<link rel="stylesheet" href="css/components.css?v=7">
+<link rel="stylesheet" href="css/pages.css?v=7">
+</head>
+<body class="page" data-page="about">
+
+  <header class="site-nav">
+    <a class="logo-button" href="index.html">SG</a>
+  </header>
+
+  <main class="page__main">
+    <header class="page__head">
+      <p class="page__eyebrow text-label load-rise">About</p>
+      <h1 class="text-title load-rise" style="--load-delay: 80ms;">Sadie Gold</h1>
+      <p class="page__lede load-rise" style="--load-delay: 160ms;">Brand Designer</p>
+    </header>
+
+    <div class="about load-rise" style="--load-delay: 260ms;">
+      <div class="about__bio text-project-body" data-about-bio></div>
+
+      <dl class="about__facts">
+        <div>
+          <dt class="text-label">Education</dt>
+          <dd>New Media Design BFA, graduating spring 2027</dd>
+        </div>
+        <div data-about-meta hidden>
+          <dt class="text-label">Based</dt>
+          <dd></dd>
+        </div>
+      </dl>
+
+      <div class="about__links">
+        <a class="cs-link text-label" data-about-email href="#">Email</a>
+        <a class="cs-link text-label" data-about-resume href="#" target="_blank" rel="noopener">Resume</a>
+        <button class="cs-link text-label" type="button" data-open-contact data-cursor-solid="white">Contact</button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p class="text-label">&copy; Sadie Gold 2026</p>
+    <a class="text-label" href="/mindcloud/">MindCloud</a>
+  </footer>
+
+  <div class="contact-modal"></div>
+
+  <script src="js/nav.js?v=7"></script>
+  <script src="js/gestures.js?v=7"></script>
+  <script src="js/cursor.js?v=7"></script>
+  <script src="js/contact.js?v=7"></script>
+  <script src="js/touch.js?v=7"></script>
+  <script>
+    (function () {
+      var copy = window.SITE_COPY;
+      if (!copy) return;
+      document.querySelector('[data-about-bio]').textContent = copy.bio.join(' ');
+      // first META line is the location ("Based in NYC. Available Worldwide")
+      var meta = document.querySelector('[data-about-meta]');
+      if (copy.meta[0]) {
+        meta.querySelector('dd').textContent = copy.meta[0].replace(/^Based in /, '');
+        meta.hidden = false;
+      }
+      var email = document.querySelector('[data-about-email]');
+      email.textContent = copy.email;
+      email.href = 'mailto:' + copy.email;
+      document.querySelector('[data-about-resume]').href = copy.resume;
+    })();
+  </script>
+</body>
+</html>

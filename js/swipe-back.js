@@ -156,6 +156,7 @@
   var wheelTimer = null;
   window.addEventListener('wheel', function (e) {
     if (settling) { e.preventDefault(); return; }
+    if (html.classList.contains('is-viewer-open')) return; // the viewer is on top
     var horizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY);
     if (!active) {
       // only START on a clearly horizontal, rightward swipe (deltaX < 0)
@@ -173,8 +174,8 @@
   window.addEventListener('touchstart', function (e) {
     if (settling || e.touches.length !== 1) { touchStart = null; return; }
     var t = e.touches[0];
-    // leave the left edge to iOS, and the draggable image boxes to drag.js
-    if (t.clientX < EDGE_PX || e.target.closest('[data-draggable], button, video')) { touchStart = null; return; }
+    // leave the left edge to iOS, and swipes inside the image viewer to it
+    if (t.clientX < EDGE_PX || e.target.closest('.viewer, button, video')) { touchStart = null; return; }
     touchStart = { x: t.clientX, y: t.clientY, decided: false };
   }, { passive: true });
 
