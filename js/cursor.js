@@ -48,7 +48,7 @@
   var curY = targetY;
   var hasMoved = false;
   var lastFrame = performance.now();
-  var FOLLOW_TAU_MS = 100; // 140 / 1.4 — 1.4x faster tracking (smaller tau = tighter, faster follow)
+  var FOLLOW_TAU_MS = 91; // 100 / 1.1: 10% faster tracking (smaller tau = tighter, faster follow)
 
   window.addEventListener('mousemove', function (e) {
     targetX = e.clientX;
