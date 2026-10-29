@@ -211,6 +211,7 @@
     items.forEach(function (item) {
       var paper = el('div', 'paper cs-paper' + (item.cutout ? ' is-cutout' : ''));
       paper.setAttribute('data-draggable', '');
+      if (item.scale) paper.setAttribute('data-scale', item.scale);
       var inner = el('div', 'paper__inner');
       if (item.src) {
         // opens in the viewer itself (on the second click), not on the first
@@ -254,10 +255,17 @@
     return 4 / 3;
   }
 
-  // Desktop / tablet: papers spread across the section, each about a third
-  // of its width (more papers = smaller, more overlap), alternately high
-  // and low with a little seeded jitter and tilt. The section grows to fit
-  // the lowest paper, so nothing ever hangs outside it.
+  // Desktop / tablet: papers scattered across the section width.
+  //   SIZE: every paper gets about the same visual area (a tall photo is
+  //     drawn narrower, a wide slide wider), so mixed shapes read as one
+  //     even set; `scale` on an image (e.g. 1.2) makes just that one bigger.
+  //     Sizes are a share of the section width, so they keep the same
+  //     proportions at every desktop / tablet width.
+  //   PLACE: up to 4 papers in one loose row; more than that become two
+  //     overlapping rows. Each row spreads edge to edge, alternately a bit
+  //     high and low, with seeded jitter and tilt (same scatter every visit).
+  //   STACK: larger sheets go underneath smaller ones.
+  //   The section grows to fit the lowest paper, so nothing hangs outside.
   function layoutPapers(wrap) {
     var list = Array.prototype.slice.call(wrap.children);
     if (!wide.matches) {
@@ -268,21 +276,41 @@
     var rand = seeded(slug);
     var W = wrap.clientWidth;
     var n = list.length;
-    var share = n === 1 ? 0.5 : n === 2 ? 0.46 : n === 3 ? 0.4 : n === 4 ? 0.34 : 0.28;
-    var pw = Math.round(W * share);
-    var heights = list.map(function (p) { return pw / shape(p); });
-    var tallest = Math.max.apply(null, heights);
-    var bottom = 0;
-    list.forEach(function (p, i) {
-      var x = n === 1 ? (W - pw) / 2 : i * (W - pw) / (n - 1);
-      var y = ((i % 2 ? 0.2 : 0.02) + rand() * 0.1) * tallest;
-      p.style.width = pw + 'px';
-      p.style.left = Math.round(x) + 'px';
-      p.style.top = Math.round(y) + 'px';
-      p.style.zIndex = String(i + 1);
-      p.style.setProperty('--tilt', ((rand() * 2 - 1) * 4).toFixed(1) + 'deg');
-      bottom = Math.max(bottom, y + heights[i]);
+    var rows = n > 4 ? 2 : 1;
+    var perRow = Math.ceil(n / rows);
+    var base = W * (perRow === 1 ? 0.5 : perRow === 2 ? 0.44 : perRow === 3 ? 0.38 : 0.32);
+    var sizes = list.map(function (p) {
+      var aspect = shape(p);
+      var w = base * Math.sqrt(aspect / (4 / 3));                   // equal-area width
+      w = Math.max(base * 0.7, Math.min(base * 1.35, w));            // keep extremes in check
+      w *= Number(p.getAttribute('data-scale')) || 1;
+      w = Math.min(w, W);
+      return { w: Math.round(w), h: w / aspect };
     });
+    // stacking: bigger sheets sit underneath smaller ones, so a small photo
+    // never disappears behind a large slide (clicking still brings any to front)
+    var stack = [];
+    sizes.map(function (sz, i) { return { i: i, area: sz.w * sz.h }; })
+      .sort(function (a, b) { return b.area - a.area || a.i - b.i; })
+      .forEach(function (o, rank) { stack[o.i] = rank + 1; });
+    var bottom = 0, rowTop = 0;
+    for (var r = 0; r < rows; r++) {
+      var start = r * perRow, end = Math.min(n, start + perRow), count = end - start;
+      var rowTall = 0;
+      for (var i = start; i < end; i++) rowTall = Math.max(rowTall, sizes[i].h);
+      for (var k = 0, j = start; j < end; j++, k++) {
+        var p = list[j], sz = sizes[j];
+        var x = count === 1 ? (W - sz.w) / 2 : k * (W - sz.w) / (count - 1);
+        var y = rowTop + ((k % 2 ? 0.16 : 0.02) + rand() * 0.08) * rowTall;
+        p.style.width = sz.w + 'px';
+        p.style.left = Math.round(x) + 'px';
+        p.style.top = Math.round(y) + 'px';
+        p.style.zIndex = String(stack[j]);
+        p.style.setProperty('--tilt', ((rand() * 2 - 1) * 4).toFixed(1) + 'deg');
+        bottom = Math.max(bottom, y + sz.h);
+      }
+      rowTop += rowTall * 0.62;  // the next row tucks up under this one
+    }
     wrap.style.height = Math.ceil(bottom + 32) + 'px'; // room for tilt + shadow
   }
 
@@ -307,8 +335,10 @@
     if (window.PaperInteraction) window.PaperInteraction.refresh();
     if (window.DragAndDrop) window.DragAndDrop.refresh();
 
-    // the last paper starts on top, so it's the front one
-    var front = list[list.length - 1];
+    // whichever paper the layout put on top starts as the front one
+    var front = list.reduce(function (top, p) {
+      return Number(p.style.zIndex) > Number(top.style.zIndex) ? p : top;
+    }, list[0]);
     if (front && window.PaperInteraction) window.PaperInteraction.setFront(front);
 
 

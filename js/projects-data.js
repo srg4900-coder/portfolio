@@ -24,6 +24,7 @@
     video: 'path.mp4'   play a muted loop instead (src is then the poster)
     cutout: true        transparent PNG/WebP: shown whole on a plain print
     contain: true       show the whole image, uncropped (slides, sheets)
+    scale: 1.2          (01 Idea papers) shown that much larger than the others
     large: true         (03 Work only) spans wider in the grid
   01 Idea images become loose papers you can shuffle and drag: any number,
   any shape, shown whole (no crop), no caption on the page (label still
@@ -99,10 +100,14 @@ window.PROJECTS = {
     idea: {
       copy: 'After seeing Boy’s Club, the in-house CD at Grassroots, a luxury car club out of NYC, hired me freelance as creative director on the film for their fall merch drop. I pitched a direction plus one alternate, then built storyboards, style sheets, and a timed shot list. The winning pitch: young love in the city, the thrill of speed, tension, and falling for someone new.',
       images: [
-        { src: 'assets/case-studies/grassroots/gr-pitch-moodboard.jpg', contain: true, label: 'Pitch Deck', alt: 'Moodboard slide from the Grassroots pitch deck: vintage cars, couples and city scenes' },
-        { src: 'assets/case-studies/grassroots/gr-stylesheet-her.jpg', contain: true, label: 'Talent style sheet, her', alt: 'Wardrobe styling sheet for her: lace tank, light sweater, jeans, sunglasses, ending in his jacket' },
-        { src: 'assets/case-studies/grassroots/gr-stylesheet-him.jpg', contain: true, label: 'Talent style sheet, him', alt: 'Wardrobe styling sheet for him: suit and tie at the start, racing jacket and sunglasses at the end' },
-        { src: 'assets/case-studies/grassroots/gr-storyboard-frames.jpg', contain: true, label: 'Storyboard frames', alt: 'Hand-drawn blue-ink storyboard grid for the Grassroots fall film' }
+        // files: assets/case-studies/grassroots/idea/. scale: 1.2 = shown 20% larger than the rest
+        { src: 'assets/case-studies/grassroots/idea/gr-pitch-moodboard.jpg', scale: 1.2, label: 'Pitch Deck', alt: 'Moodboard slide from the Grassroots pitch deck: vintage cars, couples and city scenes' },
+        { src: 'assets/case-studies/grassroots/idea/gr-film-porsche-woods.jpg', label: 'On film: the drive', alt: 'Film photo: the talent smiling from the driver\u2019s seat of the Porsche on a wooded road' },
+        { src: 'assets/case-studies/grassroots/idea/gr-stylesheet-her.jpg', scale: 1.2, label: 'Talent style sheet, her', alt: 'Wardrobe styling sheet for her: lace tank, light sweater, jeans, sunglasses, ending in his jacket' },
+        { src: 'assets/case-studies/grassroots/idea/gr-jacket-lining.jpg', label: 'The jacket, lining', alt: 'Close-up of the green Grassroots jacket held open to show its brown gingham lining' },
+        { src: 'assets/case-studies/grassroots/idea/gr-stylesheet-him.jpg', scale: 1.2, label: 'Talent style sheet, him', alt: 'Wardrobe styling sheet for him: suit and tie at the start, racing jacket and sunglasses at the end' },
+        { src: 'assets/case-studies/grassroots/idea/gr-film-between-takes.jpg', label: 'On film: between takes', alt: 'Film photo between takes: a woman in sunglasses sitting in the open back of a silver SUV beside a yellow gear case' },
+        { src: 'assets/case-studies/grassroots/idea/gr-storyboard-frames.jpg', contain: true, label: 'Storyboard frames', alt: 'Hand-drawn blue-ink storyboard grid for the Grassroots fall film' }
       ]
     },
     friction: {
