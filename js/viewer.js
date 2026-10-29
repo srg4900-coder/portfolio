@@ -14,11 +14,19 @@
   calls window.ImageViewer.open(item).
 
   Keyboard: Esc closes, Left/Right step, Tab stays inside the viewer, and
-  focus goes back to the image that opened it. Touch: swipe left/right
+  focus goes back to the image that opened it. Trackpad: a two-finger
+  sideways swipe steps (one image per swipe). Touch: swipe left/right
   to step. Named "viewer" because .lightbox is already the homepage frame.
 */
 (function () {
   var items = [], index = 0, opener = null;
+
+  // Opened by keyboard -> focus the Close button (so Tab / Esc work at once).
+  // Opened by mouse / touch -> focus the dialog itself instead, so no focus
+  // ring appears around Close.
+  var viaKeyboard = false;
+  document.addEventListener('keydown', function () { viaKeyboard = true; }, true);
+  document.addEventListener('pointerdown', function () { viaKeyboard = false; }, true);
 
   function el(tag, cls, text) {
     var node = document.createElement(tag);
@@ -32,6 +40,7 @@
   root.setAttribute('aria-modal', 'true');
   root.setAttribute('aria-label', 'Image viewer');
   root.hidden = true;
+  root.tabIndex = -1;
 
   var closeBtn = el('button', 'viewer__close', 'Close ✕');
   var prevBtn = el('button', 'viewer__step viewer__step--prev');
@@ -60,7 +69,9 @@
   root.appendChild(caption);
   document.body.appendChild(root);
 
-  function show(i) {
+  // still: no slide (the first image when the viewer opens)
+  function show(i, still) {
+    var dir = still ? 0 : (i > index ? 1 : i < index ? -1 : 0);
     index = (i + items.length) % items.length;
     var item = items[index];
     stage.innerHTML = '';
@@ -80,6 +91,10 @@
       media.alt = item.getAttribute('data-alt') || '';
     }
     media.className = 'viewer__media';
+    if (dir) {
+      media.style.setProperty('--viewer-from', (dir * 28) + 'px');
+      media.classList.add('is-entering');
+    }
     stage.appendChild(media);
     label.textContent = item.getAttribute('data-label') || '';
     count.textContent = items.length > 1 ? (index + 1) + ' / ' + items.length : '';
@@ -92,11 +107,12 @@
     var group = trigger.closest('[data-viewer-group]');
     items = group ? Array.prototype.slice.call(group.querySelectorAll('[data-viewer]')) : [trigger];
     opener = trigger;
-    show(items.indexOf(trigger));
+    show(items.indexOf(trigger), true);
     root.hidden = false;
     document.documentElement.classList.add('is-viewer-open');
     requestAnimationFrame(function () { root.classList.add('is-open'); });
-    closeBtn.focus();
+    if (viaKeyboard) closeBtn.focus();
+    else root.focus({ preventScroll: true });
   }
 
   function close() {
@@ -133,12 +149,31 @@
         function (n) { return !n.hidden; }
       );
       var first = focusable[0], last = focusable[focusable.length - 1];
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      if (document.activeElement === root) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+      else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     }
   }, true);
 
   window.ImageViewer = { open: open };
+
+  // two-finger trackpad swipe (a sideways wheel gesture): one step per
+  // swipe. The gesture keeps sending events through its momentum, so it's
+  // locked after one step until the events stop for a moment.
+  var wheelX = 0, wheelLocked = false, wheelTimer = null;
+  root.addEventListener('wheel', function (e) {
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;  // up/down: not ours
+    e.preventDefault();  // no browser back/forward swipe while viewing
+    clearTimeout(wheelTimer);
+    wheelTimer = setTimeout(function () { wheelX = 0; wheelLocked = false; }, 200);
+    if (wheelLocked || items.length < 2) return;
+    wheelX += e.deltaX;
+    if (Math.abs(wheelX) > 40) {
+      show(index + (wheelX > 0 ? 1 : -1));
+      wheelLocked = true;
+      wheelX = 0;
+    }
+  }, { passive: false });
 
   // swipe left/right on touch screens
   var startX = null, startY = null;

@@ -130,12 +130,19 @@
   modal.setAttribute('aria-label', 'Contact');
   modal.inert = true;
   var opener = null;
+  // keyboard open -> focus Close; mouse / touch -> focus the dialog, so no
+  // focus ring shows around Close
+  var viaKeyboard = false;
+  document.addEventListener('keydown', function () { viaKeyboard = true; }, true);
+  document.addEventListener('pointerdown', function () { viaKeyboard = false; }, true);
+  modal.tabIndex = -1;
 
   function open(trigger) {
     opener = trigger || null;
     modal.inert = false;
     modal.classList.add('is-open');
-    closeBtn.focus();
+    if (viaKeyboard) closeBtn.focus();
+    else modal.focus({ preventScroll: true });
   }
   function close() {
     if (!modal.classList.contains('is-open')) return;

@@ -255,8 +255,7 @@ body.project-page {
 .cs-beats {
   grid-column: 3 / 8;
 }
-/* the closing line starts at the left margin, like the credits under it */
-.cs-outcome { grid-column: 1 / 7; }
+
 
 .cs-figs,
 .cs-grid {
@@ -324,48 +323,79 @@ body.project-page {
   background: var(--color-white);
   transform: rotate(-4deg);
   box-shadow: var(--shadow-paper);
-  transition: transform var(--duration-base) var(--ease-bounce);
+  transition: transform var(--duration-slow) var(--ease-smooth);
   pointer-events: none;
 }
 .cs-fig__open:hover .cs-fig__note { transform: rotate(-6deg) translateY(-3px); }
 
-/* "View" pill (top-right) and, in 03 Work, the image's label (bottom-left):
-   both appear on hover / keyboard focus. Touch screens have no hover, so
-   there they always show, quietly. The cursor stays the plain dot. */
+/* "View" (top-right) and, in 03 Work, the image's label (bottom-left):
+   plain white text straight on the image, no box, with a soft shadow so
+   it reads on light and dark frames. Both appear on hover / keyboard
+   focus; touch screens have no hover, so there they always show. The
+   cursor stays the plain dot. */
 .cs-fig__icon,
 .cs-fig__overlay {
   position: absolute;
-  padding: 5px 11px 4px;
-  border-radius: 999px;
-  background: var(--color-paper);
-  color: var(--color-ink);
+  color: var(--color-white);
   font-size: var(--text-small-size);
   font-weight: 400;
   line-height: 1.3;
+  text-shadow: 0 1px 2px rgba(16, 14, 12, 0.45), 0 0 12px rgba(16, 14, 12, 0.35);
   opacity: 0;
   transform: translateY(4px);
   transition: opacity var(--duration-fast) ease, transform var(--duration-base) var(--ease-smooth);
   pointer-events: none;
 }
-.cs-fig__icon { top: 10px; right: 10px; }
+/* cut-outs and slides sit on the pale print: dark text there instead */
+.cs-fig--cutout .cs-fig__icon,
+.cs-fig--cutout .cs-fig__overlay,
+.cs-fig--contain .cs-fig__icon,
+.cs-fig--contain .cs-fig__overlay {
+  color: var(--color-ink);
+  text-shadow: none;
+}
+.cs-fig__icon { top: 12px; right: 14px; }
 .cs-fig__overlay {
-  left: 10px;
-  bottom: 10px;
-  max-width: calc(100% - 20px);
+  left: 14px;
+  bottom: 12px;
+  max-width: calc(100% - 28px);
   text-align: left;
 }
 .cs-fig__open:hover .cs-fig__icon,
 .cs-fig__open:hover .cs-fig__overlay,
 .cs-fig__open:focus-visible .cs-fig__icon,
 .cs-fig__open:focus-visible .cs-fig__overlay {
-  opacity: 0.95;
+  opacity: 1;
   transform: none;
 }
 .cs-fig__open:hover .cs-fig__media { transform: scale(1.02); }
 
-@media (hover: none) {
-  .cs-fig__icon,
-  .cs-fig__overlay { opacity: 0.85; transform: none; }
+/* the corner under the word is light (js/project.js matchContrast): dark text */
+.cs-fig.is-light-bl .cs-fig__overlay,
+.cs-fig.is-light-tr .cs-fig__icon {
+  color: var(--color-ink);
+  text-shadow: 0 0 10px rgba(253, 249, 245, 0.55);
+}
+
+/* LABEL BY INPUT DEVICE (not screen width):
+   mouse / trackpad: label inside the image on hover; the caption under it
+     stays in the page for screen readers but isn't shown
+   touch (phones, tablets without a mouse): no hover, so the caption shows
+     under the image and the in-image label is off; "View" stays, quietly */
+.cs-fig__overlay { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .cs-fig__overlay { display: block; }
+  .cs-fig__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+@media (hover: none), (pointer: coarse) {
+  .cs-fig__icon { opacity: 0.85; transform: none; }
 }
 
 .cs-fig__label {
@@ -402,15 +432,6 @@ body.project-page {
 .cs-fig--large .is-missing {
   position: absolute;
   inset: 0;
-}
-
-.cs-outcome {
-  margin-top: var(--space-block);
-  max-width: 40ch;
-  font-size: var(--text-h2-size);
-  font-weight: 300;
-  line-height: 1.3;
-  color: var(--text-strong);
 }
 
 /* ---------- 01 Idea papers (js/project.js layoutPapers, paper.js, drag.js) ---------- */
@@ -576,7 +597,6 @@ body.project-page {
   .cs-section__title,
   .cs-section__copy,
   .cs-beats,
-  .cs-outcome,
   .cs-next__text,
   .cs-next__media { grid-column: 1 / -1; }
 

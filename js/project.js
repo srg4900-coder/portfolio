@@ -115,54 +115,84 @@
   }
 
   // one labeled image that opens in the viewer (or a missing box).
-  // overlay: the label sits inside the image, bottom-left, shown on hover
-  // (03 Work); otherwise it's a caption under the image (02 Friction).
-  // A "View" pill (top-right) shows on hover; the cursor stays the plain dot.
-  function figure(item, overlay) {
+  // The label is written twice and CSS picks one by input device:
+  //   mouse / trackpad  -> inside the image, bottom-left, on hover only
+  //                        (the caption under it is kept for screen readers
+  //                        but not shown)
+  //   touch (phone, tablet without a mouse) -> the caption under the image,
+  //                        since there's no hover
+  // A "View" word (top-right) shows on hover; the cursor stays the plain dot.
+  function figure(item) {
     var fig = el('figure', 'cs-fig' + (item.large ? ' cs-fig--large' : '') +
       (item.cutout ? ' cs-fig--cutout' : '') + (item.contain ? ' cs-fig--contain' : ''));
     if (!item.src) {
+      // the label is already printed inside the grey box
       fig.appendChild(missing(item.label, 'cs-fig__open'));
-    } else {
-      var open = el('button', 'cs-fig__open');
-      open.type = 'button';
-      open.setAttribute('data-viewer', '');
-      open.setAttribute('data-src', item.src);
-      if (item.video) open.setAttribute('data-video', item.video);
-      open.setAttribute('data-alt', item.alt || '');
-      open.setAttribute('data-label', item.label || '');
-      open.setAttribute('aria-label', 'View larger: ' + (item.alt || item.label || 'image'));
-      open.appendChild(media(item, 'cs-fig__media'));
-      // note: a small image pinned on top like a post-it (e.g. the
-      // storyboard sketch on its final frame); decorative, the alt of the
-      // main image describes the pair
-      if (item.note) {
-        var note = el('img', 'cs-fig__note');
-        note.src = item.note;
-        note.alt = '';
-        note.loading = 'lazy';
-        open.appendChild(note);
-      }
-      var icon = el('span', 'cs-fig__icon', item.video ? 'Play' : 'View');
-      icon.setAttribute('aria-hidden', 'true');
-      open.appendChild(icon);
-      if (overlay && item.label) {
-        var tag = el('span', 'cs-fig__overlay', item.label);
-        tag.setAttribute('aria-hidden', 'true'); // the button's own label already says it
-        open.appendChild(tag);
-      }
-      fig.appendChild(open);
+      return fig;
     }
-    if (item.label && !(overlay && item.src)) fig.appendChild(el('figcaption', 'cs-fig__label', item.label));
+    var open = el('button', 'cs-fig__open');
+    open.type = 'button';
+    open.setAttribute('data-viewer', '');
+    open.setAttribute('data-src', item.src);
+    if (item.video) open.setAttribute('data-video', item.video);
+    open.setAttribute('data-alt', item.alt || '');
+    open.setAttribute('data-label', item.label || '');
+    open.setAttribute('aria-label', 'View larger: ' + (item.alt || item.label || 'image'));
+    var img = media(item, 'cs-fig__media');
+    open.appendChild(img);
+    // note: a small image pinned on top like a post-it (e.g. the
+    // storyboard sketch on its final frame); decorative, the alt of the
+    // main image describes the pair
+    if (item.note) {
+      var note = el('img', 'cs-fig__note');
+      note.src = item.note;
+      note.alt = '';
+      note.loading = 'lazy';
+      open.appendChild(note);
+    }
+    var icon = el('span', 'cs-fig__icon', item.video ? 'Play' : 'View');
+    icon.setAttribute('aria-hidden', 'true');
+    open.appendChild(icon);
+    if (item.label) {
+      var tag = el('span', 'cs-fig__overlay', item.label);
+      tag.setAttribute('aria-hidden', 'true'); // the caption below carries it for screen readers
+      open.appendChild(tag);
+    }
+    fig.appendChild(open);
+    if (item.label) fig.appendChild(el('figcaption', 'cs-fig__label', item.label));
+    if (!item.video && !item.cutout && !item.contain) matchContrast(img, fig);
     return fig;
   }
 
+  // "Opposite color" text on the image: once it loads, measure how light the
+  // two corners the words sit on are (bottom-left label, top-right View) and
+  // switch that word to dark ink on a light corner; white stays on dark ones.
+  function matchContrast(img, fig) {
+    function corner(ctx, x, y) {
+      var d = ctx.getImageData(x, y, 12, 8).data, sum = 0;
+      for (var i = 0; i < d.length; i += 4) sum += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+      return sum / (d.length / 4) / 255;
+    }
+    function run() {
+      try {
+        var c = document.createElement('canvas');
+        c.width = 40; c.height = 40;
+        var ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0, 40, 40);
+        fig.classList.toggle('is-light-bl', corner(ctx, 0, 32) > 0.62);
+        fig.classList.toggle('is-light-tr', corner(ctx, 28, 0) > 0.62);
+      } catch (e) { /* unreadable image: keep white text */ }
+    }
+    if (img.complete && img.naturalWidth) run();
+    else img.addEventListener('load', run);
+  }
+
   // ratio: optional per-section tile shape, e.g. '16 / 10' for film frames
-  function figures(items, cls, ratio, overlay) {
+  function figures(items, cls, ratio) {
     var wrap = el('div', cls);
     wrap.setAttribute('data-viewer-group', '');
     if (ratio) wrap.style.setProperty('--tile-ratio', ratio);
-    items.forEach(function (item) { wrap.appendChild(figure(item, overlay)); });
+    items.forEach(function (item) { wrap.appendChild(figure(item)); });
     return wrap;
   }
 
@@ -474,8 +504,9 @@
     if (workImages.length || text(work.outcome)) {
       var workName = inProgress ? 'Work So Far' : 'Work';
       var workSec = section('work', '03', workName);
-      if (workImages.length) workSec.appendChild(figures(workImages, 'cs-grid', work.ratio, true));
-      if (text(work.outcome)) workSec.appendChild(el('p', 'cs-outcome', text(work.outcome)));
+      // the outcome sits under the heading, small like the Idea / Friction copy
+      if (text(work.outcome)) workSec.appendChild(el('p', 'cs-section__copy cs-outcome text-project-body', text(work.outcome)));
+      if (workImages.length) workSec.appendChild(figures(workImages, 'cs-grid', work.ratio));
       sections.push({ node: workSec, num: '03', name: workName });
     }
 

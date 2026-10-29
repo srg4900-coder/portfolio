@@ -498,7 +498,7 @@ html.is-touch .contact-modal__resume:active {
   justify-content: flex-start; /* left-justified */
   overflow-y: auto;
   transform: scale(0.96);
-  transition: transform var(--duration-base) var(--ease-bounce);
+  transition: transform var(--duration-slow) var(--ease-smooth);
 }
 
 .contact-modal.is-open .contact-modal__paper {
@@ -573,7 +573,7 @@ html.is-touch .contact-modal__resume:active {
   height: 36px;  /* the Resume pill's height, so all three weigh the same */
   color: var(--color-ink);
   cursor: pointer;
-  transition: transform var(--duration-base) var(--ease-bounce), opacity var(--duration-fast) ease;
+  transition: transform var(--duration-base) var(--ease-smooth), opacity var(--duration-fast) ease;
 }
 .contact-modal__social svg {
   width: 24px;
@@ -585,7 +585,7 @@ html.is-touch .contact-modal__resume:active {
   stroke-linejoin: round;
 }
 .contact-modal__social .dot { fill: currentColor; stroke: none; }
-/* hover: a small lift and tilt with the site's bounce */
+/* hover: a small lift and tilt that settles like the homepage motion */
 .contact-modal__social:hover,
 .contact-modal__social:focus-visible {
   transform: translateY(-4px) rotate(-8deg) scale(1.1);
@@ -715,9 +715,11 @@ html.is-viewer-open { overflow: hidden; }
   background: rgba(16, 14, 12, 0.94);
   color: var(--color-paper);
   opacity: 0;
-  transition: opacity var(--duration-fast) ease;
+  transition: opacity var(--duration-base) var(--ease-smooth);
 }
 .viewer[hidden] { display: none; }
+.viewer:focus,
+.contact-modal:focus { outline: none; }  /* the dialog itself takes focus on a mouse open */
 .viewer.is-open { opacity: 1; }
 
 .viewer__close {
@@ -746,6 +748,17 @@ html.is-viewer-open { overflow: hidden; }
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+}
+/* stepping (arrows, keys, swipe): the next image drifts in a few px from
+   the side it comes from and settles, on the homepage's ease and pace */
+.viewer__media.is-entering {
+  animation: viewer-in 700ms var(--ease-smooth) both;
+}
+@keyframes viewer-in {
+  from { opacity: 0; transform: translateX(var(--viewer-from, 0px)) scale(0.985); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .viewer__media.is-entering { animation: none; }
 }
 
 .viewer__step {
