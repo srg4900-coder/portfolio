@@ -87,7 +87,7 @@ window.PROJECTS = {
       'Ryan Winter',      // TODO(Sadie): add their roles, e.g. 'Ryan Winter, Talent'
       'Kathleen Berry'
     ],
-    action: { label: 'Watch the Film', video: 'assets/video/grassroots-fall-film.mp4' },
+    // no action button: the full film already plays as the hero
     home: { video: 'assets/video/grassroots-fall-film-thumb.mp4', image: 'assets/case-studies/grassroots/gr-driver-seat.jpg' },
     hero: {
       video: 'assets/video/grassroots-fall-film.mp4',

@@ -15,6 +15,10 @@
   // TODO(Sadie): drop the PDF at this path (or change it) — the button
   // downloads whatever file lives here.
   var RESUME_URL = '/assets/resume/Sadie-Gold-Resume.pdf'; // absolute: works from any page depth (incl. 404.html)
+  // TODO(Sadie): paste your profile addresses; an empty one shows greyed
+  // out and inert (same dead-link rule as the resume).
+  var INSTAGRAM_URL = '';
+  var LINKEDIN_URL = '';
 
   // Each inner array = one paragraph; each string = one line.
   var META_LINES = [
@@ -84,10 +88,36 @@
     resume.removeAttribute('href');
   });
 
+  // Resume + social icons: one row, evenly spaced, equal weight. The icons
+  // are bare glyphs (no outline), with a small lift-and-tilt on hover.
+  var ICONS = {
+    instagram: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle class="dot" cx="17.3" cy="6.7" r="1.1"/></svg>',
+    linkedin: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7.5 10.5v6M7.5 7.4v.1M11.2 16.5v-6M11.2 13.2c0-1.6 1-2.8 2.5-2.8s2.4 1 2.4 2.7v3.4"/></svg>'
+  };
+  function social(name, label, url) {
+    var a = el('a', 'contact-modal__social');
+    a.innerHTML = ICONS[name];
+    a.setAttribute('aria-label', label);
+    a.setAttribute('data-cursor-solid', 'white');
+    if (url) {
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+    } else {
+      a.classList.add('is-unavailable');
+      a.setAttribute('aria-disabled', 'true');
+    }
+    return a;
+  }
+  var actions = el('div', 'contact-modal__actions');
+  actions.appendChild(resume);
+  actions.appendChild(social('instagram', 'Instagram (opens in a new tab)', INSTAGRAM_URL));
+  actions.appendChild(social('linkedin', 'LinkedIn (opens in a new tab)', LINKEDIN_URL));
+
   content.appendChild(emailLink);
   content.appendChild(lines('contact-modal__meta', META_LINES));
   content.appendChild(lines('contact-modal__bio', BIO_LINES));
-  content.appendChild(resume);
+  content.appendChild(actions);
   paper.appendChild(closeBtn);
   paper.appendChild(content);
   modal.appendChild(paper);
