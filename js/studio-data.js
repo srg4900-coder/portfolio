@@ -23,10 +23,11 @@ window.STUDIO = {
       items: [
         {
           src: 'assets/studio/paintings/master-work.jpg',
-          alt: 'Moonlit river scene: a domed city and a stone bridge under stormy blue clouds, a lit boat in the foreground',
-          title: '[Title]',
-          medium: '[Medium]',
-          year: '[Year]'
+          alt: 'Color pastel master study: a moonlit river with a domed city and a stone bridge under stormy blue clouds, a lit boat in the foreground',
+          title: 'Master study after Camille Roqueplan (1831)',
+          medium: 'Color pastel',
+          year: 2023,
+          award: 'Selected for the RIT Studio Showcase'
         }
       ]
     },
