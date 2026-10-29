@@ -44,7 +44,7 @@
     disciplines: ['Branding', 'Print'],
     duration: '6 weeks',                   // a number + day/week/month/year, or 'Ongoing'
     status: 'Live',                        // Live / In Production / In Progress / Concept
-    award: 'Gold ADDY',                    // 2-3 words: gold tag on the homepage print + hero; full story goes in the copy
+    award: 'Gold ADDY',                    // short: gold tag on the homepage print + credits; \n starts a new line
     released: 'Sep. 2026',
     client: 'Client name',
     course: 'Course, Professor',
@@ -190,7 +190,7 @@ window.PROJECTS = {
     role: 'Motion Designer & Illustrator',
     disciplines: ['Motion Design', 'Illustration', 'Hand Animation'],
     duration: '5 weeks',
-    award: 'Gold ADDY',
+    award: 'AAF ADDY Gold\nAward Winner',
     course: 'Motion Design, Prof. Austin Shaw',
     collaborators: ['Lana Del Rey, Music'],
     tools: ['Procreate', 'After Effects', 'Hand-drawn sketch'],

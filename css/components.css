@@ -676,7 +676,9 @@ html.is-touch .contact-modal__resume:active {
   padding: 5px 10px 4px;
   background: var(--color-gold);
   color: var(--color-ink);
-  white-space: nowrap;
+  white-space: pre-line;  /* a \n in the award text starts a new line */
+  line-height: 1.35;
+  text-align: left;
   box-shadow: var(--shadow-paper);
 }
 
