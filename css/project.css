@@ -312,6 +312,23 @@ body.project-page {
   padding: 4%;
 }
 
+/* a pinned "post-it" image on top of a frame (item.note): small, tilted,
+   white paper edge and a soft shadow, top-left so the View pill stays clear */
+.cs-fig__note {
+  position: absolute;
+  top: 6%;
+  left: 4%;
+  width: 30%;
+  max-width: 220px;
+  padding: 5px;
+  background: var(--color-white);
+  transform: rotate(-4deg);
+  box-shadow: var(--shadow-paper);
+  transition: transform var(--duration-base) var(--ease-bounce);
+  pointer-events: none;
+}
+.cs-fig__open:hover .cs-fig__note { transform: rotate(-6deg) translateY(-3px); }
+
 /* "View" pill (top-right) and, in 03 Work, the image's label (bottom-left):
    both appear on hover / keyboard focus. Touch screens have no hover, so
    there they always show, quietly. The cursor stays the plain dot. */

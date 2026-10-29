@@ -133,6 +133,16 @@
       open.setAttribute('data-label', item.label || '');
       open.setAttribute('aria-label', 'View larger: ' + (item.alt || item.label || 'image'));
       open.appendChild(media(item, 'cs-fig__media'));
+      // note: a small image pinned on top like a post-it (e.g. the
+      // storyboard sketch on its final frame); decorative, the alt of the
+      // main image describes the pair
+      if (item.note) {
+        var note = el('img', 'cs-fig__note');
+        note.src = item.note;
+        note.alt = '';
+        note.loading = 'lazy';
+        open.appendChild(note);
+      }
       var icon = el('span', 'cs-fig__icon', item.video ? 'Play' : 'View');
       icon.setAttribute('aria-hidden', 'true');
       open.appendChild(icon);

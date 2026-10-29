@@ -33,6 +33,8 @@
   that section (default: portrait 4 / 5 in Work), e.g. for film frames or
   slides, so they aren't cropped.
     position: '30% 50%' which part of the image the crop keeps
+    note: 'path.jpg'    a small image pinned on top like a post-it
+                        (e.g. a storyboard sketch on its final frame)
 
   TEMPLATE
   'my-project': {
@@ -109,8 +111,19 @@ window.PROJECTS = {
       ratio: '16 / 10',
       result: 'Rollers, road, drone, city, and studio stills, true to the original moodboard and the CD’s brief. Short film and social media content for the drop after editing by the Grassroots team.',
       images: [
-        { label: 'Storyboard vs. final frame', alt: '' },
-        { label: 'Behind the scenes, location 1', alt: '' }
+        {
+          src: 'assets/case-studies/grassroots/gr-final-jacket-barn.jpg',
+          note: 'assets/case-studies/grassroots/gr-storyboard-scenic-outlook.jpg',
+          label: 'Storyboard vs. final frame',
+          alt: 'Final frame: he drapes the jacket over her shoulders against the Porsche in front of a white barn, with the hand-drawn storyboard sketch of the same moment pinned in the corner'
+        },
+        // more behind-the-scenes shots are in grassroots/bts/
+        {
+          src: 'assets/case-studies/grassroots/bts/gr-bts-barn-monitor.jpg',
+          position: '50% 62%',
+          label: 'Behind the scenes, location 1',
+          alt: 'Behind the scenes at the barn: the crew beside the camera rig, its monitor showing the Porsche and both talent framed for the shot'
+        }
       ]
     },
     work: {
