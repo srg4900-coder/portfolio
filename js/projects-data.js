@@ -165,7 +165,8 @@ window.PROJECTS = {
   },
 
   // ---------- A Series of Unfortunate Events: Title Sequence ----------
-  // Images come from the process book (title_sequence_deliverables/).
+  // Images: frames/ (final style frames), process/ (process book pages),
+  // references/ (inspiration boards).
   'title-sequence': {
     title: 'A Series of Unfortunate Events: Title Sequence',
     hook: 'A clue in every frame',
@@ -177,18 +178,19 @@ window.PROJECTS = {
     collaborators: ['Music by Lana Del Rey'],
     tools: ['Procreate', 'After Effects', 'Hand-drawn sketch'],
     action: { label: 'Watch the Sequence', url: 'https://www.youtube.com/watch?v=Fl9wpFEMiEA' },
-    home: { video: 'assets/video/title-sequence-thumb.mp4', image: 'assets/case-studies/title-sequence/ts-frame-03.jpg' },
+    home: { video: 'assets/video/title-sequence-thumb.mp4', image: 'assets/case-studies/title-sequence/frames/ts-03-birdcage.webp' },
     hero: {
       video: 'assets/video/title-sequence.mp4',
-      src: 'assets/case-studies/title-sequence/ts-frame-03.jpg',
+      src: 'assets/case-studies/title-sequence/frames/ts-03-birdcage.webp',
       alt: 'Illustrated title sequence frame: a gilded birdcage in a jungle hallway with a checkered floor'
     },
     idea: {
       ratio: '16 / 10',
       copy: 'Opening credits for Netflix\u2019s A Series of Unfortunate Events. I wanted viewers to feel the show\u2019s themes while only hinting at the plot. Storybook paper cutouts nod to its roots as a children\u2019s novel and give it an eerie, academic edge. Every vignette hides metaphors and easter eggs that only surface after a few rewatches.',
       images: [
-        { src: 'assets/case-studies/title-sequence/ts-sketches-storyboards.jpg', contain: true, label: 'Early sketch', alt: 'Process book page of pencil character sketches and storyboards' },
-        { src: 'assets/case-studies/title-sequence/ts-frame-01.jpg', label: 'Paper cutout style frame', alt: 'Paper cutout style frame: a trolley on tracks between torn pink cliffs' },
+        { src: 'assets/case-studies/title-sequence/process/ts-sketches-storyboards.jpg', contain: true, label: 'Early sketch', alt: 'Process book page of pencil character sketches and storyboards' },
+        { src: 'assets/case-studies/title-sequence/references/ts-graphical-inspiration.webp', contain: true, label: 'Graphical inspiration', alt: 'Moodboard of 1930s posters and illustration: a hedge maze, an ocean liner, Harper\u2019s Bazaar, art deco cars' },
+        { src: 'assets/case-studies/title-sequence/frames/ts-01-trolley.jpg', label: 'Paper cutout style frame', alt: 'Paper cutout style frame: a trolley on tracks between torn pink cliffs' },
         { label: 'Easter egg, revealed', alt: '' }
       ]
     },
@@ -199,21 +201,21 @@ window.PROJECTS = {
       ratio: '16 / 10',
       images: [
         { label: 'Critique round 1 vs. final', alt: '' },
-        { src: 'assets/case-studies/title-sequence/ts-illustrations.jpg', contain: true, label: 'Procreate illustration in progress', alt: 'Cutout illustrations: a birdcage, a trolley, plants, darts and silhouetted characters' }
+        { src: 'assets/case-studies/title-sequence/process/ts-illustrations.jpg', contain: true, label: 'Procreate illustration in progress', alt: 'Cutout illustrations: a birdcage, a trolley, plants, darts and silhouetted characters' }
       ]
     },
     work: {
-      ratio: '16 / 9',
+      ratio: '16 / 10',
       images: [
-        { src: 'assets/case-studies/title-sequence/ts-frame-08.jpg', large: true, label: 'Title card', alt: 'Title card: Lemony Snicket\u2019s A Series of Unfortunate Events over dark eye-pattern wallpaper' },
-        { src: 'assets/case-studies/title-sequence/ts-frame-01.jpg', label: 'Vignette 1, the trolley', alt: 'A trolley on tracks between torn pink cliffs' },
-        { src: 'assets/case-studies/title-sequence/ts-frame-02.jpg', label: 'Vignette 2, the hallway', alt: 'Silhouetted figures in a wallpapered hallway beneath a tall shadow' },
-        { src: 'assets/case-studies/title-sequence/ts-frame-03.jpg', label: 'Vignette 3, the birdcage', alt: 'A gilded birdcage in a jungle hallway with a checkered floor' },
-        { src: 'assets/case-studies/title-sequence/ts-frame-04.jpg', label: 'Vignette 4, the ship', alt: 'A figure climbing the side of a black ship over dark waves' },
-        { src: 'assets/case-studies/title-sequence/ts-frame-05.jpg', label: 'Vignette 5, the hedge maze', alt: 'Silhouettes running through a green hedge maze shaped like a key' },
-        { src: 'assets/case-studies/title-sequence/ts-frame-06.jpg', label: 'Vignette 6, the lamp', alt: 'A shadowed figure beside a lampshade and teacup on a red wall' },
-        { src: 'assets/case-studies/title-sequence/ts-frame-07.jpg', label: 'Vignette 7, the darts', alt: 'Feathered darts and a spyglass floating against dark wallpaper' },
-        { src: 'assets/case-studies/title-sequence/ts-social-assets.jpg', contain: true, label: 'Social assets', alt: 'Instagram post and story mockups using the birdcage and ship frames' }
+        { src: 'assets/case-studies/title-sequence/frames/ts-08-title-card.webp', large: true, label: 'Title card', alt: 'Title card: Lemony Snicket\u2019s A Series of Unfortunate Events over dark eye-pattern wallpaper' },
+        { src: 'assets/case-studies/title-sequence/frames/ts-01-trolley.jpg', label: 'Vignette 1, the trolley', alt: 'A trolley on tracks between torn pink cliffs' },
+        { src: 'assets/case-studies/title-sequence/frames/ts-02-hallway.webp', label: 'Vignette 2, the hallway', alt: 'Three child silhouettes huddled in an eye-patterned hallway beneath a looming shadow' },
+        { src: 'assets/case-studies/title-sequence/frames/ts-03-birdcage.webp', label: 'Vignette 3, the birdcage', alt: 'An open gilded birdcage with a snake curled inside, among jungle leaves on a checkered floor' },
+        { src: 'assets/case-studies/title-sequence/frames/ts-04-ship.webp', label: 'Vignette 4, the ship', alt: 'A tiny figure falling down the black hull of the S.S. Peru into dark waves' },
+        { src: 'assets/case-studies/title-sequence/frames/ts-05-hedge-maze.jpg', label: 'Vignette 5, the hedge maze', alt: 'Silhouettes running through a green hedge maze shaped like a key' },
+        { src: 'assets/case-studies/title-sequence/frames/ts-06-curtain.webp', label: 'Vignette 6, the curtain', alt: 'A shadowed figure parting a red curtain onto a tea set on a small table' },
+        { src: 'assets/case-studies/title-sequence/frames/ts-07-darts.webp', label: 'Vignette 7, the darts', alt: 'Red and cream feathered darts and a brass spyglass falling against a dark background' },
+        { src: 'assets/case-studies/title-sequence/process/ts-social-assets.jpg', contain: true, label: 'Social assets', alt: 'Instagram post and story mockups using the birdcage and ship frames' }
       ],
       outcome: 'Gold ADDY Award, 2026, entered by Prof. Austin Shaw. Featured in his new edition textbook and on RIT institutional billboards.'
     }
