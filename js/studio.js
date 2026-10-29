@@ -51,14 +51,13 @@
       open.setAttribute('data-alt', item.alt || '');
       open.setAttribute('data-label', label);
       open.setAttribute('aria-label', 'View larger: ' + (item.alt || item.title || 'image'));
-      open.setAttribute('data-cursor-label', 'View');
       var img = el('img', 'cs-fig__media');
       img.src = item.src;
       img.alt = item.alt || '';
       img.loading = 'lazy';
       img.decoding = 'async';
       open.appendChild(img);
-      var icon = el('span', 'cs-fig__icon', '+');
+      var icon = el('span', 'cs-fig__icon', 'View');
       icon.setAttribute('aria-hidden', 'true');
       open.appendChild(icon);
       fig.appendChild(open);

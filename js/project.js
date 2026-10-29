@@ -114,8 +114,11 @@
     return box;
   }
 
-  // one labeled image that opens in the viewer (or a missing box)
-  function figure(item) {
+  // one labeled image that opens in the viewer (or a missing box).
+  // overlay: the label sits inside the image, bottom-left, shown on hover
+  // (03 Work); otherwise it's a caption under the image (02 Friction).
+  // A "View" pill (top-right) shows on hover; the cursor stays the plain dot.
+  function figure(item, overlay) {
     var fig = el('figure', 'cs-fig' + (item.large ? ' cs-fig--large' : '') +
       (item.cutout ? ' cs-fig--cutout' : '') + (item.contain ? ' cs-fig--contain' : ''));
     if (!item.src) {
@@ -129,23 +132,27 @@
       open.setAttribute('data-alt', item.alt || '');
       open.setAttribute('data-label', item.label || '');
       open.setAttribute('aria-label', 'View larger: ' + (item.alt || item.label || 'image'));
-      open.setAttribute('data-cursor-label', item.video ? 'Play' : 'View');
       open.appendChild(media(item, 'cs-fig__media'));
-      var icon = el('span', 'cs-fig__icon', item.video ? '▶' : '+');
+      var icon = el('span', 'cs-fig__icon', item.video ? 'Play' : 'View');
       icon.setAttribute('aria-hidden', 'true');
       open.appendChild(icon);
+      if (overlay && item.label) {
+        var tag = el('span', 'cs-fig__overlay', item.label);
+        tag.setAttribute('aria-hidden', 'true'); // the button's own label already says it
+        open.appendChild(tag);
+      }
       fig.appendChild(open);
     }
-    if (item.label) fig.appendChild(el('figcaption', 'cs-fig__label', item.label));
+    if (item.label && !(overlay && item.src)) fig.appendChild(el('figcaption', 'cs-fig__label', item.label));
     return fig;
   }
 
   // ratio: optional per-section tile shape, e.g. '16 / 10' for film frames
-  function figures(items, cls, ratio) {
+  function figures(items, cls, ratio, overlay) {
     var wrap = el('div', cls);
     wrap.setAttribute('data-viewer-group', '');
     if (ratio) wrap.style.setProperty('--tile-ratio', ratio);
-    items.forEach(function (item) { wrap.appendChild(figure(item)); });
+    items.forEach(function (item) { wrap.appendChild(figure(item, overlay)); });
     return wrap;
   }
 
@@ -264,17 +271,9 @@
     var front = list[list.length - 1];
     if (front && window.PaperInteraction) window.PaperInteraction.setFront(front);
 
-    function labels(top) {
-      list.forEach(function (p) {
-        if (!p.hasAttribute('data-viewer')) return;
-        p.setAttribute('data-cursor-label', p === top ? 'View' : 'Drag');
-      });
-    }
-    labels(front);
 
     wrap.addEventListener('paper:activate', function (e) {
       var p = e.target;
-      labels(p);
       if (e.detail.source === 'drag' || !p.hasAttribute('data-viewer') || !window.ImageViewer) return;
       // phones: no stack to shuffle, so a tap opens it straight away
       if (e.detail.wasActive || !wide.matches) window.ImageViewer.open(p);
@@ -284,7 +283,6 @@
       if (!p || !p.hasAttribute('data-viewer') || (e.key !== 'Enter' && e.key !== ' ')) return;
       e.preventDefault();
       if (window.PaperInteraction) window.PaperInteraction.setFront(p);
-      labels(p);
       window.ImageViewer.open(p);
     });
   }
@@ -466,7 +464,7 @@
     if (workImages.length || text(work.outcome)) {
       var workName = inProgress ? 'Work So Far' : 'Work';
       var workSec = section('work', '03', workName);
-      if (workImages.length) workSec.appendChild(figures(workImages, 'cs-grid', work.ratio));
+      if (workImages.length) workSec.appendChild(figures(workImages, 'cs-grid', work.ratio, true));
       if (text(work.outcome)) workSec.appendChild(el('p', 'cs-outcome', text(work.outcome)));
       sections.push({ node: workSec, num: '03', name: workName });
     }
@@ -555,7 +553,6 @@
     if (nextData) {
       var card = el('a', 'cs-next__card subgrid');
       card.href = projectUrl(nextSlug);
-      card.setAttribute('data-cursor-label', 'Next');
       var cardText = el('div', 'cs-next__text');
       var nextPos = ORDER.indexOf(nextSlug);
       var kicker = el('span', 'cs-next__kicker', 'Next project ');

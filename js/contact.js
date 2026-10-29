@@ -15,10 +15,10 @@
   // TODO(Sadie): drop the PDF at this path (or change it) — the button
   // downloads whatever file lives here.
   var RESUME_URL = '/assets/resume/Sadie-Gold-Resume.pdf'; // absolute: works from any page depth (incl. 404.html)
-  // TODO(Sadie): paste your profile addresses; an empty one shows greyed
-  // out and inert (same dead-link rule as the resume).
-  var INSTAGRAM_URL = '';
-  var LINKEDIN_URL = '';
+  // Profile addresses; an empty one shows greyed out and inert (same
+  // dead-link rule as the resume).
+  var INSTAGRAM_URL = 'https://www.instagram.com/sadiegold.co/';
+  var LINKEDIN_URL = 'https://www.linkedin.com/in/sadie-goldberg-653534205';
 
   // Each inner array = one paragraph; each string = one line.
   var META_LINES = [
