@@ -13,8 +13,9 @@
               any section with no data is skipped entirely (and left out
               of the strip); Status "In Progress" renames Work to
               "Work So Far". Idea's images are loose papers (below).
-    CREDITS   Duration, Status, Award, Released, Client, Course,
-              Collaborators, Tools: whichever exist
+    CREDITS   Duration, Award, Client, Course, Collaborators, Tools:
+              whichever exist. Status isn't shown; it only drives
+              "Work So Far" for In Progress projects.
     NEXT      next project's title + hero (loops last -> first), All Work,
               Contact
 
@@ -526,7 +527,6 @@
     var creditList = el('dl', 'cs-meta cs-meta--credits');
     var dur = duration(data.duration);
     metaRow(creditList, 'Duration', dur || '');
-    metaRow(creditList, 'Status', data.status, { tag: true });
     metaRow(creditList, 'Award', data.award, { tag: true, award: true });
     // Released is hidden for now (Sadie, Oct 2026); the data stays in projects-data.js.
     // metaRow(creditList, 'Released', data.released);
