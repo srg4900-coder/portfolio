@@ -177,7 +177,7 @@
       try {
         var c = document.createElement('canvas');
         c.width = 40; c.height = 40;
-        var ctx = c.getContext('2d');
+        var ctx = c.getContext('2d', { willReadFrequently: true });
         ctx.drawImage(img, 0, 0, 40, 40);
         fig.classList.toggle('is-light-bl', corner(ctx, 0, 32) > 0.62);
         fig.classList.toggle('is-light-tr', corner(ctx, 28, 0) > 0.62);
@@ -700,7 +700,7 @@
     [ideaImages, frictionImages, workImages].forEach(function (items) {
       items.forEach(function (i) {
         if (!i.src) todo.push('missing asset: ' + i.label);
-        else if (/^\[|^$/.test(i.alt || '') || /^\[|^$/.test(i.label || '')) todo.push(i.src + ' (alt/label)');
+        else if (/^\[|^$/.test(i.alt || '')) todo.push(i.src + ' (alt text)'); // labels are optional
       });
     });
     if (todo.length) console.info('[case study] still to fill in for "' + slug + '":\n  ' + todo.join('\n  '));

@@ -124,7 +124,55 @@
     var cells = [];   // untransformed document positions, cached per layout
     var vw = 0, vh = 0, span = 1;
 
+    // ---------- TITLE -> LOGO ----------
+    // The logo (top-left) starts hidden. As the page scrolls, each word of
+    // the big title travels to its own word in the logo ("Sadie Gold", or
+    // the "S" / "G" of "SG" on phones), shrinking to the logo's size; in the
+    // last stretch the title fades and the real logo fades in, so it becomes
+    // the working home link. Scrolling back reverses it. Same smoothed
+    // scroll value and ease as the prints, so it moves with the page.
+    var words = Array.prototype.slice.call(hero.querySelectorAll('.hero__word'));
+    var role = hero.querySelector('.hero__role');
+    var logo = document.querySelector('.logo-button');
+    var morph = [];
+
+    function logoTargets() {
+      var name = logo.querySelector('.logo-button__name');
+      var showName = name && getComputedStyle(name).display !== 'none';
+      var node = (showName ? name : logo.querySelector('span')).firstChild;
+      var parts = showName ? [[0, 5], [6, 10]] : [[0, 1], [1, 2]];
+      return parts.map(function (p) {
+        var range = document.createRange();
+        range.setStart(node, p[0]);
+        range.setEnd(node, Math.min(p[1], node.length));
+        var b = range.getBoundingClientRect();
+        return { left: b.left, top: b.top, h: b.height };
+      });
+    }
+
+    function measureMorph() {
+      if (!logo || !words.length) return;
+      var sy = window.scrollY;
+      var targets = logoTargets();
+      var ratio = parseFloat(getComputedStyle(logo).fontSize) / parseFloat(getComputedStyle(words[0]).fontSize);
+      morph = words.map(function (w, i) {
+        var prev = w.style.transform;
+        w.style.transform = 'none';
+        var r = w.getBoundingClientRect();
+        w.style.transform = prev;
+        var t = targets[i] || targets[0];
+        return {
+          left: r.left,
+          top: r.top + sy,                                // where it sits at scroll 0
+          s: ratio,
+          tl: t.left,
+          tt: t.top + t.h / 2 - (r.height * ratio) / 2   // centred on the logo word
+        };
+      });
+    }
+
     function measure() {
+      measureMorph();
       vw = window.innerWidth;
       vh = window.innerHeight;
       span = Math.max(1, hero.offsetHeight * 0.85);
@@ -153,9 +201,28 @@
       var y = current;
       var progress = clamp01(y / span);
 
-      // hero floats up faster than the page and fades, clearing the stage for the prints
-      hero.style.transform = 'translate3d(0,' + (-y * 0.45).toFixed(1) + 'px,0)';
-      hero.style.opacity = Math.max(0, 1 - progress * 1.5).toFixed(3);
+      // the role line floats up faster than the page and fades, clearing the stage
+      if (role) {
+        role.style.transform = 'translate3d(0,' + (-y * 0.45).toFixed(1) + 'px,0)';
+        role.style.opacity = Math.max(0, 1 - progress * 1.5).toFixed(3);
+      }
+
+      // title -> logo, over the first part of the scroll
+      var e = ease(clamp01(y / (span * 0.55)));
+      morph.forEach(function (m, i) {
+        var vx = m.left + (m.tl - m.left) * e;
+        var vy = m.top + (m.tt - m.top) * e;             // wanted on-screen position
+        var tx = vx - m.left;
+        var ty = vy - (m.top - window.scrollY);          // minus where the page has carried it
+        var sc = 1 + (m.s - 1) * e;
+        words[i].style.transform = 'translate3d(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px,0) scale(' + sc.toFixed(4) + ')';
+        words[i].style.opacity = clamp01((1 - e) / 0.12).toFixed(3);
+      });
+      if (logo && morph.length) {
+        var shown = clamp01((e - 0.88) / 0.12);
+        logo.style.opacity = shown.toFixed(3);
+        logo.style.pointerEvents = shown > 0.5 ? '' : 'none';
+      }
 
       var list = phone.matches ? SCATTER_PHONE : SCATTER_WIDE;
       var n = sheets.length;

@@ -36,11 +36,26 @@ body.home { background: transparent; }
   pointer-events: none;
 }
 
-.hero__title span {
+.hero__title > span {
   display: block;
   animation: rise 1100ms var(--ease-smooth) both;
 }
-.hero__title span + span { animation-delay: 90ms; }
+.hero__title > span + span { animation-delay: 90ms; }
+
+/* the words that travel into the logo (js/home.js); scaled from their top-left */
+.hero__word {
+  display: inline-block;
+  transform-origin: 0 0;
+  will-change: transform, opacity;
+}
+
+/* the hero sits above the nav so the travelling title passes over the
+   nav's paper fade instead of under it (pointer-events stay off) */
+.hero { z-index: calc(var(--z-nav) + 1); }
+
+/* the homepage logo starts hidden and is revealed as the title arrives
+   (inline opacity from js/home.js); a keyboard user can still reach it */
+.home .logo-button:focus-visible { opacity: 1 !important; }
 
 .hero__role {
   margin-top: clamp(28px, 7vh, 72px);
@@ -224,6 +239,6 @@ body.home { background: transparent; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero__title span, .hero__role, .sheet__paper, .sheet__award { animation: none; }
+  .hero__title > span, .hero__role, .sheet__paper, .sheet__award { animation: none; }
   .sheet { transform: none !important; }
 }
