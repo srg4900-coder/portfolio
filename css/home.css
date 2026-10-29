@@ -143,6 +143,26 @@ body.home { background: transparent; }
   box-shadow: var(--shadow-paper-lift);
 }
 
+/* award tag: pinned over the print's top-left corner, slightly askew,
+   lands with the caption and lifts with the print on hover */
+.sheet__link { position: relative; }
+.sheet__award {
+  position: absolute;
+  top: -10px;
+  left: -12px;
+  z-index: 2;
+  transform: rotate(-4deg);
+  opacity: var(--settle, 1);
+  transition: transform var(--duration-base) var(--ease-smooth);
+  /* deals in with its print, a beat after it */
+  animation: deal 1000ms var(--ease-smooth) both;
+  animation-delay: calc(420ms + var(--i, 0) * 70ms);
+}
+.sheet__link:hover .sheet__award,
+.sheet__link:focus-visible .sheet__award {
+  transform: translateY(-4px) rotate(-4deg);
+}
+
 /* caption: fades in as the sheet lands (--settle set by home.js) */
 .sheet__caption {
   display: flex;
@@ -204,6 +224,6 @@ body.home { background: transparent; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero__title span, .hero__role, .sheet__paper { animation: none; }
+  .hero__title span, .hero__role, .sheet__paper, .sheet__award { animation: none; }
   .sheet { transform: none !important; }
 }

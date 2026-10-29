@@ -602,6 +602,17 @@ html.is-touch .contact-modal__resume:active {
 .site-footer a:hover { opacity: 1; }
 .site-footer__links { display: flex; gap: var(--space-block); }
 
+/* ---------- award tag (a project's `award` field: homepage print + case-study hero) ---------- */
+/* one style for every award; only the words change (e.g. "Gold ADDY") */
+.award-tag {
+  display: inline-block;
+  padding: 5px 10px 4px;
+  background: var(--color-gold);
+  color: var(--color-ink);
+  white-space: nowrap;
+  box-shadow: var(--shadow-paper);
+}
+
 /* ---------- missing-asset stand-in (js/project.js, js/studio.js) ---------- */
 /* a grey box carrying the label of the image that still needs adding */
 .is-missing {

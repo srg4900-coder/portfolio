@@ -207,7 +207,7 @@
       var row = el('div', 'cs-meta__row');
       row.appendChild(el('dt', 'text-label', label));
       var dd = el('dd');
-      if (opts.tag) dd.appendChild(el('span', 'cs-tag text-label', items[0]));
+      if (opts.tag) dd.appendChild(el('span', (opts.award ? 'award-tag' : 'cs-tag') + ' text-label', items[0]));
       else if (opts.stacked) items.forEach(function (i) { dd.appendChild(el('span', 'cs-meta__line', i)); });
       else dd.textContent = items.join(', ');
       row.appendChild(dd);
@@ -217,6 +217,7 @@
     metaRow('Disciplines', data.disciplines);
     metaRow('Duration', data.duration);
     metaRow('Status', data.status, { tag: true });
+    metaRow('Award', data.award, { tag: true, award: true });
     metaRow('Released', data.released);
     metaRow('Client', data.client);
     metaRow('Course', data.course);

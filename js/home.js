@@ -51,6 +51,8 @@
       sheet.innerHTML =
         '<a class="sheet__link" href="' + Order.link('project.html?project=' + slug) + '" data-cursor-label="View">' +
           '<div class="sheet__paper' + (isCard ? ' sheet__paper--card' : '') + '">' + media + '</div>' +
+          // award tag pinned to the print's corner (css/home.css), read as part of the link
+          (p.award ? '<span class="sheet__award award-tag text-label">' + p.award.replace(/</g, '&lt;') + '</span>' : '') +
           '<div class="sheet__caption">' +
             '<span class="text-label">' + num + ' &nbsp;' + p.title.split(': ')[0].replace(/</g, '&lt;') + '</span>' +
             '<span class="text-label">' + (p.role || '') + '</span>' +

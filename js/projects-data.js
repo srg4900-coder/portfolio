@@ -38,6 +38,7 @@
     disciplines: ['Branding', 'Print'],
     duration: '6 weeks',
     status: 'Live',                        // Live / In Production / In Progress / Concept
+    award: 'Gold ADDY',                    // 2-3 words: gold tag on the homepage print + hero; full story goes in the copy
     released: 'Sep. 2026',
     client: 'Client name',
     course: 'Course, Professor',
@@ -171,6 +172,7 @@ window.PROJECTS = {
     role: 'Motion Designer & Illustrator',
     disciplines: ['Motion Design', 'Illustration', 'Hand Animation'],
     duration: '[5 weeks]',
+    award: 'Gold ADDY',
     course: 'Motion Design, Prof. Austin Shaw',
     collaborators: ['Music by Lana Del Rey'],
     tools: ['Procreate', 'After Effects', 'Hand-drawn sketch'],
