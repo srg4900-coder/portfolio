@@ -2,7 +2,7 @@
   TOUCH STAND-INS (phones/tablets only)
   -------------------------------------
   Touch screens have no cursor and no hover, so the mouse-driven fun
-  (cursor labels, hand-gesture cursors, hover lifts) never happens there.
+  (cursor labels, hover lifts) never happens there.
   Each block below is a tap-based stand-in for one of those. Runs only
   when the primary input is touch; does nothing on mouse/trackpad.
 
@@ -12,8 +12,6 @@
                         when a tap brings it to the front (homepage)
     3. SCROLL DRIFT     papers drift slightly as they scroll through the
                         screen (homepage; no motion permission — see 3)
-    4. CONTACT HANDS    popup opens -> the wave plays in its corner; tapping
-                        Resume -> the thumbs-up plays beside it
 
   Tap feedback for links/buttons (and the always-long About arrow) is
   CSS-only: see html.is-touch rules in components.css / main.css.
@@ -34,7 +32,7 @@
   // BUG FIX: these used to fire on finger-DOWN. iPhone Safari watches
   // for anything becoming visible during a tap and, if it sees that,
   // treats the tap as a "hover" and withholds the click — so showing the
-  // label (or the Resume thumbs-up, 4) on finger-down cost the visitor
+  // label on finger-down cost the visitor
   // extra taps before links/buttons responded. They now run on `click`,
   // i.e. only after the tap has already gone through.
   document.addEventListener('click', function (e) {
@@ -72,7 +70,7 @@
   // gentle parallax, alternating directions so neighbours don't move in
   // lockstep. Pure scroll position: no permissions, no sensors.
   var driftPapers = document.querySelectorAll('.papers-stage .paper');
-  if (driftPapers.length && !window.HandGestures.REDUCE_MOTION) {
+  if (driftPapers.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     var DRIFT_MAX_PX = 8;
     var driftQueued = false;
     function applyDrift() {
@@ -90,63 +88,5 @@
     window.addEventListener('scroll', function () {
       if (!driftQueued) { driftQueued = true; requestAnimationFrame(applyDrift); }
     }, { passive: true });
-  }
-
-  // ---------- 4. CONTACT HANDS ----------
-  var modal = document.querySelector('.contact-modal');
-  var G = window.HandGestures;
-  if (modal && G) {
-    // Plays `name` through `loops` times (one-shots: once), ending on its
-    // last frame. Returns a cancel function.
-    function play(stack, name, loops) {
-      var cfg = G.GESTURES[name];
-      var last = cfg.frames.length - 1;
-      var total = G.REDUCE_MOTION ? 0 : (cfg.loop ? loops * cfg.frames.length : cfg.frames.length - 1);
-      var step = 0, timer = null;
-      stack.show(name, G.REDUCE_MOTION ? last : 0);
-      (function next() {
-        if (step >= total) { stack.show(name, last); return; }
-        timer = setTimeout(function () {
-          step++;
-          stack.show(name, cfg.loop ? step % cfg.frames.length : Math.min(step, last));
-          next();
-        }, cfg.frameMs);
-      })();
-      return function () { clearTimeout(timer); };
-    }
-
-    var waveHand = G.build('touch-gesture');
-    waveHand.el.classList.add('touch-gesture--corner');
-    var thumbHand = G.build('touch-gesture');
-    thumbHand.el.classList.add('touch-gesture--resume');
-    var stopWave = null, stopThumb = null, thumbTimer = null;
-
-    // the modal's contents are built by contact.js, which runs first
-    var paper = modal.querySelector('.contact-modal__paper');
-    if (paper) {
-      paper.appendChild(waveHand.el);
-      paper.appendChild(thumbHand.el);
-    }
-
-    new MutationObserver(function () {
-      var open = modal.classList.contains('is-open');
-      if (stopWave) stopWave();
-      waveHand.el.classList.toggle('is-shown', open);
-      if (open) stopWave = play(waveHand, 'wave', 2);
-      else thumbHand.el.classList.remove('is-shown');
-    }).observe(modal, { attributes: true, attributeFilter: ['class'] });
-
-    var resume = modal.querySelector('.contact-modal__resume');
-    if (resume) {
-      resume.addEventListener('click', function () { // after the tap — see the BUG FIX note in 1
-        thumbHand.el.style.left = (resume.offsetLeft + resume.offsetWidth + 8) + 'px';
-        thumbHand.el.style.top = (resume.offsetTop + resume.offsetHeight / 2) + 'px';
-        if (stopThumb) stopThumb();
-        clearTimeout(thumbTimer);
-        thumbHand.el.classList.add('is-shown');
-        stopThumb = play(thumbHand, 'thumbs-up', 1);
-        thumbTimer = setTimeout(function () { thumbHand.el.classList.remove('is-shown'); }, 1600);
-      });
-    }
   }
 })();

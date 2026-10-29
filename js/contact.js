@@ -48,8 +48,6 @@
     return p;
   }
 
-  modal.setAttribute('data-cursor-gesture', 'wave'); // hand cursors (js/cursor.js)
-
   var paper = el('div', 'contact-modal__paper');
   var closeBtn = el('button', 'contact-modal__close', 'Close \u2715');
   closeBtn.type = 'button';
@@ -70,7 +68,6 @@
   } else {
     resume.setAttribute('download', 'Sadie-Gold-Resume.pdf'); // desktop: download, with this file name
   }
-  resume.setAttribute('data-cursor-gesture', 'thumbs-up');
 
   // Dead-link rule: if the PDF isn't actually there yet, the button is
   // greyed out and inert (.is-unavailable) instead of downloading a 404.
@@ -85,7 +82,6 @@
     resume.setAttribute('aria-disabled', 'true');
     resume.setAttribute('tabindex', '-1');
     resume.removeAttribute('href');
-    resume.removeAttribute('data-cursor-gesture');
   });
 
   content.appendChild(emailLink);

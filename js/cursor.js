@@ -50,65 +50,9 @@
   var lastFrame = performance.now();
   var FOLLOW_TAU_MS = 100; // 140 / 1.4 — 1.4x faster tracking (smaller tau = tighter, faster follow)
 
-  // HAND GESTURE CURSORS: over any [data-cursor-gesture="<name>"]
-  // element, the dot hides and an animated hand (frames + timing in
-  // js/gestures.js) becomes the cursor. The NEAREST such element wins, so
-  // a gesture on a button beats the one on the modal around it.
-  //   wave       (whole open contact modal) — loops while the mouse
-  //              moves; when it stops, finishes the wave it's in and
-  //              rests on the last frame (never freezes mid-wave)
-  //   thumbs-up  (the modal's Resume button) — plays once, holds
-  var GESTURES = window.HandGestures.GESTURES;
-  var REDUCE_MOTION = window.HandGestures.REDUCE_MOTION; // hand shows its final frame, doesn't animate
-  var GESTURE_IDLE_MS = 250; // looping gestures: no movement this long = finish up and rest
-
-  var hands = window.HandGestures.build('cursor-gesture');
-  var gestureEl = hands.el;
-  document.body.appendChild(gestureEl);
-
-  var gestureName = null, gesture = null;
-  var lastMoveT = 0;
-  var frame = 0, frameT = 0;
-
-  function showFrame(i) {
-    frame = i;
-    hands.show(gestureName, frame);
-  }
-
-  function setGesture(name) {
-    if (name && !GESTURES[name]) name = null;
-    if (name === gestureName) return;
-    gestureName = name;
-    gesture = name ? GESTURES[name] : null;
-    gestureEl.classList.toggle('is-active', !!gesture);
-    label.classList.toggle('is-gesture-mode', !!gesture);
-    if (!gesture) { hands.show(null); return; }
-    var last = gesture.frames.length - 1;
-    // looping gestures start at rest; one-shots start at the top
-    frameT = performance.now();
-    showFrame(gesture.loop || REDUCE_MOTION ? last : 0);
-  }
-
-  // Called every animation frame from loop() below.
-  function stepGesture(now) {
-    if (!gesture || REDUCE_MOTION) return;
-    var last = gesture.frames.length - 1;
-    if (now - frameT < gesture.frameMs) return;
-    if (gesture.loop) {
-      var moving = now - lastMoveT < GESTURE_IDLE_MS;
-      if (!moving && frame === last) return; // resting
-      frameT = now;
-      showFrame((frame + 1) % gesture.frames.length);
-    } else if (frame < last) {
-      frameT = now;
-      showFrame(frame + 1);
-    }
-  }
-
   window.addEventListener('mousemove', function (e) {
     targetX = e.clientX;
     targetY = e.clientY;
-    lastMoveT = performance.now();
     if (!hasMoved) { curX = targetX; curY = targetY; hasMoved = true; }
     label.classList.add('is-visible');
   }, { passive: true });
@@ -167,7 +111,6 @@
       drawnX = curX; drawnY = curY;
       var pos = curX.toFixed(2) + 'px ' + curY.toFixed(2) + 'px';
       label.style.translate = pos;
-      gestureEl.style.translate = pos;
     }
 
     // PERF: hit-test every frame only while the pointer is moving; when
@@ -187,16 +130,12 @@
         if (target) { expandFor(target); } else { collapse(); }
       }
 
-      var gestureTarget = hit ? hit.closest('[data-cursor-gesture]') : null;
-      setGesture(gestureTarget ? gestureTarget.getAttribute('data-cursor-gesture') : null);
-
       var solidTarget = hit ? hit.closest('[data-cursor-solid]') : null;
       if (solidTarget !== currentSolidTarget) {
         currentSolidTarget = solidTarget;
         label.classList.toggle('is-solid-white', !!solidTarget && solidTarget.getAttribute('data-cursor-solid') === 'white');
       }
     }
-    if (hasMoved) stepGesture(now); // hand frames advance every frame regardless
 
     requestAnimationFrame(loop);
   }

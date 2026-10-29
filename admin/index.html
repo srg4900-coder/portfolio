@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Portfolio Links | Sadie Gold</title>
+
+<!--
+  PORTFOLIO LINKS (private). Make a link for a company with the projects in
+  the order they should see them: sadiegold.co/?for=<name>.
+    - sign in with the MindCloud PIN (same session cookie, 30 days)
+    - project titles come from js/projects-data.js, the default order from
+      its HOME_ORDER
+    - saved in the Cloudflare D1 database by functions/api ([[path]].js):
+      PUT /api/orders/<name>, DELETE /api/orders/<name>, GET /api/orders
+  Not linked from anywhere on the site, and marked noindex.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500&family=Cutive+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/tokens.css?v=8">
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--color-paper);
+    color: var(--text-strong);
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: var(--text-small-size);
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input { font: inherit; color: inherit; }
+  :focus-visible { outline: 1px solid var(--color-ink); outline-offset: 3px; }
+
+  .label {
+    font-family: var(--font-mono);
+    font-size: var(--text-label-size);
+    letter-spacing: var(--text-label-tracking);
+    text-transform: uppercase;
+  }
+  .muted { color: var(--text-muted); }
+
+  .wrap {
+    padding: var(--space-block) var(--page-margin) var(--space-section);
+    row-gap: var(--space-block);
+    align-items: start;
+  }
+  header.top { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+  h1 { font-size: var(--text-h1-size); font-weight: 300; }
+  h2 { margin-bottom: var(--space-item); }
+
+  .panel { grid-column: span 4; }
+  @media (max-width: 900px) { .panel { grid-column: 1 / -1; } }
+
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--space-item); }
+  .field input {
+    padding: 10px 12px;
+    border: 1px solid rgba(29, 27, 24, 0.25);
+    background: var(--color-white);
+  }
+  .hint { font-size: 12px; color: var(--text-muted); }
+
+  .btn {
+    padding: 10px 18px;
+    border: 1px solid var(--color-ink);
+    border-radius: 999px;
+    background: none;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: var(--text-label-size);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .btn--solid { background: var(--color-ink); color: var(--color-paper); }
+  .btn--quiet { border-color: transparent; text-decoration: underline; text-underline-offset: 4px; padding-left: 0; padding-right: 0; }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+  .order { list-style: none; border-top: 1px solid rgba(29, 27, 24, 0.15); margin-bottom: var(--space-item); }
+  .order li {
+    display: grid;
+    grid-template-columns: 24px 28px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(29, 27, 24, 0.15);
+    background: var(--color-paper);
+    cursor: grab;
+  }
+  .order li.is-off .order__title { opacity: 0.35; text-decoration: line-through; }
+  .order li.is-dragging { opacity: 0.5; }
+  .order__num { color: var(--text-muted); }
+  .order__moves button {
+    width: 30px; height: 30px; border: 1px solid rgba(29, 27, 24, 0.2); background: none; cursor: pointer;
+  }
+
+  .result {
+    margin-top: var(--space-item);
+    padding: 12px;
+    background: var(--color-blush);
+    word-break: break-all;
+  }
+
+  .links { list-style: none; border-top: 1px solid rgba(29, 27, 24, 0.15); }
+  .links li { padding: 14px 0; border-bottom: 1px solid rgba(29, 27, 24, 0.15); display: flex; flex-direction: column; gap: 6px; }
+  .links__head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+  .links__order { color: var(--text-soft); }
+
+  .login { grid-column: 2 / 6; max-width: 360px; }
+  @media (max-width: 900px) { .login { grid-column: 1 / -1; } }
+  .error { color: #9B2C2C; min-height: 1.4em; margin-top: 8px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+  <main class="wrap grid">
+    <header class="top">
+      <h1>Portfolio links</h1>
+      <a class="label muted" href="/">View site &rarr;</a>
+    </header>
+
+    <!-- sign in (MindCloud PIN) -->
+    <form class="login" id="login" hidden>
+      <div class="field">
+        <label class="label" for="pin">PIN</label>
+        <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" required>
+      </div>
+      <button class="btn btn--solid" type="submit">Sign in</button>
+      <p class="error label" id="login-error" role="alert"></p>
+    </form>
+
+    <!-- editor -->
+    <section class="panel" id="editor" hidden aria-labelledby="editor-title">
+      <h2 class="label" id="editor-title">New link</h2>
+      <div class="field">
+        <label class="label" for="label">Company / who it's for</label>
+        <input id="label" type="text" placeholder="e.g. Acme Studio" maxlength="80">
+      </div>
+      <div class="field">
+        <label class="label" for="key">Link name</label>
+        <input id="key" type="text" pattern="[a-z0-9-]{1,48}" maxlength="48" placeholder="acme-studio-7k2f">
+        <span class="hint">Lowercase letters, numbers, dashes. The random ending keeps links from being guessed.</span>
+      </div>
+
+      <p class="label" id="order-label">Order <span class="muted">(drag, or use the arrows; uncheck to hide)</span></p>
+      <ol class="order" id="order" aria-labelledby="order-label"></ol>
+
+      <div class="row">
+        <button class="btn btn--solid" id="save" type="button">Save link</button>
+        <button class="btn" id="reset" type="button">Reset to default</button>
+        <button class="btn btn--quiet" id="new" type="button">Start a new link</button>
+      </div>
+      <p class="error label" id="save-error" role="alert"></p>
+      <div class="result" id="result" hidden>
+        <p class="label muted">Send this link</p>
+        <p id="result-url"></p>
+        <div class="row" style="margin-top: 10px;">
+          <button class="btn" id="copy" type="button">Copy</button>
+          <a class="btn" id="open" target="_blank" rel="noopener">Open</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- saved links -->
+    <section class="panel" id="saved" hidden aria-labelledby="saved-title">
+      <h2 class="label" id="saved-title">Saved links</h2>
+      <p class="muted" id="saved-empty">None yet. The default order (no ?for=) is what everyone else sees.</p>
+      <ul class="links" id="links"></ul>
+    </section>
+  </main>
+
+  <script src="/js/projects-data.js?v=8"></script>
+  <script>
+  (function () {
+    var PROJECTS = window.PROJECTS || {};
+    var DEFAULT = (window.HOME_ORDER || []).filter(function (s) { return PROJECTS[s]; });
+    var ALL = DEFAULT.concat(Object.keys(PROJECTS).filter(function (s) { return DEFAULT.indexOf(s) === -1; }));
+
+    var $ = function (id) { return document.getElementById(id); };
+    var rows = [];        // [{ slug, on }] in display order
+    var keyTouched = false;
+
+    function title(slug) { return PROJECTS[slug] ? PROJECTS[slug].title : slug; }
+    function linkFor(key) { return location.origin + '/?for=' + key; }
+    function slugify(s) {
+      return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 36);
+    }
+    function suffix() { return Math.random().toString(36).slice(2, 6); }
+
+    function api(method, path, body) {
+      return fetch('/api/' + path, {
+        method: method,
+        credentials: 'same-origin',
+        headers: body ? { 'Content-Type': 'application/json' } : {},
+        body: body ? JSON.stringify(body) : undefined
+      }).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (d) {
+          if (!r.ok) throw new Error(d.error || ('Error ' + r.status));
+          return d;
+        });
+      });
+    }
+
+    // ---------- order list ----------
+    function setRows(order) {
+      var shown = order.filter(function (s) { return PROJECTS[s]; });
+      rows = shown.map(function (s) { return { slug: s, on: true }; })
+        .concat(ALL.filter(function (s) { return shown.indexOf(s) === -1; })
+          .map(function (s) { return { slug: s, on: false }; }));
+      renderRows();
+    }
+
+    function renderRows() {
+      var list = $('order');
+      list.innerHTML = '';
+      var n = 0;
+      rows.forEach(function (row, i) {
+        var li = document.createElement('li');
+        li.draggable = true;
+        li.dataset.index = i;
+        li.className = row.on ? '' : 'is-off';
+        var box = document.createElement('input');
+        box.type = 'checkbox';
+        box.checked = row.on;
+        box.setAttribute('aria-label', 'Show ' + title(row.slug));
+        box.addEventListener('change', function () { row.on = box.checked; renderRows(); });
+        var num = document.createElement('span');
+        num.className = 'order__num label';
+        num.textContent = row.on ? String(++n).padStart(2, '0') : '--';
+        var name = document.createElement('span');
+        name.className = 'order__title';
+        name.textContent = title(row.slug) + (DEFAULT.indexOf(row.slug) === -1 ? ' (draft)' : '');
+        var moves = document.createElement('span');
+        moves.className = 'order__moves row';
+        [['↑', -1, 'up'], ['↓', 1, 'down']].forEach(function (m) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.textContent = m[0];
+          b.setAttribute('aria-label', 'Move ' + title(row.slug) + ' ' + m[2]);
+          b.disabled = (m[1] < 0 && i === 0) || (m[1] > 0 && i === rows.length - 1);
+          b.addEventListener('click', function () { move(i, i + m[1]); focusMove(i + m[1], m[1] < 0 ? 0 : 1); });
+          moves.appendChild(b);
+        });
+        li.appendChild(box); li.appendChild(num); li.appendChild(name); li.appendChild(moves);
+        list.appendChild(li);
+      });
+    }
+
+    function move(from, to) {
+      if (to < 0 || to >= rows.length) return;
+      var item = rows.splice(from, 1)[0];
+      rows.splice(to, 0, item);
+      renderRows();
+    }
+    function focusMove(index, which) {
+      var li = $('order').children[index];
+      var btn = li && li.querySelectorAll('.order__moves button')[which];
+      if (btn && !btn.disabled) btn.focus();
+    }
+
+    // drag and drop
+    var dragFrom = null;
+    $('order').addEventListener('dragstart', function (e) {
+      var li = e.target.closest('li'); if (!li) return;
+      dragFrom = Number(li.dataset.index);
+      li.classList.add('is-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    $('order').addEventListener('dragover', function (e) { e.preventDefault(); });
+    $('order').addEventListener('drop', function (e) {
+      e.preventDefault();
+      var li = e.target.closest('li');
+      if (li && dragFrom !== null) move(dragFrom, Number(li.dataset.index));
+      dragFrom = null;
+    });
+    $('order').addEventListener('dragend', function () { dragFrom = null; renderRows(); });
+
+    // ---------- editor ----------
+    function startNew() {
+      $('editor-title').textContent = 'New link';
+      $('label').value = '';
+      $('key').value = '';
+      $('key').readOnly = false;
+      keyTouched = false;
+      $('result').hidden = true;
+      $('save-error').textContent = '';
+      setRows(DEFAULT);
+    }
+    function edit(link) {
+      $('editor-title').textContent = 'Edit link';
+      $('label').value = link.label;
+      $('key').value = link.key;
+      $('key').readOnly = true; // the name is the link; changing it would break the one you sent
+      keyTouched = true;
+      $('result').hidden = true;
+      $('save-error').textContent = '';
+      setRows(link.order);
+      $('label').focus();
+    }
+
+    $('label').addEventListener('input', function () {
+      if (!keyTouched && !$('key').readOnly) {
+        var base = slugify($('label').value);
+        $('key').value = base ? base + '-' + ($('key').dataset.suffix || ($('key').dataset.suffix = suffix())) : '';
+      }
+    });
+    $('key').addEventListener('input', function () { keyTouched = true; });
+    $('reset').addEventListener('click', function () { setRows(DEFAULT); });
+    $('new').addEventListener('click', startNew);
+
+    $('save').addEventListener('click', function () {
+      var key = $('key').value.trim();
+      var order = rows.filter(function (r) { return r.on; }).map(function (r) { return r.slug; });
+      $('save-error').textContent = '';
+      if (!/^[a-z0-9-]{1,48}$/.test(key)) { $('save-error').textContent = 'Link name: lowercase letters, numbers and dashes only.'; return; }
+      if (!order.length) { $('save-error').textContent = 'Pick at least one project.'; return; }
+      $('save').disabled = true;
+      api('PUT', 'orders/' + key, { label: $('label').value.trim() || key, order: order })
+        .then(function () {
+          var url = linkFor(key);
+          $('result-url').textContent = url;
+          $('open').href = url;
+          $('result').hidden = false;
+          $('key').readOnly = true;
+          $('editor-title').textContent = 'Edit link';
+          loadLinks();
+        })
+        .catch(function (err) { $('save-error').textContent = err.message; })
+        .then(function () { $('save').disabled = false; });
+    });
+
+    $('copy').addEventListener('click', function () {
+      var url = $('result-url').textContent;
+      navigator.clipboard.writeText(url).then(function () {
+        $('copy').textContent = 'Copied';
+        setTimeout(function () { $('copy').textContent = 'Copy'; }, 1500);
+      });
+    });
+
+    // ---------- saved links ----------
+    function loadLinks() {
+      return api('GET', 'orders').then(function (d) {
+        var list = $('links');
+        list.innerHTML = '';
+        $('saved-empty').hidden = d.orders.length > 0;
+        d.orders.forEach(function (link) {
+          var li = document.createElement('li');
+          var head = document.createElement('div');
+          head.className = 'links__head';
+          var name = document.createElement('strong');
+          name.style.fontWeight = '500';
+          name.textContent = link.label;
+          var key = document.createElement('span');
+          key.className = 'label muted';
+          key.textContent = '?for=' + link.key;
+          head.appendChild(name); head.appendChild(key);
+          var order = document.createElement('span');
+          order.className = 'links__order';
+          order.textContent = link.order.map(function (s, i) { return String(i + 1).padStart(2, '0') + ' ' + title(s).split(': ')[0]; }).join('  ·  ');
+          var actions = document.createElement('div');
+          actions.className = 'row';
+          var copy = document.createElement('button');
+          copy.className = 'btn'; copy.type = 'button'; copy.textContent = 'Copy link';
+          copy.addEventListener('click', function () {
+            navigator.clipboard.writeText(linkFor(link.key)).then(function () {
+              copy.textContent = 'Copied';
+              setTimeout(function () { copy.textContent = 'Copy link'; }, 1500);
+            });
+          });
+          var editBtn = document.createElement('button');
+          editBtn.className = 'btn'; editBtn.type = 'button'; editBtn.textContent = 'Edit';
+          editBtn.addEventListener('click', function () { edit(link); });
+          var del = document.createElement('button');
+          del.className = 'btn btn--quiet'; del.type = 'button'; del.textContent = 'Delete';
+          del.addEventListener('click', function () {
+            if (!confirm('Delete the link for ' + link.label + '? Anyone who has it will see the default order instead.')) return;
+            api('DELETE', 'orders/' + link.key).then(loadLinks);
+          });
+          actions.appendChild(copy); actions.appendChild(editBtn); actions.appendChild(del);
+          li.appendChild(head); li.appendChild(order); li.appendChild(actions);
+          list.appendChild(li);
+        });
+      });
+    }
+
+    // ---------- sign in ----------
+    function showApp() {
+      $('login').hidden = true;
+      $('editor').hidden = false;
+      $('saved').hidden = false;
+      startNew();
+      loadLinks().catch(function (err) { $('saved-empty').textContent = err.message; });
+    }
+
+    $('login').addEventListener('submit', function (e) {
+      e.preventDefault();
+      $('login-error').textContent = '';
+      api('POST', 'login', { pin: $('pin').value })
+        .then(showApp)
+        .catch(function (err) { $('login-error').textContent = err.message; });
+    });
+
+    api('GET', 'login')
+      .then(function (d) { if (d.ok) showApp(); else throw 0; })
+      .catch(function () {
+        $('login').hidden = false;
+        $('pin').focus();
+      });
+  })();
+  </script>
+</body>
+</html>

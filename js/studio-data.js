@@ -11,13 +11,25 @@
       year: 2025,
       award: ''                             // optional, e.g. 'Best in Show, ...'
     }
-  When the first pieces are in, turn on the Studio link in js/nav.js
-  (SHOW_STUDIO). Copy rules: no em dashes; placeholders in [brackets].
+  Studio isn't in the main nav on purpose: it's linked from About, under
+  the homepage prints and in the footer. Copy rules: no em dashes;
+  placeholders in [brackets].
 */
 window.STUDIO = {
   intro: '[One-line intro]',
   groups: [
-    { name: 'Paintings', items: [] },
+    {
+      name: 'Paintings',
+      items: [
+        {
+          src: 'assets/studio/paintings/master-work.jpg',
+          alt: 'Moonlit river scene: a domed city and a stone bridge under stormy blue clouds, a lit boat in the foreground',
+          title: '[Title]',
+          medium: '[Medium]',
+          year: '[Year]'
+        }
+      ]
+    },
     { name: 'Sketches', items: [] },
     { name: 'Sewing', items: [] }
   ]

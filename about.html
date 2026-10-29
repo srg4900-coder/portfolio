@@ -16,9 +16,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500&family=Cutive+Mono&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/tokens.css?v=7">
-<link rel="stylesheet" href="css/components.css?v=7">
-<link rel="stylesheet" href="css/pages.css?v=7">
+<link rel="stylesheet" href="css/tokens.css?v=8">
+<link rel="stylesheet" href="css/components.css?v=8">
+<link rel="stylesheet" href="css/pages.css?v=8">
 </head>
 <body class="page" data-page="about">
 
@@ -47,6 +47,15 @@
         </div>
       </dl>
 
+      <!-- the nudge into Studio: a quiet card, not a headline -->
+      <a class="about__studio" href="studio.html" data-cursor-label="Studio">
+        <img class="about__studio-img" src="assets/studio/paintings/master-work.jpg" alt="" loading="lazy">
+        <span class="about__studio-text">
+          <span class="text-label">Off the clock</span>
+          <span>Paintings, sketches and sewing live in the Studio &rarr;</span>
+        </span>
+      </a>
+
       <div class="about__links">
         <a class="cs-link text-label" data-about-email href="#">Email</a>
         <a class="cs-link text-label" data-about-resume href="#" target="_blank" rel="noopener">Resume</a>
@@ -57,16 +66,18 @@
 
   <footer class="site-footer">
     <p class="text-label">&copy; Sadie Gold 2026</p>
-    <a class="text-label" href="/mindcloud/">MindCloud</a>
+    <nav class="site-footer__links" aria-label="More">
+      <a class="text-label" href="studio.html">Studio</a>
+      <a class="text-label" href="/mindcloud/">MindCloud</a>
+    </nav>
   </footer>
 
   <div class="contact-modal"></div>
 
-  <script src="js/nav.js?v=7"></script>
-  <script src="js/gestures.js?v=7"></script>
-  <script src="js/cursor.js?v=7"></script>
-  <script src="js/contact.js?v=7"></script>
-  <script src="js/touch.js?v=7"></script>
+  <script src="js/nav.js?v=8"></script>
+  <script src="js/cursor.js?v=8"></script>
+  <script src="js/contact.js?v=8"></script>
+  <script src="js/touch.js?v=8"></script>
   <script>
     (function () {
       var copy = window.SITE_COPY;

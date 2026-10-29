@@ -14,8 +14,13 @@ body.home { background: transparent; }
   background: linear-gradient(to bottom, var(--lightbox-surface) 45%, rgba(247, 245, 244, 0));
 }
 
+.home {
+  /* the grid's margin starts inside the light-box frame */
+  --page-margin: calc(var(--frame-width) + var(--grid-margin));
+}
+
 .home main {
-  padding: 0 calc(var(--frame-width) + var(--grid-margin));
+  padding: 0 var(--page-margin);
 }
 
 /* ---------- hero ---------- */
@@ -51,10 +56,11 @@ body.home { background: transparent; }
 
 /* ---------- sheets: the organized grid ---------- */
 /*
-  Gallery wall: two columns, left a little narrower than right, every
-  print in a row the same height. Images crop to fit (object-fit: cover),
-  so any source image lands uniform. Left prints are 4:3; right prints'
-  ratio is derived so both columns share one height.
+  Gallery wall (kept as designed, not forced onto the 8 columns): two
+  columns, left a little narrower than right, every print in a row the
+  same height. It sits inside the shared page margins. Images crop to fit
+  (object-fit: cover), so any source image lands uniform. Left prints are
+  4:3; right prints' ratio is derived so both columns share one height.
 */
 .sheets {
   --ratio-l: 4 / 3;
@@ -142,7 +148,7 @@ body.home { background: transparent; }
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  margin-top: 14px;
+  margin-top: var(--space-item);
   opacity: var(--settle, 1);
 }
 .sheet__caption .text-label:last-child { color: var(--text-muted); }
@@ -154,25 +160,47 @@ body.home { background: transparent; }
 /* ---------- footer ---------- */
 
 .home .site-footer {
-  padding: 0 calc(var(--frame-width) + var(--grid-margin)) calc(var(--frame-width) + 24px);
+  padding: 0 var(--page-margin) calc(var(--frame-width) + 24px);
   background: none;
   border: 0;
 }
 
+/* ---------- Studio nudge, under the prints (lines up with the right column) ---------- */
+.studio-nudge {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+  column-gap: clamp(32px, 9vw, 120px);
+  max-width: 1320px;
+  margin: calc(clamp(96px, 16vh, 200px) * -0.5) auto 0;
+  padding: 0 clamp(0px, 3vw, 48px) var(--space-section);
+}
+.studio-nudge__link {
+  grid-column: 2;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--grid-gutter);
+  padding-top: var(--space-item);
+  border-top: 1px solid rgba(29, 27, 24, 0.2);
+  color: var(--text-soft);
+  transition: color var(--duration-fast) ease;
+}
+.studio-nudge__link:hover { color: var(--text-strong); }
+
 /* ---------- tablet ---------- */
 @media (max-width: 1024px) {
-  .sheets { column-gap: 40px; padding-left: 0; padding-right: 0; }
+  .sheets,
+  .studio-nudge { column-gap: 40px; padding-left: 0; padding-right: 0; }
 }
 
 /* ---------- phone: one column, every print 4:3 ---------- */
 @media (max-width: 640px) {
   .hero { min-height: 92svh; }
-  .sheets {
-    grid-template-columns: 1fr;
-    row-gap: 48px;
-  }
+  .sheets,
+  .studio-nudge { grid-template-columns: 1fr; }
+  .sheets { row-gap: 48px; }
   .sheet,
   .sheet:nth-child(even) { --ratio: 4 / 3; }
+  .studio-nudge__link { grid-column: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {

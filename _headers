@@ -9,3 +9,8 @@
   Cache-Control: no-cache
 /js/*
   Cache-Control: no-cache
+
+# The portfolio-links admin page stays out of search results.
+/admin/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-cache

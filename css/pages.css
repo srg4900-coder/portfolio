@@ -59,6 +59,31 @@
 /* the email reads in full, not shouted in caps */
 .about__links [data-about-email] { text-transform: none; letter-spacing: 0.02em; }
 
+/* the Studio nudge: thumbnail + one line, under the facts */
+.about__studio {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--grid-gutter);
+  padding-top: var(--space-item);
+  border-top: 1px solid rgba(29, 27, 24, 0.2);
+  color: var(--text-soft);
+  transition: color var(--duration-fast) ease;
+}
+.about__studio:hover { color: var(--text-strong); }
+.about__studio-img {
+  width: 96px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  flex: none;
+}
+.about__studio-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--text-small-size);
+}
+
 /* ---------- studio ---------- */
 
 .studio__group {
@@ -103,4 +128,5 @@
 
 @media (max-width: 760px) {
   .about { grid-template-columns: 1fr; }
+  .about__studio { grid-column: 1; }
 }

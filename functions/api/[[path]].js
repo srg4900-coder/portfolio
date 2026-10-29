@@ -12,6 +12,14 @@
     POST /api/login    exchange the PIN for a 30-day session cookie
     GET  /api/login    { ok } if the current cookie is still valid
 
+  PORTFOLIO ORDERS (company links, managed at /admin/; see js/order.js):
+    GET    /api/order/<key>    public — { order: [slugs] } for ?for=<key>
+    GET    /api/orders         PIN session required — every saved link
+    PUT    /api/orders/<key>   PIN session required — save { label, order }
+    DELETE /api/orders/<key>   PIN session required — remove a link
+  Stored in the same D1 database; the portfolio_orders table creates
+  itself on first save, so there's no extra dashboard setup.
+
   Cloudflare dashboard setup this needs (see MINDCLOUD_SETUP.md):
     - a D1 database bound to this Pages project as  DB
     - an encrypted environment variable              MINDCLOUD_PIN
@@ -34,7 +42,8 @@ export async function onRequest(context) {
   if (!env.DB || !env.MINDCLOUD_PIN) {
     return json(500, { ok: false, error: 'mind cloud backend not configured' });
   }
-  const route = (params.path || []).join('/');
+  const parts = params.path || [];
+  const route = parts.join('/');
   const method = request.method;
 
   try {
@@ -46,6 +55,10 @@ export async function onRequest(context) {
     if (route === 'login' && method === 'GET') {
       return json(200, { ok: await isAuthed(request, env) });
     }
+    if (parts[0] === 'order' && parts.length === 2 && method === 'GET') return getOrder(env, parts[1]);
+    if (route === 'orders' && method === 'GET') return listOrders(request, env);
+    if (parts[0] === 'orders' && parts.length === 2 && method === 'PUT') return saveOrder(request, env, parts[1]);
+    if (parts[0] === 'orders' && parts.length === 2 && method === 'DELETE') return deleteOrder(request, env, parts[1]);
     return json(404, { ok: false, error: 'not found' });
   } catch (err) {
     return json(500, { ok: false, error: 'server error' });
@@ -122,6 +135,64 @@ async function login(request, env) {
   const token = exp + '.' + (await sign(String(exp), env.MINDCLOUD_PIN));
   const cookie = `${COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_DAYS * 86400}`;
   return json(200, { ok: true }, { 'Set-Cookie': cookie });
+}
+
+// ---------- portfolio orders ----------
+
+const ORDER_KEY = /^[a-z0-9-]{1,48}$/;   // the ?for= part of a company link
+const PROJECT_SLUG = /^[a-z0-9-]{1,64}$/;
+
+async function ensureOrdersTable(env) {
+  await env.DB.prepare(
+    'CREATE TABLE IF NOT EXISTS portfolio_orders (key TEXT PRIMARY KEY, label TEXT NOT NULL, project_order TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)'
+  ).run();
+}
+
+async function getOrder(env, key) {
+  if (!ORDER_KEY.test(key)) return json(404, { ok: false, error: 'not found' });
+  let row = null;
+  try {
+    row = await env.DB.prepare('SELECT project_order FROM portfolio_orders WHERE key = ?').bind(key).first();
+  } catch {
+    // table doesn't exist yet (nothing saved): same as an unknown link
+  }
+  if (!row) return json(404, { ok: false, error: 'not found' });
+  return json(200, { ok: true, order: JSON.parse(row.project_order) });
+}
+
+async function listOrders(request, env) {
+  if (!(await isAuthed(request, env))) return json(401, { ok: false, error: 'not authenticated' });
+  await ensureOrdersTable(env);
+  const { results } = await env.DB
+    .prepare('SELECT key, label, project_order, updated_at AS updatedAt FROM portfolio_orders ORDER BY updated_at DESC')
+    .all();
+  return json(200, {
+    ok: true,
+    orders: results.map(r => ({ key: r.key, label: r.label, order: JSON.parse(r.project_order), updatedAt: r.updatedAt })),
+  });
+}
+
+async function saveOrder(request, env, key) {
+  if (!(await isAuthed(request, env))) return json(401, { ok: false, error: 'not authenticated' });
+  if (!ORDER_KEY.test(key)) return json(400, { ok: false, error: 'link name: lowercase letters, numbers and dashes only' });
+  const data = await readJson(request);
+  const label = String(data.label || '').trim().slice(0, 80) || key;
+  const order = Array.isArray(data.order) ? data.order.map(String).filter(s => PROJECT_SLUG.test(s)).slice(0, 50) : [];
+  if (!order.length) return json(400, { ok: false, error: 'pick at least one project' });
+  await ensureOrdersTable(env);
+  const now = new Date().toISOString();
+  await env.DB.prepare(
+    'INSERT INTO portfolio_orders (key, label, project_order, created_at, updated_at) VALUES (?, ?, ?, ?, ?) ' +
+    'ON CONFLICT(key) DO UPDATE SET label = excluded.label, project_order = excluded.project_order, updated_at = excluded.updated_at'
+  ).bind(key, label, JSON.stringify(order), now, now).run();
+  return json(200, { ok: true, key, label, order });
+}
+
+async function deleteOrder(request, env, key) {
+  if (!(await isAuthed(request, env))) return json(401, { ok: false, error: 'not authenticated' });
+  await ensureOrdersTable(env);
+  await env.DB.prepare('DELETE FROM portfolio_orders WHERE key = ?').bind(key).run();
+  return json(200, { ok: true });
 }
 
 // ---------- helpers ----------

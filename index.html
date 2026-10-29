@@ -13,9 +13,10 @@
     css/components.css   base, type, nav, light-box background, cursor, paper, contact modal (shared)
     css/home.css         homepage: hero + sheets (scatter -> grid)
     js/projects-data.js  every project's title, cover, media (shared) + HOME_ORDER
+    js/order.js          default order, or a company link's (?for=), see /admin/
     js/home.js           builds the sheets, scroll-driven scatter -> grid
     js/nav.js            the header links on every page (Work / About / Contact)
-    js/cursor.js, touch.js, gestures.js, contact.js, viewer.js (shared)
+    js/cursor.js, touch.js, contact.js, viewer.js (shared)
 -->
 
 <script>
@@ -29,9 +30,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500&family=Cutive+Mono&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/tokens.css?v=7">
-<link rel="stylesheet" href="css/components.css?v=7">
-<link rel="stylesheet" href="css/home.css?v=7">
+<link rel="stylesheet" href="css/tokens.css?v=8">
+<link rel="stylesheet" href="css/components.css?v=8">
+<link rel="stylesheet" href="css/home.css?v=8">
 </head>
 <body class="home">
 
@@ -49,24 +50,34 @@
     </section>
 
     <section class="sheets" id="work" aria-label="Selected work">
-      <!-- one .sheet per HOME_ORDER entry, built by js/home.js -->
+      <!-- one .sheet per project, in the portfolio order (js/order.js), built by js/home.js -->
     </section>
+
+    <!-- the quiet way into Studio: under the prints, not in the nav -->
+    <aside class="studio-nudge">
+      <a class="studio-nudge__link text-label" href="studio.html" data-cursor-solid="white">
+        <span>Off the clock: paintings, sketches, sewing</span><span aria-hidden="true">Studio &rarr;</span>
+      </a>
+    </aside>
   </main>
 
   <footer class="site-footer">
     <p class="text-label">&copy; Sadie Gold 2026</p>
-    <a class="text-label" href="/mindcloud/">MindCloud</a>
+    <nav class="site-footer__links" aria-label="More">
+      <a class="text-label" href="studio.html">Studio</a>
+      <a class="text-label" href="/mindcloud/">MindCloud</a>
+    </nav>
   </footer>
 
   <!-- contents built by js/contact.js -->
   <div class="contact-modal"></div>
 
-  <script src="js/nav.js?v=7"></script>
-  <script src="js/gestures.js?v=7"></script>
-  <script src="js/cursor.js?v=7"></script>
-  <script src="js/contact.js?v=7"></script>
-  <script src="js/projects-data.js?v=7"></script>
-  <script src="js/home.js?v=7"></script>
-  <script src="js/touch.js?v=7"></script>
+  <script src="js/nav.js?v=8"></script>
+  <script src="js/cursor.js?v=8"></script>
+  <script src="js/contact.js?v=8"></script>
+  <script src="js/projects-data.js?v=8"></script>
+  <script src="js/order.js?v=8"></script>
+  <script src="js/home.js?v=8"></script>
+  <script src="js/touch.js?v=8"></script>
 </body>
 </html>

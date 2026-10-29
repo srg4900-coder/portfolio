@@ -1,7 +1,17 @@
 /*
   CASE STUDY — every project page (markup built by js/project.js).
   Order: hero, section strip, 01 Idea / 02 Friction / 03 Work, Next.
-  Uses tokens only; the 8-column rhythm matches the .grid helper.
+
+  Text and structure sit on the 8-column page grid (css/tokens.css):
+    hero       title + hook across the grid, image full-bleed (the one
+               deliberate exception), meta in cols 1-6, action in 7-8
+    sections   heading cols 1-2, copy / beats / outcome cols 3-7
+    next       text cols 1-3, next project's image cols 4-8
+  Image grids span the full width inside the same margins and gutters,
+  in equal columns: Idea / Friction 2, 3 or 4 across by count, Work 3
+  across (2 on tablet and phone).
+  Spacing only uses the --space-* steps. Phones (<= 760px) stack every
+  block across the full 8 columns.
 */
 
 body.project-page {
@@ -15,41 +25,46 @@ body.project-page {
 }
 
 .cs {
-  padding-top: calc(var(--nav-height) + clamp(24px, 5vw, 56px));
+  padding-top: calc(var(--nav-height) + var(--space-block));
 }
 
 /* ---------- hero ---------- */
 
-.cs-hero__head {
-  padding: 0 var(--grid-margin);
-}
+.cs-hero__head > * { grid-column: 1 / -1; }
 
 .cs-hero__count {
   color: var(--text-muted);
-  margin-bottom: clamp(12px, 2vw, 20px);
+  margin-bottom: var(--space-item);
 }
 
-.cs-hero__title {
-  font-size: min(var(--text-title-size), 13vw);
+.cs-hero__name {
+  display: block;
+  font-size: min(var(--text-title-size), 12vw);
   max-width: 14ch;
 }
 
+.cs-hero__subtitle {
+  display: block;
+  margin-top: var(--space-item);
+  color: var(--text-soft);
+}
+
 .cs-hero__hook {
-  margin-top: clamp(14px, 2vw, 24px);
-  max-width: 34ch;
+  grid-column: 1 / 6;
+  margin-top: var(--space-block);
   font-size: var(--text-h1-size);
   font-weight: 300;
   line-height: 1.15;
   color: var(--text-soft);
 }
 
-/* full-bleed: edge to edge, no side margin */
+/* full-bleed: edge to edge, the one block that ignores the margins */
 .cs-hero__media {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
   max-height: 82svh;
-  margin-top: clamp(32px, 5vw, 64px);
+  margin-top: var(--space-block);
   overflow: hidden;
   background: var(--color-blush);
 }
@@ -62,8 +77,8 @@ body.project-page {
 
 .cs-hero__mute {
   position: absolute;
-  right: var(--grid-margin);
-  bottom: var(--grid-margin);
+  right: var(--page-margin);
+  bottom: var(--page-margin);
   padding: 9px 16px;
   border-radius: 999px;
   background: rgba(29, 27, 24, 0.55);
@@ -74,29 +89,33 @@ body.project-page {
 .cs-hero__mute:hover { background: rgba(29, 27, 24, 0.85); }
 
 .cs-hero__info {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px 48px;
-  padding: clamp(24px, 3vw, 36px) var(--grid-margin) 0;
+  margin-top: var(--space-block);
+  align-items: start;
 }
 
+/* meta: cols 1-6, three fields per row, each 2 columns wide */
 .cs-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px clamp(28px, 4vw, 56px);
+  grid-column: 1 / 7;
+  display: grid;
+  grid-template-columns: subgrid;
+  row-gap: var(--space-block);
 }
+@supports not (grid-template-columns: subgrid) {
+  .cs-meta { grid-template-columns: repeat(6, minmax(0, 1fr)); column-gap: var(--grid-gutter); }
+}
+
+.cs-meta__row { grid-column: span 2; }
 
 .cs-meta dt { color: var(--text-muted); }
 
 .cs-meta dd {
-  margin-top: 6px;
+  margin-top: var(--space-item);
   font-size: var(--text-small-size);
   font-weight: 400;
-  line-height: 1.4;
-  max-width: 28ch;
+  line-height: 1.45;
 }
+
+.cs-meta__line { display: block; }
 
 .cs-tag {
   display: inline-block;
@@ -105,6 +124,8 @@ body.project-page {
 }
 
 .cs-action {
+  grid-column: 7 / 9;
+  justify-self: end;
   display: inline-flex;
   align-items: center;
   padding: 12px 22px;
@@ -124,7 +145,7 @@ body.project-page {
 
 .cs-body {
   position: relative;
-  margin-top: clamp(56px, 8vw, 112px);
+  margin-top: var(--space-section);
 }
 
 /* desktop: sticks under the site nav for the whole case study */
@@ -135,14 +156,14 @@ body.project-page {
   height: var(--steps-height);
   display: flex;
   align-items: center;
-  padding: 0 var(--grid-margin);
+  padding: 0 var(--page-margin);
   background: var(--color-paper);
   border-bottom: 1px solid rgba(29, 27, 24, 0.12);
 }
 
 .cs-steps__list {
   display: flex;
-  gap: clamp(20px, 3vw, 40px);
+  gap: var(--space-block);
   list-style: none;
 }
 
@@ -184,12 +205,10 @@ body.project-page {
 /* ---------- sections ---------- */
 
 .cs-section {
-  display: grid;
-  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
-  column-gap: var(--grid-gutter);
-  padding: clamp(56px, 8vw, 112px) var(--grid-margin) 0;
+  padding-top: var(--space-section);
   scroll-margin-top: calc(var(--nav-height) + var(--steps-height));
 }
+.cs-section:first-of-type { padding-top: var(--space-block); }
 
 .cs-section__title {
   grid-column: 1 / 3;
@@ -210,19 +229,13 @@ body.project-page {
 .cs-figs,
 .cs-grid {
   grid-column: 1 / -1;
-  margin-top: clamp(32px, 5vw, 64px);
-}
-
-/* ---------- labeled images (Idea / Friction / Work) ---------- */
-
-.cs-figs {
   display: grid;
-  grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
-  gap: clamp(20px, 3vw, 40px) var(--grid-gutter);
+  column-gap: var(--grid-gutter);
+  row-gap: var(--space-row);
+  margin-top: var(--space-block);
 }
-.cs-figs--1 { --cols: 1; max-width: 880px; }
-.cs-figs--3 { --cols: 3; }
-.cs-figs--4 { --cols: 4; }
+
+/* ---------- labeled images ---------- */
 
 .cs-fig {
   display: flex;
@@ -234,12 +247,11 @@ body.project-page {
   position: relative;
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: var(--tile-ratio, 4 / 5);
   overflow: hidden;
   background: var(--color-blush);
   cursor: zoom-in;
 }
-.cs-figs--1 .cs-fig__open { aspect-ratio: 3 / 2; }
 
 .cs-fig__media {
   width: 100%;
@@ -248,10 +260,24 @@ body.project-page {
   transition: transform var(--duration-slow) var(--ease-smooth);
 }
 
+/* grey "missing" stand-ins keep their own look inside any frame */
+.cs-fig__open.is-missing,
+.cs-hero__img.is-missing,
+.cs-next__img.is-missing {
+  display: flex;
+  background: var(--color-missing);
+  cursor: default;
+}
+
 /* transparent cut-outs sit whole on a plain print instead of being cropped */
 .cs-fig--cutout .cs-fig__media {
   object-fit: contain;
   padding: 10%;
+}
+/* slides and sheets: whole, uncropped, on the same plain print */
+.cs-fig--contain .cs-fig__media {
+  object-fit: contain;
+  padding: 4%;
 }
 
 /* "opens larger" affordance: a small + in the corner on hover / focus
@@ -268,7 +294,7 @@ body.project-page {
   border-radius: 50%;
   background: var(--color-paper);
   color: var(--color-ink);
-  font-size: 18px;
+  font-size: 15px;
   line-height: 1;
   opacity: 0;
   transform: scale(0.8);
@@ -286,21 +312,24 @@ body.project-page {
 }
 
 .cs-fig__label {
-  margin-top: 10px;
+  margin-top: var(--space-item);
   color: var(--text-soft);
 }
 
-/* ---------- 03 Work grid: varied scale via `large` ---------- */
+/* --- Idea / Friction: equal columns by image count (2, 3 or 4 across),
+   same margins + gutters as the page grid --- */
+.cs-figs { grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); }
+.cs-figs--1 { --cols: 1; max-width: 880px; }
+.cs-figs--3 { --cols: 3; }
+.cs-figs--4 { --cols: 4; }
+.cs-figs--1 .cs-fig { --tile-ratio: 3 / 2; }
 
+/* --- 03 Work: three across; `large` takes a 2 x 2 block and fills
+   whatever height its neighbouring rows give it --- */
 .cs-grid {
-  display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-auto-flow: dense;
-  gap: clamp(28px, 4vw, 48px) var(--grid-gutter);
 }
-
-/* desktop: a large final takes a 2 x 2 block; its image fills whatever
-   height the neighbouring rows give it */
 .cs-fig--large {
   grid-column: span 2;
   grid-row: span 2;
@@ -310,13 +339,14 @@ body.project-page {
   flex: 1;
   min-height: 240px;
 }
-.cs-fig--large .cs-fig__media {
+.cs-fig--large .cs-fig__media,
+.cs-fig--large .is-missing {
   position: absolute;
   inset: 0;
 }
 
 .cs-outcome {
-  margin-top: clamp(40px, 6vw, 72px);
+  margin-top: var(--space-block);
   max-width: 40ch;
   font-size: var(--text-h2-size);
   font-weight: 300;
@@ -329,8 +359,8 @@ body.project-page {
 .cs-beats__row {
   display: grid;
   grid-template-columns: 7.5em minmax(0, 1fr);
-  gap: 16px;
-  padding: 14px 0;
+  gap: var(--grid-gutter);
+  padding: var(--space-item) 0;
   border-top: 1px solid rgba(29, 27, 24, 0.12);
   font-size: var(--text-body-size);
   line-height: var(--text-body-line-height);
@@ -343,32 +373,28 @@ body.project-page {
 /* ---------- next project + links (never a dead end) ---------- */
 
 .cs-next {
-  margin-top: clamp(96px, 14vw, 180px);
-  padding: 0 var(--grid-margin) clamp(48px, 6vw, 80px);
+  margin-top: var(--space-section);
+  padding-bottom: var(--space-section);
 }
 
 .cs-next__card {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
-  gap: var(--grid-gutter);
   align-items: end;
-  padding-top: 24px;
+  padding-top: var(--space-item);
   border-top: 1px solid var(--text-strong);
   cursor: pointer;
 }
 
 .cs-next__text {
+  grid-column: 1 / 4;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-bottom: 4px;
+  gap: var(--space-item);
 }
 .cs-next__text .text-label:first-child { color: var(--text-muted); }
 .cs-next__role { color: var(--text-muted); }
 
-.cs-next__title { transition: opacity var(--duration-fast) ease; }
-
 .cs-next__media {
+  grid-column: 4 / 9;
   aspect-ratio: 16 / 10;
   overflow: hidden;
   background: var(--color-blush);
@@ -384,22 +410,22 @@ body.project-page {
 .cs-next__card:focus-visible .cs-next__img { transform: scale(1.03); }
 
 .cs-next__links {
+  grid-column: 1 / -1;
   display: flex;
-  gap: clamp(24px, 4vw, 48px);
-  margin-top: clamp(32px, 5vw, 56px);
+  gap: var(--space-block);
+  margin-top: var(--space-block);
 }
 
 .cs-missing {
   min-height: 50vh;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 24px;
-  padding: 0 var(--grid-margin);
+  align-content: start;
+  row-gap: var(--space-block);
 }
+.cs-missing > * { grid-column: 1 / -1; justify-self: start; }
 
-/* ---------- tablet ---------- */
+/* ---------- tablet: tiles two across ---------- */
 @media (max-width: 1024px) {
+  .cs-meta__row { grid-column: span 3; }
   .cs-figs--3,
   .cs-figs--4,
   .cs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -408,21 +434,29 @@ body.project-page {
   .cs-fig--large .cs-fig__open { aspect-ratio: 3 / 2; flex: none; min-height: 0; }
 }
 
-/* ---------- phone ---------- */
+/* ---------- phone: every block across all 8 columns ---------- */
 @media (max-width: 760px) {
+  .cs-hero__hook,
+  .cs-meta,
+  .cs-action,
   .cs-section__title,
   .cs-section__copy,
   .cs-beats,
-  .cs-outcome { grid-column: 1 / -1; }
+  .cs-outcome,
+  .cs-next__text,
+  .cs-next__media { grid-column: 1 / -1; }
+
+  .cs-meta__row { grid-column: span 4; }
+  .cs-action { justify-self: start; margin-top: var(--space-block); }
+
   .cs-section__copy,
-  .cs-beats { margin-top: 20px; }
+  .cs-beats { margin-top: var(--space-block); }
 
   .cs-hero__media { aspect-ratio: 4 / 3; }
 
   .cs-beats__row { grid-template-columns: 1fr; gap: 4px; }
 
-  .cs-next__card { grid-template-columns: 1fr; }
-  .cs-next__media { order: -1; }
+  .cs-next__media { order: -1; margin-bottom: var(--space-item); }
 }
 
 @media (prefers-reduced-motion: reduce) {

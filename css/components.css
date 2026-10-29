@@ -298,50 +298,8 @@ body.custom-cursor-active * {
   border-radius: 0;
 }
 
-/* Hand-gesture cursors (contact modal wave, Resume thumbs-up) — see
-   HAND GESTURE CURSORS in js/cursor.js. Figma frames from
-   assets/cursor/, all stacked; only .is-current shows. Pops in with the
-   site's bounce ease. */
-.cursor-gesture {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: var(--z-cursor-label);
-  pointer-events: none;
-  width: 64px;  /* frame canvas; the hand itself fills ~60% of it */
-  height: 64px;
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.5);
-  transition:
-    opacity var(--duration-fast) ease,
-    transform var(--duration-base) var(--ease-bounce);
-}
-
-.cursor-gesture.is-active {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-}
-
-.cursor-label.is-gesture-mode {
-  opacity: 0;
-}
-
-.cursor-gesture__frame,
-.touch-gesture__frame {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  visibility: hidden;
-}
-
-.cursor-gesture__frame.is-current,
-.touch-gesture__frame.is-current {
-  visibility: visible;
-}
-
 @media (pointer: coarse) {
-  .cursor-label, .cursor-gesture { display: none; }
+  .cursor-label { display: none; }
 }
 
 /* ---------- touch stand-ins (js/touch.js; html.is-touch = phone/tablet) ---------- */
@@ -375,34 +333,6 @@ html.is-touch button {
 .touch-label.is-shown {
   opacity: 0.95;
   transform: translate(-50%, -100%) translateY(-36px) scale(1);
-}
-
-/* hands that play in place (contact popup corner, beside Resume) */
-.touch-gesture {
-  position: absolute;
-  z-index: 2;
-  width: 72px;
-  height: 72px;
-  pointer-events: none;
-  opacity: 0;
-  transform: scale(0.5);
-  transition:
-    opacity var(--duration-fast) ease,
-    transform var(--duration-base) var(--ease-bounce);
-}
-
-.touch-gesture.is-shown {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.touch-gesture--corner {
-  right: 20px;
-  bottom: 20px;
-}
-
-.touch-gesture--resume {
-  margin-top: -36px; /* top is set to the button's vertical middle in JS */
 }
 
 /* light tap feedback — a quick press-in, since there's no hover */
@@ -670,6 +600,38 @@ html.is-touch .contact-modal__resume:active {
   transition: opacity var(--duration-fast) ease;
 }
 .site-footer a:hover { opacity: 1; }
+.site-footer__links { display: flex; gap: var(--space-block); }
+
+/* ---------- missing-asset stand-in (js/project.js, js/studio.js) ---------- */
+/* a grey box carrying the label of the image that still needs adding */
+.is-missing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  background: var(--color-missing);
+  color: var(--text-muted);
+  text-align: center;
+  cursor: default;
+}
+.is-missing__tag { opacity: 0.7; }
+.is-missing__label { color: var(--text-strong); }
+
+/* ---------- grid overlay (Shift+G on any page, js/nav.js) ---------- */
+.grid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-cursor-label);
+  pointer-events: none;
+}
+.grid-overlay span {
+  height: 100%;
+  background: rgba(210, 120, 120, 0.12);
+  border-left: 1px solid rgba(210, 120, 120, 0.35);
+  border-right: 1px solid rgba(210, 120, 120, 0.35);
+}
 
 /* ---------- image viewer (js/viewer.js; case studies + Studio) ---------- */
 

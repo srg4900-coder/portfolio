@@ -60,11 +60,29 @@
   --text-label-size: 13px;          /* Cutive Mono labels: never smaller */
   --text-label-tracking: 0.06em;
 
-  /* ---------- layout ---------- */
+  /* ---------- layout: one 8-column grid on every page ----------
+     |margin| col |gutter| col |gutter| ... | col |margin|
+       margin   20px phone -> 56px desktop (4vw)
+       gutter   16px phone -> 32px desktop (2vw)
+       columns  8, equal, fill what's left
+     Everything sits on it via .grid (below): spans are written in
+     columns (e.g. 3 / 8), never in px. --page-margin is the margin as
+     applied: the homepage adds the light-box frame to it (home.css).
+     Press Shift+G on any page to see the columns (js/nav.js). */
   --grid-columns: 8;
-  --grid-margin: clamp(20px, 4vw, 56px);  /* measured from inside the frame */
+  --grid-margin: clamp(20px, 4vw, 56px);
   --grid-gutter: clamp(16px, 2vw, 32px);
+  --page-margin: var(--grid-margin);
   --nav-height: 64px;
+
+  /* vertical rhythm: the only spacing steps used between blocks */
+  --space-section: clamp(72px, 10vw, 144px);  /* between sections */
+  --space-block: clamp(32px, 4vw, 56px);      /* heading -> content, content -> content */
+  --space-row: clamp(28px, 3vw, 44px);        /* between rows of images */
+  --space-item: clamp(10px, 1vw, 14px);       /* image -> its label, label -> value */
+
+  /* grey stand-in for an image that isn't in the folder yet */
+  --color-missing: #D9D6D1;
 
   /* ---------- motion ---------- */
   --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
@@ -107,8 +125,19 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(var(--grid-columns), 1fr);
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
   column-gap: var(--grid-gutter);
-  padding-left: var(--grid-margin);
-  padding-right: var(--grid-margin);
+  padding-left: var(--page-margin);
+  padding-right: var(--page-margin);
+}
+
+/* a nested block that keeps the parent's 8 columns (spans still line up) */
+.subgrid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  column-gap: var(--grid-gutter);
+}
+@supports not (grid-template-columns: subgrid) {
+  .subgrid { grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr)); }
 }

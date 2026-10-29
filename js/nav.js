@@ -8,14 +8,13 @@
 
   The current page's link gets aria-current="page" (underlined in
   components.css). Project pages count as Work.
+  When a company link is open (?for=, js/order.js), the links carry it.
 */
 (function () {
-  // TODO(Sadie): flip to true once js/studio-data.js has real pieces in it.
-  var SHOW_STUDIO = false;
-
+  // Studio is deliberately NOT here: it's found from About, the homepage
+  // (under the prints) and the footer, so it never competes with the work.
   var LINKS = [
     { label: 'Work', href: 'index.html#work', page: 'work' },
-    { label: 'Studio', href: 'studio.html', page: 'studio', hidden: !SHOW_STUDIO },
     { label: 'About', href: 'about.html', page: 'about' },
     { label: 'Contact', contact: true }
   ];
@@ -40,7 +39,6 @@
   nav.setAttribute('aria-label', 'Main');
 
   LINKS.forEach(function (link) {
-    if (link.hidden) return;
     var item;
     if (link.contact) {
       item = document.createElement('button');
@@ -59,4 +57,19 @@
   });
 
   header.appendChild(nav);
+
+  // GRID OVERLAY: Shift+G shows the 8 columns of the page grid (margins +
+  // gutters from css/tokens.css), to check that things line up. Press again
+  // to hide. Ignored while typing in a field.
+  var overlay = null;
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'G' || !e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
+    if (overlay) { overlay.remove(); overlay = null; return; }
+    overlay = document.createElement('div');
+    overlay.className = 'grid-overlay grid';
+    overlay.setAttribute('aria-hidden', 'true');
+    for (var i = 0; i < 8; i++) overlay.appendChild(document.createElement('span'));
+    document.body.appendChild(overlay);
+  });
 })();
