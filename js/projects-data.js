@@ -46,7 +46,7 @@
     released: 'Sep. 2026',
     client: 'Client name',
     course: 'Course, Professor',
-    collaborators: ['Name, role'],
+    collaborators: ['Name, Role'],          // one person per entry: 'Name, Role' (role shows lighter)
     tools: ['Figma'],
     action: { label: 'View Live Site', url: 'https://...' }, // or video: 'path.mp4' to play it here
     hero: { src: '...', alt: '...' },      // add video: '...' for a moving hero
@@ -84,7 +84,8 @@ window.PROJECTS = {
       'Max Meyers, DP',
       'Morgan Mundahl, Photographer',
       'Ilya Rustamov, Talent',
-      'Ryan Winter & Kathleen Berry'
+      'Ryan Winter',      // TODO(Sadie): add their roles, e.g. 'Ryan Winter, Talent'
+      'Kathleen Berry'
     ],
     action: { label: 'Watch the Film', video: 'assets/video/grassroots-fall-film.mp4' },
     home: { video: 'assets/video/grassroots-fall-film-thumb.mp4', image: 'assets/case-studies/grassroots/gr-driver-seat.jpg' },
@@ -178,7 +179,7 @@ window.PROJECTS = {
     duration: '5 weeks',
     award: 'Gold ADDY',
     course: 'Motion Design, Prof. Austin Shaw',
-    collaborators: ['Music by Lana Del Rey'],
+    collaborators: ['Lana Del Rey, Music'],
     tools: ['Procreate', 'After Effects', 'Hand-drawn sketch'],
     action: { label: 'Watch the Sequence', url: 'https://www.youtube.com/watch?v=Fl9wpFEMiEA' },
     hero: {

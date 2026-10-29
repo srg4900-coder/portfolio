@@ -360,16 +360,24 @@
 
     var info = el('div', 'cs-hero__info grid');
     var meta = el('dl', 'cs-meta');
-    // stacked: one entry per line (collaborators), otherwise comma-separated
+    // stacked: one entry per line (collaborators: each entry is one person,
+    // 'Name, Role', and the role after the first comma shows lighter);
+    // otherwise comma-separated
     function metaRow(target, label, value, opts) {
       var items = list(value);
       if (!items.length) return;
       opts = opts || {};
-      var row = el('div', 'cs-meta__row');
+      var row = el('div', 'cs-meta__row' + (opts.stacked ? ' cs-meta__row--wide' : ''));
       row.appendChild(el('dt', 'text-label', label));
       var dd = el('dd');
       if (opts.tag) dd.appendChild(el('span', (opts.award ? 'award-tag' : 'cs-tag') + ' text-label', items[0]));
-      else if (opts.stacked) items.forEach(function (i) { dd.appendChild(el('span', 'cs-meta__line', i)); });
+      else if (opts.stacked) items.forEach(function (i) {
+        var line = el('span', 'cs-meta__line');
+        var cut = i.indexOf(', ');
+        line.appendChild(document.createTextNode(cut > -1 ? i.slice(0, cut) : i));
+        if (cut > -1) line.appendChild(el('span', 'cs-meta__role', i.slice(cut + 2)));
+        dd.appendChild(line);
+      });
       else dd.textContent = items.join(', ');
       row.appendChild(dd);
       target.appendChild(row);

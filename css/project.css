@@ -125,6 +125,12 @@ body.project-page {
 }
 
 .cs-meta__line { display: block; }
+.cs-meta__role {
+  margin-left: 0.6em;
+  color: var(--text-muted);
+}
+/* collaborators get two field widths, so a name + role stays on one line */
+.cs-meta--credits .cs-meta__row--wide { grid-column: span 4; }
 
 .cs-tag {
   display: inline-block;
@@ -528,6 +534,7 @@ body.project-page {
 /* ---------- tablet: tiles two across ---------- */
 @media (max-width: 1024px) {
   .cs-meta__row { grid-column: span 3; }
+  .cs-meta--credits .cs-meta__row--wide { grid-column: span 6; }
   .cs-figs--3,
   .cs-figs--4,
   .cs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -549,6 +556,7 @@ body.project-page {
   .cs-next__media { grid-column: 1 / -1; }
 
   .cs-meta__row { grid-column: span 4; }
+  .cs-meta--credits .cs-meta__row--wide { grid-column: 1 / -1; }
   .cs-action { justify-self: start; margin-top: var(--space-block); }
 
   .cs-section__copy,
