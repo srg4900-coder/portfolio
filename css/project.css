@@ -125,6 +125,42 @@ body.project-page {
 }
 
 .cs-meta__line { display: block; }
+
+/* Client with links (js/project.js clientRow): name + small Instagram glyph */
+.cs-client {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cs-client__name {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition: text-decoration-color var(--duration-fast) ease;
+}
+.cs-client__name:hover,
+.cs-client__name:focus-visible { text-decoration-color: currentColor; }
+.cs-client__ig {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  transition: transform var(--duration-base) var(--ease-smooth), color var(--duration-fast) ease;
+}
+.cs-client__ig svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+.cs-client__ig .dot { fill: currentColor; stroke: none; }
+.cs-client__ig:hover,
+.cs-client__ig:focus-visible {
+  color: var(--text-strong);
+  transform: translateY(-2px) rotate(-8deg);
+}
 .cs-meta__role {
   margin-left: 0.6em;
   color: var(--text-muted);

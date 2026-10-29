@@ -47,7 +47,7 @@
     status: 'Live',                        // Live / In Production / In Progress / Concept
     award: 'Gold ADDY',                    // short: gold tag on the homepage print + credits; \n starts a new line
     released: 'Sep. 2026',
-    client: 'Client name',
+    client: 'Client name',                 // or { name, url, instagram }: the name links, with an Instagram icon
     course: 'Course, Professor',
     collaborators: ['Name, Role'],          // one person per entry: 'Name, Role' (role shows lighter)
     tools: ['Figma'],
@@ -81,14 +81,18 @@ window.PROJECTS = {
     duration: '2 weeks',
     status: 'Live',
     released: 'Sep. 2026',
-    client: 'Grassroots',
+    client: {
+      name: 'Grassroots',
+      url: 'https://grassrootsedition.com/',
+      instagram: 'https://www.instagram.com/grassroots_edition/'
+    },
     collaborators: [
-      'Grassroots, In-House CD',
-      'Max Meyers, DP',
-      'Morgan Mundahl, Photographer',
-      'Ilya Rustamov, Talent',
-      'Ryan Winter',      // TODO(Sadie): add their roles, e.g. 'Ryan Winter, Talent'
-      'Kathleen Berry'
+      'Grassroots',
+      'Max Meyers, In-House CD',
+      'Morgan Mundahl, DP',
+      'Ilya Rustamov, Photographer',
+      'Ryan Winter, Talent',
+      'Kathleen Berry, Talent'
     ],
     // no action button: the full film already plays as the hero
     home: { video: 'assets/video/grassroots-fall-film-thumb.mp4', image: 'assets/case-studies/grassroots/gr-driver-seat.jpg' },
@@ -158,9 +162,15 @@ window.PROJECTS = {
     idea: {
       copy: 'Sketched in a three hour train delay in Italy. The premise: a girl who wears the clothes taken from the men she holds close. The core image: rigid menswear worn for years until its lines loosen, cut and cloth intact, structure softened into her lines. Drop one blends 1920s athletic wear, vintage collegiate, and 60s rock and roll.',
       images: [
+        { src: 'assets/case-studies/boys-club/bc-08.jpg', label: 'Editorial, drop one', alt: 'Black and white editorial: the model lying across a bed in an oversized white tee' },
         { label: 'Original sketch, Italy', alt: '' },
+        { src: 'assets/case-studies/boys-club/bc-04-cutout.webp', cutout: true, label: 'Pennant flag', alt: 'Cream felt pennant with a navy B and navy border' },
+        { src: 'assets/case-studies/boys-club/bc-03.jpg', label: 'Editorial, white sweater', alt: 'The model sitting on a wooden dresser in an oversized white sweater, tote at her feet' },
         { label: 'Reference: 1930s athletic wear', alt: '' },
-        { label: 'Moodboard', alt: '' }
+        { src: 'assets/case-studies/boys-club/bc-06-cutout.webp', cutout: true, label: 'Drop 001 label', alt: 'Hand-stamped cloth label: B mark, boy’s club, drop 001' },
+        { src: 'assets/case-studies/boys-club/bc-07-cutout.webp', cutout: true, label: 'Typewritten hang tag', alt: 'Typewritten tag: Boy’s Club, est 1989, NYC, young forever, flirt with me' },
+        { label: 'Moodboard', alt: '' },
+        { src: 'assets/case-studies/boys-club/bc-05.jpg', label: 'At the cutting table', alt: 'Red tee laid flat with a ruler, pencil and a sketchbook of B lettering' }
       ]
     },
     friction: {
@@ -174,14 +184,7 @@ window.PROJECTS = {
       ]
     },
     work: {
-      images: [
-        { src: 'assets/case-studies/boys-club/bc-08.jpg', large: true, label: 'Editorial, drop one', alt: 'Black and white editorial: the model lying across a bed in an oversized white tee' },
-        { src: 'assets/case-studies/boys-club/bc-04-cutout.webp', cutout: true, label: 'Pennant flag', alt: 'Cream felt pennant with a navy B and navy border' },
-        { src: 'assets/case-studies/boys-club/bc-03.jpg', label: 'Editorial, white sweater', alt: 'The model sitting on a wooden dresser in an oversized white sweater, tote at her feet' },
-        { src: 'assets/case-studies/boys-club/bc-06-cutout.webp', cutout: true, label: 'Drop 001 label', alt: 'Hand-stamped cloth label: B mark, boy’s club, drop 001' },
-        { src: 'assets/case-studies/boys-club/bc-07-cutout.webp', cutout: true, label: 'Typewritten hang tag', alt: 'Typewritten tag: Boy’s Club, est 1989, NYC, young forever, flirt with me' },
-        { src: 'assets/case-studies/boys-club/bc-05.jpg', label: 'At the cutting table', alt: 'Red tee laid flat with a ruler, pencil and a sketchbook of B lettering' }
-      ],
+      // the photos now live in 01 Idea (the interactive papers)
       outcome: 'Ten pieces, one model, 180 selects. Storefront launching November. Next: a 36-unit domestic production run, pending funding.'
     }
   },

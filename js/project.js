@@ -264,7 +264,8 @@
   //   PLACE: up to 4 papers in one loose row; more than that become two
   //     overlapping rows. Each row spreads edge to edge, alternately a bit
   //     high and low, with seeded jitter and tilt (same scatter every visit).
-  //   STACK: larger sheets go underneath smaller ones.
+  //   STACK: larger sheets go underneath smaller ones; grey "missing"
+  //   placeholders are drawn smaller and always sit under real images.
   //   The section grows to fit the lowest paper, so nothing hangs outside.
   function layoutPapers(wrap) {
     var list = Array.prototype.slice.call(wrap.children);
@@ -284,13 +285,18 @@
       var w = base * Math.sqrt(aspect / (4 / 3));                   // equal-area width
       w = Math.max(base * 0.7, Math.min(base * 1.35, w));            // keep extremes in check
       w *= Number(p.getAttribute('data-scale')) || 1;
+      if (!p.hasAttribute('data-viewer')) w *= 0.8;                // grey placeholders: smaller
       w = Math.min(w, W);
       return { w: Math.round(w), h: w / aspect };
     });
     // stacking: bigger sheets sit underneath smaller ones, so a small photo
     // never disappears behind a large slide (clicking still brings any to front)
     var stack = [];
-    sizes.map(function (sz, i) { return { i: i, area: sz.w * sz.h }; })
+    sizes.map(function (sz, i) {
+      // placeholders always sit at the very bottom, under every real image
+      var placeholder = !list[i].hasAttribute('data-viewer');
+      return { i: i, area: sz.w * sz.h + (placeholder ? 1e9 : 0) };
+    })
       .sort(function (a, b) { return b.area - a.area || a.i - b.i; })
       .forEach(function (o, rank) { stack[o.i] = rank + 1; });
     var bottom = 0, rowTop = 0;
@@ -607,13 +613,42 @@
     metaRow(creditList, 'Award', data.award, { tag: true, award: true });
     // Released is hidden for now (Sadie, Oct 2026); the data stays in projects-data.js.
     // metaRow(creditList, 'Released', data.released);
-    metaRow(creditList, 'Client', data.client);
+    if (data.client && typeof data.client === 'object') clientRow(creditList, data.client);
+    else metaRow(creditList, 'Client', data.client);
     metaRow(creditList, 'Course', data.course);
     metaRow(creditList, 'Collaborators', data.collaborators, { stacked: true });
     metaRow(creditList, 'Tools', data.tools);
     if (creditList.children.length) {
       credits.appendChild(creditList);
       main.appendChild(credits);
+    }
+
+    // Client with links: the name goes to their site (underline on hover),
+    // a small Instagram glyph beside it goes to their profile
+    function clientRow(target, c) {
+      if (!c.name) return;
+      var row = el('div', 'cs-meta__row');
+      row.appendChild(el('dt', 'text-label', 'Client'));
+      var dd = el('dd', 'cs-client');
+      var name = el(c.url ? 'a' : 'span', 'cs-client__name', c.name);
+      if (c.url) {
+        name.href = c.url;
+        name.target = '_blank';
+        name.rel = 'noopener';
+        name.setAttribute('aria-label', c.name + ' website (opens in a new tab)');
+      }
+      dd.appendChild(name);
+      if (c.instagram) {
+        var ig = el('a', 'cs-client__ig');
+        ig.href = c.instagram;
+        ig.target = '_blank';
+        ig.rel = 'noopener';
+        ig.setAttribute('aria-label', c.name + ' on Instagram (opens in a new tab)');
+        ig.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle class="dot" cx="17.3" cy="6.7" r="1.1"/></svg>';
+        dd.appendChild(ig);
+      }
+      row.appendChild(dd);
+      target.appendChild(row);
     }
 
     // ---------- NEXT ----------
