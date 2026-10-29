@@ -46,6 +46,8 @@ body.project-page {
 .cs-hero__subtitle {
   display: block;
   margin-top: var(--space-item);
+  font-size: var(--text-h2-size);
+  font-weight: 400;
   color: var(--text-soft);
 }
 
@@ -77,6 +79,8 @@ body.project-page {
 
 .cs-hero__mute {
   position: absolute;
+  font-size: var(--text-small-size);
+  font-weight: 400;
   right: var(--page-margin);
   bottom: var(--page-margin);
   padding: 9px 16px;
@@ -105,6 +109,11 @@ body.project-page {
 }
 
 .cs-meta__row { grid-column: span 2; }
+/* hero: Role is short, Disciplines gets the room */
+.cs-hero__info .cs-meta__row + .cs-meta__row { grid-column: span 4; }
+@supports not (grid-template-columns: subgrid) {
+  .cs-meta--credits { grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr)); }
+}
 
 .cs-meta dt { color: var(--text-muted); }
 
@@ -127,6 +136,8 @@ body.project-page {
   grid-column: 7 / 9;
   justify-self: end;
   display: inline-flex;
+  font-size: var(--text-small-size);
+  font-weight: 400;
   align-items: center;
   padding: 12px 22px;
   border: 1px solid var(--color-ink);
@@ -170,6 +181,8 @@ body.project-page {
 .cs-steps__link {
   display: inline-block;
   padding: 4px 0 3px;
+  font-size: var(--text-small-size);
+  font-weight: 400;
   color: var(--text-muted);
   border-bottom: 1px solid transparent;
   cursor: pointer;
@@ -181,6 +194,15 @@ body.project-page {
   border-color: currentColor;
 }
 
+/* numbers are the only mono here (type rule, components.css) */
+.cs-steps__num,
+.cs-section__num,
+.cs-num {
+  font-family: var(--font-mono);
+  font-size: var(--text-label-size);
+  letter-spacing: var(--text-label-tracking);
+  color: var(--text-muted);
+}
 .cs-steps__num { margin-right: 8px; }
 
 /* phones: out of the way while reading, slides in on scroll-up (js/project.js) */
@@ -213,18 +235,22 @@ body.project-page {
 .cs-section__title {
   grid-column: 1 / 3;
   align-self: start;
+  font-size: var(--text-h2-size);
+  font-weight: 400;
+  line-height: 1.2;
 }
 
 .cs-section__num {
   margin-right: 12px;
-  color: var(--text-muted);
+  vertical-align: 0.15em;
 }
 
 .cs-section__copy,
-.cs-beats,
-.cs-outcome {
+.cs-beats {
   grid-column: 3 / 8;
 }
+/* the closing line starts at the left margin, like the credits under it */
+.cs-outcome { grid-column: 1 / 7; }
 
 .cs-figs,
 .cs-grid {
@@ -313,6 +339,8 @@ body.project-page {
 
 .cs-fig__label {
   margin-top: var(--space-item);
+  font-size: var(--text-small-size);
+  font-weight: 400;
   color: var(--text-soft);
 }
 
@@ -354,6 +382,75 @@ body.project-page {
   color: var(--text-strong);
 }
 
+/* ---------- 01 Idea papers (js/project.js layoutPapers, paper.js, drag.js) ---------- */
+/* Loose sheets on the page: no frame or tile behind them, just the image
+   and a soft shadow so the stack reads. They fill the section's width and
+   the section grows to fit them; dragging can't leave it. */
+.cs-papers {
+  grid-column: 1 / -1;
+  position: relative;
+  margin-top: var(--space-block);
+  isolation: isolate;  /* paper z-indexes stay inside, under the nav */
+  min-height: 200px;
+}
+.cs-paper {
+  cursor: grab;
+}
+.cs-paper.is-dragging { cursor: grabbing; }
+.cs-paper .paper__inner,
+.cs-paper:hover .paper__inner,
+.cs-paper.is-active .paper__inner {
+  background: none;
+  box-shadow: none;
+}
+.cs-paper__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transform: rotate(var(--tilt, 0deg));
+  /* drop-shadow follows the image's own edges (cut-outs included) */
+  filter: drop-shadow(0 1px 1px rgba(16, 14, 12, 0.10)) drop-shadow(0 10px 18px rgba(16, 14, 12, 0.16));
+  transition: filter var(--duration-base) ease;
+}
+.cs-paper:hover .cs-paper__img,
+.cs-paper.is-dragging .cs-paper__img {
+  filter: drop-shadow(0 2px 2px rgba(16, 14, 12, 0.10)) drop-shadow(0 20px 32px rgba(16, 14, 12, 0.24));
+}
+.cs-paper .cs-paper__img.is-missing {
+  display: flex;
+  aspect-ratio: 4 / 3;
+}
+.cs-paper:focus-visible { outline-offset: 6px; }
+
+/* phones: no scatter, a plain two-across stack (a tap opens the viewer) */
+@media (max-width: 760px) {
+  .cs-papers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-row) var(--grid-gutter);
+    align-items: start;
+    height: auto !important;
+    min-height: 0;
+  }
+  .cs-paper {
+    position: relative;
+    left: auto !important;
+    top: auto !important;
+    width: auto !important;
+    cursor: zoom-in;
+  }
+}
+
+/* ---------- credits (end of the page, left-aligned) ---------- */
+.cs-credits {
+  margin-top: var(--space-section);
+}
+.cs-meta--credits {
+  grid-column: 1 / -1;
+  padding-top: var(--space-block);
+  border-top: 1px solid rgba(29, 27, 24, 0.15);
+}
+
 /* ---------- 02 Friction beats ---------- */
 
 .cs-beats__row {
@@ -390,8 +487,13 @@ body.project-page {
   flex-direction: column;
   gap: var(--space-item);
 }
-.cs-next__text .text-label:first-child { color: var(--text-muted); }
-.cs-next__role { color: var(--text-muted); }
+.cs-next__kicker,
+.cs-next__role {
+  font-size: var(--text-small-size);
+  font-weight: 400;
+  color: var(--text-muted);
+}
+.cs-next__kicker .cs-num { margin-left: 6px; }
 
 .cs-next__media {
   grid-column: 4 / 9;

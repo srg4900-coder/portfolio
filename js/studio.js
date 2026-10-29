@@ -24,7 +24,7 @@
   });
 
   if (!groups.length) {
-    root.appendChild(el('p', 'studio__empty text-label', 'New pieces coming soon.'));
+    root.appendChild(el('p', 'studio__empty', 'New pieces coming soon.'));
     return;
   }
 
@@ -32,7 +32,7 @@
     var id = 'studio-' + group.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     var sec = el('section', 'studio__group');
     sec.setAttribute('aria-labelledby', id);
-    var h = el('h2', 'studio__title text-h2', group.name);
+    var h = el('h2', 'studio__title', group.name);
     h.id = id;
     sec.appendChild(h);
 
@@ -65,8 +65,8 @@
 
       var cap = el('figcaption', 'studio__caption');
       if (item.title) cap.appendChild(el('span', 'studio__name', item.title));
-      if (details) cap.appendChild(el('span', 'studio__details text-label', details));
-      if (item.award) cap.appendChild(el('span', 'studio__award text-label', item.award));
+      if (details) cap.appendChild(el('span', 'studio__details', details));
+      if (item.award) cap.appendChild(el('span', 'studio__award', item.award));
       fig.appendChild(cap);
       grid.appendChild(fig);
     });

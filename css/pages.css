@@ -9,6 +9,8 @@
 }
 
 .page__eyebrow {
+  font-size: var(--text-small-size);
+  font-weight: 400;
   color: var(--text-muted);
   margin-bottom: clamp(12px, 2vw, 20px);
 }
@@ -107,8 +109,19 @@
   font-size: var(--text-small-size);
   font-weight: 400;
 }
+.studio__title {
+  font-size: var(--text-h2-size);
+  font-weight: 400;
+}
+.studio__details,
+.studio__award,
+.about__studio-kicker {
+  font-size: var(--text-small-size);
+  font-weight: 400;
+}
 .studio__details { color: var(--text-muted); }
 .studio__award { color: var(--text-strong); }
+.about__studio-kicker { color: var(--text-muted); }
 .studio__award::before { content: '\2605  '; }
 
 .studio__empty {

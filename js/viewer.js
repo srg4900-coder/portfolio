@@ -9,6 +9,9 @@
     data-label   caption shown under the image
   Items inside the same [data-viewer-group] are one set: the arrows step
   through that set and loop at the ends.
+  Add data-viewer-manual to an item that decides for itself when to open
+  (the Idea papers: a click first brings the paper forward); it then
+  calls window.ImageViewer.open(item).
 
   Keyboard: Esc closes, Left/Right step, Tab stays inside the viewer, and
   focus goes back to the image that opened it. Touch: swipe left/right
@@ -107,7 +110,7 @@
 
   document.addEventListener('click', function (e) {
     var trigger = e.target.closest('[data-viewer]');
-    if (trigger) { e.preventDefault(); open(trigger); }
+    if (trigger && !trigger.hasAttribute('data-viewer-manual')) { e.preventDefault(); open(trigger); }
   });
 
   closeBtn.addEventListener('click', close);
@@ -134,6 +137,8 @@
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     }
   }, true);
+
+  window.ImageViewer = { open: open };
 
   // swipe left/right on touch screens
   var startX = null, startY = null;

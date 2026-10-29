@@ -46,7 +46,16 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   letter-spacing: -0.01em;
 }
 
-/* Cutive Mono has one thin weight: keep it uppercase, tracked, >=13px, near full opacity */
+/*
+  TYPE RULE (case studies, About, Studio, footer; the homepage prints keep
+  their captions as designed):
+    Cutive Mono   only for  numbers (02 / 04, section numbers 01 02 03),
+                            small field labels (ROLE, CLIENT, EDUCATION)
+                            and tags (status, award)
+    Albert Sans   everything else: titles, section names, body, buttons,
+                            links, captions, footer
+  Cutive Mono has one thin weight: keep it uppercase, tracked, >=13px, near full opacity.
+*/
 .text-h2,
 .text-subheader,
 .text-body1,
@@ -144,6 +153,9 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .cs-link {
   display: inline-block;
   padding-bottom: 3px;
+  font-family: var(--font-display);
+  font-size: var(--text-small-size);
+  font-weight: 400;
   border-bottom: 1px solid currentColor;
   cursor: pointer;
   transition: opacity var(--duration-fast) ease;
@@ -597,8 +609,12 @@ html.is-touch .contact-modal__resume:active {
 
 .site-footer p,
 .site-footer a {
+  font-family: var(--font-display);
+  font-size: var(--text-small-size);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0.01em;
   opacity: 0.6;
-  letter-spacing: 0.06em;
   transition: opacity var(--duration-fast) ease;
 }
 .site-footer a:hover { opacity: 1; }
@@ -717,6 +733,12 @@ html.is-viewer-open { overflow: hidden; }
   gap: 20px;
   padding: 16px 24px 24px;
   color: var(--color-paper);
+}
+.viewer__label {
+  font-family: var(--font-display);
+  font-size: var(--text-small-size);
+  text-transform: none;
+  letter-spacing: 0.01em;
 }
 .viewer__count { opacity: 0.6; }
 

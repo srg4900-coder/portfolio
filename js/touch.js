@@ -38,7 +38,7 @@
   document.addEventListener('click', function (e) {
     var target = e.target.closest('[data-cursor-label]');
     // viewer images open straight into the viewer, no label needed
-    if (!target || target.hasAttribute('data-viewer')) return;
+    if (!target || target.hasAttribute('data-viewer') || target.classList.contains('paper')) return;
     flash.textContent = target.getAttribute('data-cursor-label');
     flash.style.backgroundColor = target.getAttribute('data-cursor-fill') || '';
     flash.style.color = target.getAttribute('data-cursor-text') || '';

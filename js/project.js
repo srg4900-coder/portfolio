@@ -5,16 +5,26 @@
 
   Page order:
     HERO      counter (from the portfolio order, js/order.js), title, hook,
-              full-bleed image or video, meta row (Role + whichever
-              optional fields exist), optional action button
+              full-bleed image or video, Role + Disciplines, optional
+              action button. Nothing else, so the top reads in a glance.
     STEPS     "01 Idea / 02 Friction / 03 Work" progress strip: sticky on
               desktop, slides in on scroll-up on phones (css/project.css)
     01 Idea, 02 Friction, 03 Work
               any section with no data is skipped entirely (and left out
               of the strip); Status "In Progress" renames Work to
-              "Work So Far"
+              "Work So Far". Idea's images are loose papers (below).
+    CREDITS   Duration, Status, Award, Released, Client, Course,
+              Collaborators, Tools: whichever exist
     NEXT      next project's title + hero (loops last -> first), All Work,
               Contact
+
+  IDEA PAPERS: Idea images are scattered like sheets on a table, sized to
+  fill the section, tilted a little, overlapping (layoutPapers). Click a
+  paper: it comes to the front (js/paper.js). Click the front paper again
+  (or press Enter on any): it opens in the viewer. Mouse / trackpad can
+  drag them anywhere inside the section (js/drag.js). Phones get a plain
+  two-across stack where a tap opens the viewer. No captions: the images
+  say what they are (the label still shows in the viewer).
 
   Images with no src render as grey "missing" boxes carrying their label,
   so unfinished projects show exactly what still needs an asset. Every
@@ -110,7 +120,7 @@
       open.appendChild(icon);
       fig.appendChild(open);
     }
-    if (item.label) fig.appendChild(el('figcaption', 'cs-fig__label text-label', item.label));
+    if (item.label) fig.appendChild(el('figcaption', 'cs-fig__label', item.label));
     return fig;
   }
 
@@ -128,12 +138,147 @@
     return (items || []).filter(function (i) { return i && (i.src || i.label); });
   }
 
+  // ---------- Idea papers ----------
+  var wide = window.matchMedia('(min-width: 761px)');
+
+  function papers(items) {
+    var wrap = el('div', 'cs-papers');
+    wrap.setAttribute('data-drag-bounds', '');
+    wrap.setAttribute('data-viewer-group', '');
+    items.forEach(function (item) {
+      var paper = el('div', 'paper cs-paper' + (item.cutout ? ' is-cutout' : ''));
+      paper.setAttribute('data-draggable', '');
+      var inner = el('div', 'paper__inner');
+      if (item.src) {
+        // opens in the viewer itself (on the second click), not on the first
+        paper.setAttribute('role', 'button');
+        paper.tabIndex = 0;
+        paper.setAttribute('data-viewer', '');
+        paper.setAttribute('data-viewer-manual', '');
+        paper.setAttribute('data-src', item.src);
+        if (item.video) paper.setAttribute('data-video', item.video);
+        paper.setAttribute('data-alt', item.alt || '');
+        paper.setAttribute('data-label', item.label || '');
+        paper.setAttribute('aria-label', 'View larger: ' + (item.alt || item.label || 'image'));
+        var img = media(item, 'cs-paper__img', true);
+        img.draggable = false; // the browser's own image drag would hijack the pointer
+        inner.appendChild(img);
+      } else {
+        inner.appendChild(missing(item.label, 'cs-paper__img'));
+      }
+      paper.appendChild(inner);
+      wrap.appendChild(paper);
+    });
+    return wrap;
+  }
+
+  // small seeded random, so each project's scatter is the same every visit
+  function seeded(seed) {
+    var h = 2166136261;
+    for (var i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return function () {
+      h += 0x6D2B79F5;
+      var t = Math.imul(h ^ (h >>> 15), 1 | h);
+      t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function shape(paper) {
+    var m = paper.querySelector('img, video');
+    if (m && m.naturalWidth) return m.naturalWidth / m.naturalHeight;
+    if (m && m.videoWidth) return m.videoWidth / m.videoHeight;
+    return 4 / 3;
+  }
+
+  // Desktop / tablet: papers spread across the section, each about a third
+  // of its width (more papers = smaller, more overlap), alternately high
+  // and low with a little seeded jitter and tilt. The section grows to fit
+  // the lowest paper, so nothing ever hangs outside it.
+  function layoutPapers(wrap) {
+    var list = Array.prototype.slice.call(wrap.children);
+    if (!wide.matches) {
+      list.forEach(function (p) { p.style.left = p.style.top = p.style.width = p.style.zIndex = ''; });
+      wrap.style.height = '';
+      return;
+    }
+    var rand = seeded(slug);
+    var W = wrap.clientWidth;
+    var n = list.length;
+    var share = n === 1 ? 0.5 : n === 2 ? 0.46 : n === 3 ? 0.4 : n === 4 ? 0.34 : 0.28;
+    var pw = Math.round(W * share);
+    var heights = list.map(function (p) { return pw / shape(p); });
+    var tallest = Math.max.apply(null, heights);
+    var bottom = 0;
+    list.forEach(function (p, i) {
+      var x = n === 1 ? (W - pw) / 2 : i * (W - pw) / (n - 1);
+      var y = ((i % 2 ? 0.2 : 0.02) + rand() * 0.1) * tallest;
+      p.style.width = pw + 'px';
+      p.style.left = Math.round(x) + 'px';
+      p.style.top = Math.round(y) + 'px';
+      p.style.zIndex = String(i + 1);
+      p.style.setProperty('--tilt', ((rand() * 2 - 1) * 4).toFixed(1) + 'deg');
+      bottom = Math.max(bottom, y + heights[i]);
+    });
+    wrap.style.height = Math.ceil(bottom + 32) + 'px'; // room for tilt + shadow
+  }
+
+  function startPapers(wrap) {
+    var list = Array.prototype.slice.call(wrap.children);
+    var relayout = function () { if (!wrap.querySelector('.was-dragged')) layoutPapers(wrap); };
+    layoutPapers(wrap);
+    // re-place as each image's real shape arrives (until someone drags)
+    wrap.querySelectorAll('img').forEach(function (img) { if (!img.complete) img.addEventListener('load', relayout); });
+    wrap.querySelectorAll('video').forEach(function (v) { v.addEventListener('loadedmetadata', relayout); });
+    var lastW = wrap.clientWidth, resizeTimer = null;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        if (Math.abs(wrap.clientWidth - lastW) < 2) return;
+        lastW = wrap.clientWidth;
+        list.forEach(function (p) { p.classList.remove('was-dragged'); });
+        layoutPapers(wrap);
+      }, 150);
+    });
+
+    if (window.PaperInteraction) window.PaperInteraction.refresh();
+    if (window.DragAndDrop) window.DragAndDrop.refresh();
+
+    // the last paper starts on top, so it's the front one
+    var front = list[list.length - 1];
+    if (front && window.PaperInteraction) window.PaperInteraction.setFront(front);
+
+    function labels(top) {
+      list.forEach(function (p) {
+        if (!p.hasAttribute('data-viewer')) return;
+        p.setAttribute('data-cursor-label', p === top ? 'View' : 'Drag');
+      });
+    }
+    labels(front);
+
+    wrap.addEventListener('paper:activate', function (e) {
+      var p = e.target;
+      labels(p);
+      if (e.detail.source === 'drag' || !p.hasAttribute('data-viewer') || !window.ImageViewer) return;
+      // phones: no stack to shuffle, so a tap opens it straight away
+      if (e.detail.wasActive || !wide.matches) window.ImageViewer.open(p);
+    });
+    wrap.addEventListener('keydown', function (e) {
+      var p = e.target.closest('.cs-paper');
+      if (!p || !p.hasAttribute('data-viewer') || (e.key !== 'Enter' && e.key !== ' ')) return;
+      e.preventDefault();
+      if (window.PaperInteraction) window.PaperInteraction.setFront(p);
+      labels(p);
+      window.ImageViewer.open(p);
+    });
+  }
+
   // ---------- no such project ----------
   if (!data) {
     document.title = 'Project not found | Sadie Gold';
     var lost = el('section', 'cs-missing grid');
     lost.appendChild(el('h1', 'text-h1', 'Project not found'));
-    var back = el('a', 'cs-link text-label', 'See all work →');
+    var back = el('a', 'cs-link', 'See all work →');
     back.href = Order.link('index.html#work');
     lost.appendChild(back);
     main.appendChild(lost);
@@ -163,7 +308,7 @@
     var h1 = el('h1', 'cs-hero__title');
     var name = el('span', 'cs-hero__name text-title letter-reveal', split > -1 ? data.title.slice(0, split) : data.title);
     h1.appendChild(name);
-    if (split > -1) h1.appendChild(el('span', 'cs-hero__subtitle text-h2 load-rise', data.title.slice(split + 2)));
+    if (split > -1) h1.appendChild(el('span', 'cs-hero__subtitle load-rise', data.title.slice(split + 2)));
     head.appendChild(h1);
     if (text(data.hook)) {
       var hook = el('p', 'cs-hero__hook load-rise', text(data.hook));
@@ -180,7 +325,7 @@
       heroFig.appendChild(heroMedia);
       // moving hero: muted by default, sound only from this button
       if (heroData.video) {
-        var mute = el('button', 'cs-hero__mute text-label', 'Unmute');
+        var mute = el('button', 'cs-hero__mute', 'Unmute');
         mute.type = 'button';
         mute.setAttribute('data-cursor-solid', 'white');
         mute.addEventListener('click', function () {
@@ -200,7 +345,7 @@
     var info = el('div', 'cs-hero__info grid');
     var meta = el('dl', 'cs-meta');
     // stacked: one entry per line (collaborators), otherwise comma-separated
-    function metaRow(label, value, opts) {
+    function metaRow(target, label, value, opts) {
       var items = list(value);
       if (!items.length) return;
       opts = opts || {};
@@ -211,18 +356,11 @@
       else if (opts.stacked) items.forEach(function (i) { dd.appendChild(el('span', 'cs-meta__line', i)); });
       else dd.textContent = items.join(', ');
       row.appendChild(dd);
-      meta.appendChild(row);
+      target.appendChild(row);
     }
-    metaRow('Role', data.role);
-    metaRow('Disciplines', data.disciplines);
-    metaRow('Duration', data.duration);
-    metaRow('Status', data.status, { tag: true });
-    metaRow('Award', data.award, { tag: true, award: true });
-    metaRow('Released', data.released);
-    metaRow('Client', data.client);
-    metaRow('Course', data.course);
-    metaRow('Collaborators', data.collaborators, { stacked: true });
-    metaRow('Tools', data.tools);
+    // the top only answers "what did she do here"; the rest is in CREDITS
+    metaRow(meta, 'Role', data.role);
+    metaRow(meta, 'Disciplines', data.disciplines);
     if (meta.children.length) info.appendChild(meta);
 
     var act = data.action || {};
@@ -230,7 +368,7 @@
       var action;
       if (act.video) {
         // plays right here, in the viewer, with sound and controls
-        action = el('button', 'cs-action text-label', act.label);
+        action = el('button', 'cs-action', act.label);
         action.type = 'button';
         action.setAttribute('data-viewer', '');
         action.setAttribute('data-video', act.video);
@@ -239,7 +377,7 @@
         action.setAttribute('data-label', data.title);
         action.appendChild(el('span', 'cs-action__arrow', ' ▶'));
       } else {
-        action = el('a', 'cs-action text-label', act.label);
+        action = el('a', 'cs-action', act.label);
         action.href = act.url;
         if (/^https?:/.test(act.url)) {
           action.target = '_blank';
@@ -259,7 +397,7 @@
       var sec = el('section', 'cs-section grid');
       sec.id = id;
       sec.setAttribute('aria-labelledby', id + '-title');
-      var h = el('h2', 'cs-section__title text-h2');
+      var h = el('h2', 'cs-section__title');
       h.id = id + '-title';
       h.appendChild(el('span', 'cs-section__num', num));
       h.appendChild(document.createTextNode(label));
@@ -274,7 +412,8 @@
     if (text(idea.copy) || ideaImages.length) {
       var ideaSec = section('idea', '01', 'Idea');
       if (text(idea.copy)) ideaSec.appendChild(el('p', 'cs-section__copy text-project-body', text(idea.copy)));
-      if (ideaImages.length) ideaSec.appendChild(figures(ideaImages, 'cs-figs cs-figs--' + Math.min(ideaImages.length, 4), idea.ratio));
+      var ideaPapers = ideaImages.length ? papers(ideaImages) : null;
+      if (ideaPapers) ideaSec.appendChild(ideaPapers);
       sections.push({ node: ideaSec, num: '01', name: 'Idea' });
     }
 
@@ -317,7 +456,7 @@
       var stepList = el('ol', 'cs-steps__list');
       var links = sections.map(function (s) {
         var li = el('li');
-        var a = el('a', 'cs-steps__link text-label');
+        var a = el('a', 'cs-steps__link');
         a.href = '#' + s.node.id;
         a.appendChild(el('span', 'cs-steps__num', s.num));
         a.appendChild(document.createTextNode(s.name));
@@ -364,6 +503,25 @@
       steps.addEventListener('focusin', function () { steps.classList.add('is-shown'); });
     }
 
+    if (ideaPapers) startPapers(ideaPapers);
+
+    // ---------- CREDITS ----------
+    var credits = el('section', 'cs-credits grid');
+    credits.setAttribute('aria-label', 'Credits');
+    var creditList = el('dl', 'cs-meta cs-meta--credits');
+    metaRow(creditList, 'Duration', data.duration);
+    metaRow(creditList, 'Status', data.status, { tag: true });
+    metaRow(creditList, 'Award', data.award, { tag: true, award: true });
+    metaRow(creditList, 'Released', data.released);
+    metaRow(creditList, 'Client', data.client);
+    metaRow(creditList, 'Course', data.course);
+    metaRow(creditList, 'Collaborators', data.collaborators, { stacked: true });
+    metaRow(creditList, 'Tools', data.tools);
+    if (creditList.children.length) {
+      credits.appendChild(creditList);
+      main.appendChild(credits);
+    }
+
     // ---------- NEXT ----------
     var next = el('nav', 'cs-next grid');
     next.setAttribute('aria-label', 'More work');
@@ -375,9 +533,11 @@
       card.setAttribute('data-cursor-label', 'Next');
       var cardText = el('div', 'cs-next__text');
       var nextPos = ORDER.indexOf(nextSlug);
-      cardText.appendChild(el('span', 'text-label', 'Next project · ' + pad(nextPos + 1) + ' / ' + pad(ORDER.length)));
+      var kicker = el('span', 'cs-next__kicker', 'Next project ');
+      kicker.appendChild(el('span', 'cs-num', pad(nextPos + 1) + ' / ' + pad(ORDER.length)));
+      cardText.appendChild(kicker);
       cardText.appendChild(el('span', 'cs-next__title text-h1', nextData.title));
-      if (text(nextData.role)) cardText.appendChild(el('span', 'cs-next__role text-label', text(nextData.role)));
+      if (text(nextData.role)) cardText.appendChild(el('span', 'cs-next__role', text(nextData.role)));
       card.appendChild(cardText);
       var nextHero = nextData.hero || {};
       var cardMedia = el('div', 'cs-next__media');
@@ -389,9 +549,9 @@
       next.appendChild(card);
     }
     var nextLinks = el('div', 'cs-next__links');
-    var all = el('a', 'cs-link text-label', 'All work');
+    var all = el('a', 'cs-link', 'All work');
     all.href = Order.link('index.html#work');
-    var contact = el('button', 'cs-link text-label', 'Contact');
+    var contact = el('button', 'cs-link', 'Contact');
     contact.type = 'button';
     contact.setAttribute('data-open-contact', '');
     [all, contact].forEach(function (n) { n.setAttribute('data-cursor-solid', 'white'); nextLinks.appendChild(n); });

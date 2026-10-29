@@ -25,9 +25,13 @@
     cutout: true        transparent PNG/WebP: shown whole on a plain print
     contain: true       show the whole image, uncropped (slides, sheets)
     large: true         (03 Work only) spans wider in the grid
-  Optional on idea / friction / work: ratio: '16 / 10' sets the tile shape
-  for that section (default: portrait 4 / 5 in Work), e.g. for film frames
-  or slides, so they aren't cropped.
+  01 Idea images become loose papers you can shuffle and drag: any number,
+  any shape, shown whole (no crop), no caption on the page (label still
+  shows in the viewer). Transparent PNG/WebP cut-outs sit straight on the
+  page with a soft shadow.
+  Optional on friction / work: ratio: '16 / 10' sets the tile shape for
+  that section (default: portrait 4 / 5 in Work), e.g. for film frames or
+  slides, so they aren't cropped.
     position: '30% 50%' which part of the image the crop keeps
 
   TEMPLATE
@@ -90,7 +94,6 @@ window.PROJECTS = {
       alt: 'Still from the Grassroots fall film: a driver’s hands on the wheel of a vintage Porsche'
     },
     idea: {
-      ratio: '16 / 10',
       copy: 'After seeing Boy’s Club, the in-house CD at Grassroots, a luxury car club out of NYC, hired me freelance as creative director on the film for their fall merch drop. I pitched a direction plus one alternate, then built storyboards, style sheets, and a timed shot list. The winning pitch: young love in the city, the thrill of speed, tension, and falling for someone new.',
       images: [
         { src: 'assets/case-studies/grassroots/gr-pitch-moodboard.jpg', contain: true, label: 'Pitch Deck', alt: 'Moodboard slide from the Grassroots pitch deck: vintage cars, couples and city scenes' },
@@ -178,14 +181,12 @@ window.PROJECTS = {
     collaborators: ['Music by Lana Del Rey'],
     tools: ['Procreate', 'After Effects', 'Hand-drawn sketch'],
     action: { label: 'Watch the Sequence', url: 'https://www.youtube.com/watch?v=Fl9wpFEMiEA' },
-    home: { video: 'assets/video/title-sequence-thumb.mp4', image: 'assets/case-studies/title-sequence/frames/ts-03-birdcage.webp' },
     hero: {
       video: 'assets/video/title-sequence.mp4',
       src: 'assets/case-studies/title-sequence/frames/ts-03-birdcage.webp',
       alt: 'Illustrated title sequence frame: a gilded birdcage in a jungle hallway with a checkered floor'
     },
     idea: {
-      ratio: '16 / 10',
       copy: 'Opening credits for Netflix\u2019s A Series of Unfortunate Events. I wanted viewers to feel the show\u2019s themes while only hinting at the plot. Storybook paper cutouts nod to its roots as a children\u2019s novel and give it an eerie, academic edge. Every vignette hides metaphors and easter eggs that only surface after a few rewatches.',
       images: [
         { src: 'assets/case-studies/title-sequence/process/ts-sketches-storyboards.jpg', contain: true, label: 'Early sketch', alt: 'Process book page of pencil character sketches and storyboards' },
@@ -237,7 +238,6 @@ window.PROJECTS = {
     action: { label: 'Watch the Prototype', video: 'assets/video/special-olympics-prototype.mp4' },
     hero: { src: 'assets/case-studies/special-olympics/so-homepage-screen.jpg', alt: 'Redesigned Special Olympics New York homepage: a Supporting Champions panel over a snowy mountain town' },
     idea: {
-      ratio: '16 / 10',
       copy: '[Idea copy, 40 to 60 words]',
       images: [
         { src: 'assets/case-studies/special-olympics/so-design-goals.jpg', contain: true, label: 'Design goals', alt: 'Four design goals with icons: simple, sporty, professional, accessible' },
