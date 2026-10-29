@@ -148,27 +148,27 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 }
 .cs-link:hover { opacity: 0.55; }
 
-/* ---------- light-box: frame + glass layer (homepage only) ---------- */
+/* ---------- light-box background (homepage only) ---------- */
 /*
-  Matches Sadie's two Figma layers exactly, built in CSS so it scales:
-    color background layer  viewport fill #FDF9F5 + 20px inside stroke #100E0C
-    glass top               flat fill rgb(220 230 240) @ 20% over everything
+  Sadie's light-box image, fixed behind everything as the page's solid
+  background. Drawn as a 9-slice (border-image): the 40px bevel at each
+  edge keeps the same depth at every screen size, the corners never
+  distort, and only the flat center stretches (`fill`). The page body is
+  transparent on the homepage (css/home.css) so this shows through.
 */
 .lightbox {
   position: fixed;
   inset: 0;
-  z-index: var(--z-frame);
+  z-index: -1;
   pointer-events: none;
-  border: var(--frame-width) solid var(--frame-color);
-}
-.lightbox::after {
-  content: '';
-  position: absolute;
-  inset: calc(var(--frame-width) * -1);
-  background: var(--glass-tint);
+  border-style: solid;
+  border-width: var(--lightbox-edge);
+  border-image: url('../assets/lightbox/lightbox-frame.png') 40 fill / var(--lightbox-edge) stretch;
+  background: var(--lightbox-surface);
+  background-clip: padding-box;
 }
 
-/* pages without the light box (project pages): no frame offset */
+/* pages without the light box (every page but home): no frame offset */
 body:not(.home) { --frame-width: 0px; }
 
 @media print { .lightbox { display: none; } }

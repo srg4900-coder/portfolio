@@ -6,6 +6,14 @@
   back into its grid cell as the hero scrolls away. No JS = clean grid.
 */
 
+/* transparent so the light-box background (.lightbox, components.css) shows through */
+body.home { background: transparent; }
+
+/* the nav's fade matches the light-box surface instead of the paper color */
+.home .site-nav {
+  background: linear-gradient(to bottom, var(--lightbox-surface) 45%, rgba(247, 245, 244, 0));
+}
+
 .home main {
   padding: 0 calc(var(--frame-width) + var(--grid-margin));
 }
