@@ -94,9 +94,22 @@
 
 .studio__grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(28px, 4vw, 48px) var(--grid-gutter);
-  margin-top: clamp(24px, 3vw, 40px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));  /* 3 across on a full desktop */
+  gap: var(--space-row) var(--grid-gutter);
+  margin-top: var(--space-block);
+  align-items: start;  /* pieces keep their own heights */
+}
+
+/* Studio pieces are never cropped: each image shows whole at its own
+   proportions, scaled to the column width (overrides the case-study
+   tile's fixed shape + cover crop). */
+.studio__grid .cs-fig__open {
+  aspect-ratio: auto;
+  background: none;
+}
+.studio__grid .cs-fig__media {
+  height: auto;
+  object-fit: contain;
 }
 
 .studio__caption {
@@ -135,11 +148,14 @@
   padding: clamp(72px, 10vw, 140px) 0 clamp(48px, 6vw, 80px);
 }
 
-@media (max-width: 1024px) {
+/* small desktop + tablet: 2 across */
+@media (max-width: 1200px) {
   .studio__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 760px) {
   .about { grid-template-columns: 1fr; }
   .about__studio { grid-column: 1; }
+  /* phone: one piece per line */
+  .studio__grid { grid-template-columns: 1fr; }
 }
