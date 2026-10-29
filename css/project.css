@@ -560,6 +560,13 @@ body.project-page {
   object-fit: cover;
   transition: transform var(--duration-slow) var(--ease-smooth);
 }
+/* Next Project grade, from Sadie's image settings: saturation off, exposure
+   up a touch, contrast well up (which also lifts highlights and deepens
+   shadows). Skipped for heroes that are already black and white. */
+.cs-next__img.is-graded {
+  filter: grayscale(1) brightness(1.06) contrast(1.35);
+}
+
 .cs-next__card:hover .cs-next__img,
 .cs-next__card:focus-visible .cs-next__img { transform: scale(1.03); }
 

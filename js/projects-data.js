@@ -51,7 +51,7 @@
     collaborators: ['Name, Role'],          // one person per entry: 'Name, Role' (role shows lighter)
     tools: ['Figma'],
     action: { label: 'View Live Site', url: 'https://...' }, // or video: 'path.mp4' to play it here
-    hero: { src: '...', alt: '...' },      // add video: '...' for a moving hero
+    hero: { src: '...', alt: '...' },      // add video: '...' for a moving hero; bw: true if it's already black and white
     home: { image: '...', video: '...' },  // optional homepage cover (defaults to hero)
     idea: { copy: '[40 to 60 words]', images: [ ... ] },          // 2 to 4 images
     friction: { problem: '', response: '', result: '', images: [] }, // optional, 1 to 2 images
@@ -149,7 +149,7 @@ window.PROJECTS = {
     status: 'In Progress',
     tools: ['Figma', 'Sony A6100', 'Lightroom', 'JavaScript, AI-assisted development', 'Sewing machine'],
     // TODO(Sadie): add { label: 'Shop the Drop', url: '...' } once the storefront is live
-    hero: { src: 'assets/case-studies/boys-club/bc-02.jpg', alt: 'Black and white editorial: the model on a leather sofa beside a white dog, Boy’s Club B mark overlaid' },
+    hero: { src: 'assets/case-studies/boys-club/bc-02.jpg', bw: true, alt: 'Black and white editorial: the model on a leather sofa beside a white dog, Boy’s Club B mark overlaid' },
     idea: {
       copy: 'Sketched in a three hour train delay in Italy. The premise: a girl who wears the clothes taken from the men she holds close. The core image: rigid menswear worn for years until its lines loosen, cut and cloth intact, structure softened into her lines. Drop one blends 1920s athletic wear, vintage collegiate, and 60s rock and roll.',
       images: [

@@ -606,7 +606,9 @@
       var cardMedia = el('div', 'cs-next__media');
       var nextImg = nextHero.src || (nextData.home && nextData.home.image);
       // decorative here: the title right beside it already names the link
-      if (nextImg) cardMedia.appendChild(media({ src: nextImg, alt: '', position: nextHero.position }, 'cs-next__img'));
+      // every Next Project image gets the same black-and-white grade for a
+      // uniform footer (css/project.css), unless the hero already is (bw: true)
+      if (nextImg) cardMedia.appendChild(media({ src: nextImg, alt: '', position: nextHero.position }, 'cs-next__img' + (nextHero.bw ? '' : ' is-graded')));
       else cardMedia.appendChild(missing(nextHero.label || 'Hero image', 'cs-next__img'));
       card.appendChild(cardMedia);
       next.appendChild(card);
