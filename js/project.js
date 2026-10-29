@@ -512,7 +512,8 @@
     metaRow(creditList, 'Duration', data.duration);
     metaRow(creditList, 'Status', data.status, { tag: true });
     metaRow(creditList, 'Award', data.award, { tag: true, award: true });
-    metaRow(creditList, 'Released', data.released);
+    // Released is hidden for now (Sadie, Oct 2026); the data stays in projects-data.js.
+    // metaRow(creditList, 'Released', data.released);
     metaRow(creditList, 'Client', data.client);
     metaRow(creditList, 'Course', data.course);
     metaRow(creditList, 'Collaborators', data.collaborators, { stacked: true });
