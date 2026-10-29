@@ -63,6 +63,47 @@
 
     var sheets = Array.prototype.slice.call(root.querySelectorAll('.sheet'));
 
+    // ---------- references (js/references-data.js) ----------
+    // Little papers that end up tucked behind the prints. placeRefs puts each
+    // one at its resting spot relative to the print it belongs behind.
+    var REFS = (window.REFERENCES || []).filter(function (r) { return r && (r.src || r.text); });
+    var refs = REFS.map(function (r) {
+      var el = document.createElement('div');
+      el.className = 'ref ref--' + (r.type === 'note' ? 'note' : 'image');
+      el.style.setProperty('--tilt', (r.tilt || 0) + 'deg');
+      if (r.type === 'note') {
+        el.appendChild(document.createElement('p')).textContent = r.text;
+      } else {
+        var img = el.appendChild(document.createElement('img'));
+        img.src = r.src;
+        img.alt = r.alt || '';
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.draggable = false;
+      }
+      root.appendChild(el);
+      return el;
+    });
+
+    function placeRefs() {
+      var sx = window.scrollX, sy = window.scrollY;
+      var rr = root.getBoundingClientRect();
+      var rx = rr.left + sx, ry = rr.top + sy;
+      refs.forEach(function (el, i) {
+        var r = REFS[i];
+        var host = sheets[r.behind || 0];
+        if (!host) { el.style.display = 'none'; return; }
+        var prev = host.style.transform;
+        host.style.transform = 'none';
+        var b = host.getBoundingClientRect();
+        host.style.transform = prev;
+        var at = r.at || [0, 0];
+        el.style.width = Math.round(b.width * (r.width || 0.25)) + 'px';
+        el.style.left = Math.round(b.left + sx - rx + at[0] * b.width) + 'px';
+        el.style.top = Math.round(b.top + sy - ry + at[1] * b.height) + 'px';
+      });
+    }
+
     // videos only play while on screen
     if ('IntersectionObserver' in window) {
       var io = new IntersectionObserver(function (entries) {
@@ -97,31 +138,36 @@
     });
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      placeRefs();
+      window.addEventListener('resize', placeRefs);
+      window.addEventListener('load', placeRefs);
       if (location.hash === '#work') jumpToWork();
       return;
     }
 
     // ---------- scatter layout ----------
-    // x, y: top-left as a fraction of the viewport; r: tilt (deg); s: scale vs. resting size
+    // x, y: top-left as a fraction of the viewport; r: tilt (deg); s: scale vs. resting size.
+    // Only the first 4 prints scatter: the first two large on the light box,
+    // the next two waiting just off screen right (x > 1). Any print after the
+    // 4th simply sits in the grid. Off-screen prints first drop down along
+    // the right edge and only slide into their column at the end, so nothing
+    // sweeps across the page.
     var SCATTER_WIDE = [
-      { x: 0.47, y: 0.20, r: -2.5, s: 0.62 },
-      { x: 0.72, y: 0.26, r: 1.8,  s: 0.56 },
-      { x: 0.55, y: 0.62, r: 3.5,  s: 0.42 },
-      { x: 0.84, y: 0.64, r: -4,   s: 0.40 },
-      { x: 0.66, y: 0.08, r: 2.5,  s: 0.36 },
-      { x: 0.90, y: 0.06, r: -2,   s: 0.40 }
+      { x: 0.38, y: 0.17, r: -2.5, s: 0.93 },
+      { x: 0.72, y: 0.30, r: 1.8,  s: 0.84 },
+      { x: 1.04, y: 0.14, r: 3,    s: 0.60 },
+      { x: 1.08, y: 0.56, r: -3,   s: 0.60 }
     ];
     var SCATTER_PHONE = [
-      { x: 0.10, y: 0.56, r: -3,   s: 0.40 },
-      { x: 0.48, y: 0.52, r: 2.5,  s: 0.44 },
-      { x: 0.30, y: 0.72, r: 5,    s: 0.30 },
-      { x: 0.66, y: 0.74, r: -4,   s: 0.30 },
-      { x: 0.80, y: 0.46, r: 3,    s: 0.26 },
-      { x: 0.02, y: 0.80, r: -2,   s: 0.26 }
+      { x: 0.06, y: 0.50, r: -3,   s: 0.62 },
+      { x: 0.52, y: 0.60, r: 2.5,  s: 0.66 },
+      { x: 1.04, y: 0.40, r: 4,    s: 0.50 },
+      { x: 1.08, y: 0.70, r: -3,   s: 0.50 }
     ];
     var phone = window.matchMedia('(max-width: 640px)');
 
     var cells = [];   // untransformed document positions, cached per layout
+    var refCells = [];
     var vw = 0, vh = 0, span = 1;
 
     // ---------- TITLE -> LOGO ----------
@@ -184,7 +230,19 @@
         el.style.transform = prev;
         return { x: r.left + sx, y: r.top + sy, w: r.width };
       });
+      placeRefs();
+      refCells = refs.map(function (el) {
+        var prev = el.style.transform;
+        el.style.transform = 'none';
+        var r = el.getBoundingClientRect();
+        el.style.transform = prev;
+        return { x: r.left + sx, y: r.top + sy };
+      });
     }
+
+    // horizontal travel for things waiting off screen right: held until
+    // they've dropped most of the way down, then a short slide in
+    function slideLate(t) { return 1 - ease(clamp01((t - 0.4) / 0.6)); }
 
     function ease(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
     function clamp01(t) { return t < 0 ? 0 : t > 1 ? 1 : t; }
@@ -204,7 +262,7 @@
       // the role line floats up faster than the page and fades, clearing the stage
       if (role) {
         role.style.transform = 'translate3d(0,' + (-y * 0.45).toFixed(1) + 'px,0)';
-        role.style.opacity = Math.max(0, 1 - progress * 1.5).toFixed(3);
+        role.style.opacity = Math.max(0, 1 - progress * 3.5).toFixed(3); // gone before it reaches the logo
       }
 
       // title -> logo, over the first part of the scroll
@@ -229,7 +287,12 @@
 
       sheets.forEach(function (el, i) {
         var c = cells[i];
-        var s = list[i % list.length];
+        var s = list[i];
+        if (!s) {                      // 5th print onward: just sits in the grid
+          el.style.transform = '';
+          el.style.setProperty('--settle', 1);
+          return;
+        }
         // stagger: earlier sheets land first
         var stagger = 0.06;
         var t = ease(clamp01((progress - i * stagger) / Math.max(0.3, 1 - (n - 1) * stagger)));
@@ -240,13 +303,28 @@
           return;
         }
         // scatter target is viewport-fixed: sheets hold their pile while the hero text scrolls off
-        var tx = (s.x * vw - c.x) * k;
+        var tx = (s.x * vw - c.x) * (s.x > 0.98 ? slideLate(t) : k);
         // window.scrollY (not the smoothed y) keeps the target pinned to the real viewport
         var ty = (s.y * vh + window.scrollY - c.y) * k;
         var sc = s.s + (1 - s.s) * t;
         el.style.transform = 'translate3d(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px,0) rotate(' + (s.r * k).toFixed(2) + 'deg) scale(' + sc.toFixed(3) + ')';
         el.style.setProperty('--settle', Math.max(0, t * 1.6 - 0.6).toFixed(2));
         el.style.zIndex = progress < 1 ? 30 + ((i * 7) % n) : '';
+      });
+
+      // references: same path as the prints, a beat behind, ending tucked
+      // under them at their resting tilt
+      refs.forEach(function (el, i) {
+        var c = refCells[i], r = REFS[i];
+        if (!c || el.style.display === 'none') return;
+        var t = ease(clamp01((progress - 0.05 - i * 0.04) / 0.75));
+        var k = 1 - t;
+        var tilt = (r.tilt || 0) + 'deg';
+        if (k < 0.001) { el.style.transform = 'rotate(' + tilt + ')'; return; }
+        var st = r.start || [1.1, 0.5];
+        var tx = (st[0] * vw - c.x) * (st[0] > 0.98 ? slideLate(t) : k);
+        var ty = (st[1] * vh + window.scrollY - c.y) * k;
+        el.style.transform = 'translate3d(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px,0) rotate(' + tilt + ')';
       });
     }
 

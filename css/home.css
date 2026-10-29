@@ -178,6 +178,27 @@ body.home { background: transparent; }
   transform: translateY(-4px) rotate(-4deg);
 }
 
+/* ---------- references: little papers behind the prints (js/home.js, js/references-data.js) ---------- */
+.ref {
+  position: absolute;
+  z-index: var(--z-paper-back);   /* always under the prints */
+  transform: rotate(var(--tilt, 0deg));
+  will-change: transform;
+  pointer-events: none;
+  background: var(--color-white);
+  box-shadow: var(--shadow-paper);
+}
+.ref--image { padding: 6px; }
+.ref--image img { display: block; width: 100%; height: auto; }
+.ref--note {
+  padding: 12px 14px 16px;
+  font-size: var(--text-label-size);
+  line-height: 1.4;
+  color: var(--text-soft);
+}
+/* phones: one print per row leaves no room to peek from behind, so no refs */
+@media (max-width: 640px) { .ref { display: none; } }
+
 /* caption: fades in as the sheet lands (--settle set by home.js) */
 .sheet__caption {
   display: flex;
