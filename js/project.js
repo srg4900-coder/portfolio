@@ -58,6 +58,21 @@
   // a field can be a string or a list; either way, '' when empty
   function text(v) { return list(v).join(', '); }
   function pad(n) { return String(n).padStart(2, '0'); }
+
+  // DURATION RULE: a number and a unit ("3 days", "2 weeks", "1 year"), or
+  // the one word "Ongoing". Plural is fixed automatically ("1 weeks" ->
+  // "1 week"). Anything else returns null: it doesn't render, and the
+  // console reminder below flags it.
+  var DURATION = /^(\d+)\s+(day|week|month|year)s?$/i;
+  function duration(v) {
+    var s = text(v);
+    if (!s) return '';
+    if (/^ongoing$/i.test(s)) return 'Ongoing';
+    var m = s.match(DURATION);
+    if (!m) return null;
+    var n = Number(m[1]);
+    return n + ' ' + m[2].toLowerCase() + (n === 1 ? '' : 's');
+  }
   function projectUrl(s) { return Order.link('project.html?project=' + encodeURIComponent(s)); }
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -509,7 +524,8 @@
     var credits = el('section', 'cs-credits grid');
     credits.setAttribute('aria-label', 'Credits');
     var creditList = el('dl', 'cs-meta cs-meta--credits');
-    metaRow(creditList, 'Duration', data.duration);
+    var dur = duration(data.duration);
+    metaRow(creditList, 'Duration', dur || '');
     metaRow(creditList, 'Status', data.status, { tag: true });
     metaRow(creditList, 'Award', data.award, { tag: true, award: true });
     // Released is hidden for now (Sadie, Oct 2026); the data stays in projects-data.js.
@@ -564,6 +580,7 @@
     // ---------- reminders for Sadie (console only) ----------
     var todo = [];
     if (!text(data.role) || /^\[/.test(text(data.role))) todo.push('role');
+    if (dur === null) todo.push('duration "' + text(data.duration) + '": use a number + day/week/month/year, or Ongoing');
     if (!heroData.src) todo.push('hero image');
     else if (/^\[|^$/.test(heroData.alt || '')) todo.push('hero alt text');
     [ideaImages, frictionImages, workImages].forEach(function (items) {

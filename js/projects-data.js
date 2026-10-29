@@ -40,7 +40,7 @@
     hook: '[Hook, under 10 words]',
     role: 'Art Direction',                 // required
     disciplines: ['Branding', 'Print'],
-    duration: '6 weeks',
+    duration: '6 weeks',                   // a number + day/week/month/year, or 'Ongoing'
     status: 'Live',                        // Live / In Production / In Progress / Concept
     award: 'Gold ADDY',                    // 2-3 words: gold tag on the homepage print + hero; full story goes in the copy
     released: 'Sep. 2026',
@@ -75,7 +75,7 @@ window.PROJECTS = {
     hook: 'Feel the love, live fast',
     role: 'Creative Co-Director & Advisor',
     disciplines: ['Creative Direction', 'Styling', 'Storyboarding', 'Photography', 'Talent Direction'],
-    duration: '[2 weeks] pre-production + one-day shoot',
+    duration: '2 weeks',
     status: 'Live',
     released: 'Sep. 2026',
     client: 'Grassroots',
@@ -131,7 +131,7 @@ window.PROJECTS = {
     hook: 'Held close. His before it was hers.',
     role: 'Founder & Designer',
     disciplines: ['Brand & Creative Direction', 'Clothing Design, Alteration & Construction', 'Styling', 'Editorial Photography', 'Web & E-commerce Development'],
-    duration: 'Summer 2026, ongoing',
+    duration: 'Ongoing',
     status: 'In Progress',
     tools: ['Figma', 'Sony A6100', 'Lightroom', 'JavaScript, AI-assisted development', 'Sewing machine'],
     // TODO(Sadie): add { label: 'Shop the Drop', url: '...' } once the storefront is live
@@ -175,7 +175,7 @@ window.PROJECTS = {
     hook: 'A clue in every frame',
     role: 'Motion Designer & Illustrator',
     disciplines: ['Motion Design', 'Illustration', 'Hand Animation'],
-    duration: '[5 weeks]',
+    duration: '5 weeks',
     award: 'Gold ADDY',
     course: 'Motion Design, Prof. Austin Shaw',
     collaborators: ['Music by Lana Del Rey'],
@@ -231,7 +231,7 @@ window.PROJECTS = {
     hook: '[Hook]',
     role: '[Role]',
     disciplines: ['[Disciplines]'],
-    duration: 'Fall 2025',
+    duration: '',                          // TODO(Sadie): e.g. '12 weeks'
     status: 'Concept',
     course: 'Graphical User Interface',
     tools: ['[Tools]'],
