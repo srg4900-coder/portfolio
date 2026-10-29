@@ -604,7 +604,8 @@
       card.appendChild(cardText);
       var nextHero = nextData.hero || {};
       var cardMedia = el('div', 'cs-next__media');
-      var nextImg = nextHero.src || (nextData.home && nextData.home.image);
+      // the project's preview thumbnail (home.image) if it has one, else its hero
+      var nextImg = (nextData.home && nextData.home.image) || nextHero.src;
       // decorative here: the title right beside it already names the link
       // every Next Project image gets the same black-and-white grade for a
       // uniform footer (css/project.css), unless the hero already is (bw: true)

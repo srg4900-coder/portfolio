@@ -52,7 +52,7 @@
     tools: ['Figma'],
     action: { label: 'View Live Site', url: 'https://...' }, // or video: 'path.mp4' to play it here
     hero: { src: '...', alt: '...' },      // add video: '...' for a moving hero; bw: true if it's already black and white
-    home: { image: '...', video: '...' },  // optional homepage cover (defaults to hero)
+    home: { image: '...', video: '...' },  // optional preview thumbnail: homepage print + Next Project card (defaults to hero)
     idea: { copy: '[40 to 60 words]', images: [ ... ] },          // 2 to 4 images
     friction: { problem: '', response: '', result: '', images: [] }, // optional, 1 to 2 images
     work: { images: [ ... ], outcome: '[Under 25 words]' }       // 6 to 12 images
@@ -112,10 +112,10 @@ window.PROJECTS = {
       result: 'Rollers, road, drone, city, and studio stills, true to the original moodboard and the CD’s brief. Short film and social media content for the drop after editing by the Grassroots team.',
       images: [
         {
+          // the matching storyboard sketch is stored as gr-storyboard-scenic-outlook.jpg
           src: 'assets/case-studies/grassroots/gr-final-jacket-barn.jpg',
-          note: 'assets/case-studies/grassroots/gr-storyboard-scenic-outlook.jpg',
-          label: 'Storyboard vs. final frame',
-          alt: 'Final frame: he drapes the jacket over her shoulders against the Porsche in front of a white barn, with the hand-drawn storyboard sketch of the same moment pinned in the corner'
+          label: 'Final frame',
+          alt: 'Final frame: he drapes the jacket over her shoulders against the Porsche in front of a white barn'
         },
         // more behind-the-scenes shots are in grassroots/bts/
         {
@@ -195,6 +195,8 @@ window.PROJECTS = {
     collaborators: ['Lana Del Rey, Music'],
     tools: ['Procreate', 'After Effects', 'Hand-drawn sketch'],
     action: { label: 'Watch the Sequence', url: 'https://www.youtube.com/watch?v=Fl9wpFEMiEA' },
+    // preview thumbnail everywhere (homepage print + Next Project card)
+    home: { image: 'assets/case-studies/title-sequence/frames/ts-08-title-card.webp' },
     hero: {
       video: 'assets/video/title-sequence.mp4',
       src: 'assets/case-studies/title-sequence/frames/ts-03-birdcage.webp',

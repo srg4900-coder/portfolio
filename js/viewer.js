@@ -157,20 +157,42 @@
 
   window.ImageViewer = { open: open };
 
-  // two-finger trackpad swipe (a sideways wheel gesture): one step per
-  // swipe. The gesture keeps sending events through its momentum, so it's
-  // locked after one step until the events stop for a moment.
-  var wheelX = 0, wheelLocked = false, wheelTimer = null;
+  // two-finger trackpad swipe (a sideways wheel gesture): every swipe steps
+  // exactly one image, and swipes can follow each other without pausing.
+  // After a swipe the trackpad keeps sending "momentum" events that only
+  // fade; those are ignored. A NEW swipe shows up as the movement surging
+  // again (or reversing) inside that fading tail, so it steps right away
+  // instead of waiting for the tail to end.
+  var STEP_PX = 30;          // sideways travel that counts as a swipe
+  var wheelX = 0, locked = false, lockDir = 0, peak = 0, prev = 0, idleTimer = null;
+  function resetWheel() { wheelX = 0; locked = false; peak = 0; prev = 0; }
   root.addEventListener('wheel', function (e) {
     if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;  // up/down: not ours
     e.preventDefault();  // no browser back/forward swipe while viewing
-    clearTimeout(wheelTimer);
-    wheelTimer = setTimeout(function () { wheelX = 0; wheelLocked = false; }, 200);
-    if (wheelLocked || items.length < 2) return;
+    if (items.length < 2) return;
+    var ax = Math.abs(e.deltaX);
+    var dir = e.deltaX > 0 ? 1 : -1;
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(resetWheel, 160); // fingers lifted, tail over
+
+    if (locked) {
+      var faded = prev < peak * 0.6;                // the tail has been dying down
+      var surge = faded && ax > prev * 1.6 && ax > 6; // ...and now picks up again
+      var reverse = dir !== lockDir && ax > 6;
+      if (!surge && !reverse) {                      // still the old swipe's momentum
+        prev = ax;
+        return;
+      }
+      resetWheel();                                  // a new swipe starts here
+    }
+
     wheelX += e.deltaX;
-    if (Math.abs(wheelX) > 40) {
+    peak = Math.max(peak, ax);
+    prev = ax;
+    if (Math.abs(wheelX) > STEP_PX) {
       show(index + (wheelX > 0 ? 1 : -1));
-      wheelLocked = true;
+      locked = true;
+      lockDir = wheelX > 0 ? 1 : -1;
       wheelX = 0;
     }
   }, { passive: false });
