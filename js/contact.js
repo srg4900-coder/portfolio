@@ -141,6 +141,7 @@
     opener = trigger || null;
     modal.inert = false;
     modal.classList.add('is-open');
+    document.documentElement.classList.add('is-contact-open'); // page can't scroll behind it
     if (viaKeyboard) closeBtn.focus();
     else modal.focus({ preventScroll: true });
   }
@@ -148,6 +149,7 @@
     if (!modal.classList.contains('is-open')) return;
     modal.classList.remove('is-open');
     modal.inert = true;
+    document.documentElement.classList.remove('is-contact-open');
     if (opener) opener.focus();
   }
 
