@@ -93,8 +93,10 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   justify-content: space-between;
   padding: 0 var(--grid-margin);
   font-size: var(--text-small-size);
-  /* soft paper fade so content scrolling underneath never collides with the links */
-  background: linear-gradient(to bottom, var(--color-paper) 45%, rgba(253, 249, 245, 0));
+  /* solid paper, so on case studies it joins the sticky 01 / 02 / 03 strip
+     right under it (css/project.css) into one bar with nothing showing
+     between; the homepage swaps in a fade over the light box (home.css) */
+  background: var(--color-paper);
   pointer-events: none; /* re-enabled on the links */
 }
 .site-nav * { pointer-events: auto; }
