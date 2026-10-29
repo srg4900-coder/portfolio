@@ -129,7 +129,7 @@ window.PROJECTS = {
     work: {
       images: [
         { src: 'assets/case-studies/grassroots/gr-porsche-lawn.jpg', large: true, position: '50% 75%', alt: 'Vintage Porsche parked on a lawn in front of a house, driver door open' },
-        { src: 'assets/case-studies/grassroots/gr-talent-studio.jpg', label: 'Wardrobe: Style 2', alt: 'Talent in a navy blazer, tie and sunglasses holding a Grassroots tote in the studio' },
+        { src: 'assets/case-studies/grassroots/gr-talent-studio.jpg', label: 'Wardrobe: Look 2', alt: 'Talent in a navy blazer, tie and sunglasses holding a Grassroots tote in the studio' },
         { src: 'assets/case-studies/grassroots/gr-sketchbook.jpg', alt: 'Close-up of hands sketching in a notebook' },
         { src: 'assets/case-studies/grassroots/gr-driver-seat.jpg', alt: 'Driver’s hands on the wheel of a vintage Porsche interior' },
         { src: 'assets/case-studies/grassroots/gr-fall26-poster.jpg', label: 'Fall 26 Drop', alt: 'Fall 26 social graphic: a man in a green jacket leaning on a pink Porsche' },
