@@ -15,10 +15,17 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500&family=Cutive+Mono&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/tokens.css?v=72">
-<link rel="stylesheet" href="css/components.css?v=72">
-<link rel="stylesheet" href="css/project.css?v=72">
-<link rel="stylesheet" href="css/pages.css?v=72">
+<link rel="stylesheet" href="css/tokens.css?v=86">
+<link rel="stylesheet" href="css/components.css?v=86">
+<link rel="stylesheet" href="css/project.css?v=86">
+<link rel="stylesheet" href="css/pages.css?v=86">
+<!-- hold the page's entrance until the font and the first pieces are in
+     (released by js/studio.js; this timer is only a safety net), so it
+     plays as one clean sequence with nothing popping in late -->
+<script>
+  document.documentElement.classList.add('is-loading');
+  setTimeout(function () { document.documentElement.classList.remove('is-loading'); }, 1800);
+</script>
 </head>
 <body class="page" data-page="studio">
 
@@ -27,10 +34,13 @@
   </header>
 
   <main class="page__main">
-    <header class="page__head">
-      <p class="page__eyebrow load-rise">Select Works</p>
-      <h1 class="text-title load-rise" style="--load-delay: 80ms;">Studio</h1>
-      <p class="page__lede load-rise" style="--load-delay: 160ms;"></p>
+    <!-- laid out like a project page's top: name, type in mono, tagline -->
+    <header class="page__head page__head--studio">
+      <h1>
+        <span class="page__name text-title chunk" style="--chunk: 0">Studio</span>
+        <span class="page__kind chunk" style="--chunk: 1">Select Works</span>
+      </h1>
+      <p class="page__lede chunk" style="--chunk: 2"></p>
     </header>
 
     <div class="studio" id="studio"></div>
@@ -52,12 +62,12 @@
 
   <div class="contact-modal"></div>
 
-  <script src="js/nav.js?v=72"></script>
-  <script src="js/cursor.js?v=72"></script>
-  <script src="js/contact.js?v=72"></script>
-  <script src="js/studio-data.js?v=72"></script>
-  <script src="js/studio.js?v=72"></script>
-  <script src="js/viewer.js?v=72"></script>
-  <script src="js/touch.js?v=72"></script>
+  <script src="js/nav.js?v=86"></script>
+  <script src="js/cursor.js?v=86"></script>
+  <script src="js/contact.js?v=86"></script>
+  <script src="js/studio-data.js?v=86"></script>
+  <script src="js/studio.js?v=86"></script>
+  <script src="js/viewer.js?v=86"></script>
+  <script src="js/touch.js?v=86"></script>
 </body>
 </html>

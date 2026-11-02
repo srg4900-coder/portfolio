@@ -168,6 +168,51 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 }
 .cs-link:hover { opacity: 0.55; }
 
+/* ---------- tap targets ---------- */
+/* Plain text links and bare icons get an invisible hit area around them,
+   reaching Apple's 44 x 44pt minimum, so a near miss still lands (the
+   cursor dot is small, fingers are big). It's a ::after box, so nothing
+   moves and underlines stay where they are; stroked buttons (Resume, the
+   case-study actions) are big enough already. The ones that are already
+   positioned (popup / viewer Close) keep their own position. */
+.logo-button,
+.nav-right a,
+.nav-right button,
+.site-footer__links a,
+.site-footer__links button,
+.cs-link,
+.cs-steps__link,
+.cs-client__name,
+.cs-client__ig,
+.about__hi,
+.contact-modal__studio,
+.contact-modal__social { position: relative; }
+
+.logo-button::after,
+.nav-right a::after,
+.nav-right button::after,
+.site-footer__links a::after,
+.site-footer__links button::after,
+.cs-link::after,
+.cs-steps__link::after,
+.cs-client__name::after,
+.about__hi::after,
+.contact-modal__studio::after,
+.contact-modal__close::after,
+.viewer__close::after {
+  content: '';
+  position: absolute;
+  inset: -14px -10px;   /* 17px-tall text + 28px = 45px tall */
+}
+/* bare icons (32-36px drawn): a few px all round makes 44 */
+.contact-modal__social::after,
+.cs-client__ig::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+.cs-client__ig::after { inset: -13px; }   /* the client Instagram glyph is only 18px */
+
 /* ---------- About page turn (js/nav.js) ---------- */
 /* the canvas the page turn is drawn on, over everything but the cursor */
 .page-turn {
@@ -220,6 +265,27 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   border-image: url('../assets/lightbox/lightbox-frame.png') 40 / var(--lightbox-edge) stretch;
 }
 @media print { .lightbox__edge { display: none; } }
+
+/* iPhone Safari draws the page on under the status bar and the bottom
+   toolbar, past where fixed things (the frame, the nav) reach. A solid
+   band hangs off the top and bottom of the screen on every page, so
+   anything scrolling stays under the frame and never shows past it. */
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 50vh;
+  z-index: var(--z-frame);
+  background: var(--color-paper);
+  pointer-events: none;
+}
+body::before { bottom: 100%; }
+body::after { top: 100%; }
+body.home::before,
+body.home::after { background: var(--lightbox-surface); }
+@media print { body::before, body::after { display: none; } }
 
 /* pages without the light box (every page but home): no frame offset */
 body:not(.home) { --frame-width: 0px; }
@@ -338,17 +404,14 @@ body.custom-cursor-active * {
   mix-blend-mode: normal;
 }
 
+/* expanded into a label ("View", "Open"...): a sharp-cornered tag, like
+   the site's printed labels; only the resting dot is round */
 .cursor-label.is-expanded {
   width: auto;
   height: auto;
   padding: 10px 20px;
-  border-radius: 24px;
-  mix-blend-mode: normal;
-}
-
-/* data-cursor-shape="square" (js/cursor.js): same label, sharp corners */
-.cursor-label.is-expanded.is-square {
   border-radius: 0;
+  mix-blend-mode: normal;
 }
 
 @media (pointer: coarse) {
@@ -362,13 +425,13 @@ html.is-touch button {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* label flash: the cursor label's expanded pill, popping up above the finger */
+/* label flash: the cursor label's expanded tag, popping up above the finger */
 .touch-label {
   position: fixed;
   z-index: var(--z-cursor-label);
   pointer-events: none;
   padding: 10px 20px;
-  border-radius: 24px;
+  border-radius: 0;
   background: #FFFFFF;
   color: var(--color-ink);
   font-family: var(--font-mono);

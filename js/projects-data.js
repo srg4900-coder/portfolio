@@ -46,6 +46,7 @@
     duration: '6 weeks',                   // a number + day/week/month/year, or 'Ongoing'
     status: 'Live',                        // Live / In Production / In Progress / Concept
     award: 'Gold ADDY',                    // short: gold tag on the homepage print + credits; \n starts a new line
+    awardPlain: false,                     // optional: true = plain text in the credits (**word** bold), no tag anywhere
     awardStamp: 'assets/awards/x.png',     // optional: a stamp graphic instead of the gold tag (award text = its alt);
                                            //   white ink on transparent, it flips dark/light against what's under it
     released: 'Sep. 2026',
@@ -158,9 +159,11 @@ window.PROJECTS = {
     disciplines: ['Brand & Creative Direction', 'Clothing Design, Alteration & Construction', 'Styling', 'Editorial Photography', 'Web & E-commerce Development'],
     duration: 'Ongoing',
     status: 'In Progress',
+    award: '**CADalyst** Student Opportunity Fund',   // plain text in the credits; **word** = bold
+    awardPlain: true,
     tools: ['Figma', 'Sony A6100', 'Lightroom', 'JavaScript, AI-assisted development', 'Sewing machine'],
-    // TODO(Sadie): paste the site address into url; the button stays hidden until it has one
-    action: { label: 'View Site', url: '' },
+    // TODO(Sadie): paste the site address into url; until then the button shows greyed out
+    action: { label: 'View Site', url: '', hero: true },   // hero: true = the main image links there too (cursor reads View Site)
     hero: { src: 'assets/case-studies/boys-club/bc-02.jpg', bw: true, alt: 'Black and white editorial: the model on a leather sofa beside a white dog, Boy’s Club B mark overlaid' },
     idea: {
       copy: 'Sketched in a three hour train delay in Italy. The premise: a girl who wears the clothes taken from the men she holds close. The core image: rigid menswear worn for years until its lines loosen, cut and cloth intact, structure softened into her lines. Drop one blends 1920s athletic wear, vintage collegiate, and 60s rock and roll.',

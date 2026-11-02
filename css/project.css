@@ -201,6 +201,14 @@ body.project-page {
   background: var(--color-ink);
   color: var(--color-paper);
 }
+.cs-action__arrow { display: inline-flex; margin-left: 6px; }
+.cs-action__arrow svg { width: 0.95em; height: 0.95em; }
+/* an action without its link yet (projects-data.js url: ''): greyed, inert */
+.cs-action.is-unavailable {
+  opacity: 0.35;
+  pointer-events: none;
+  cursor: default;
+}
 
 /* ---------- section strip (01 Idea / 02 Friction / 03 Work) ---------- */
 
@@ -673,3 +681,9 @@ body.project-page {
 
 /* award stamp in the credits (css/components.css .award-stamp) */
 .cs-award-stamp { width: 96px; margin: 4px 0 0 4px; }
+
+/* bold word inside a credits line (a plain award): the heaviest loaded weight */
+.cs-meta__strong { font-weight: 500; }
+
+/* the hero image as a link (action.hero, js/project.js) */
+.cs-hero__link { display: block; cursor: pointer; }

@@ -54,7 +54,7 @@
           // award tag pinned to the print's corner (css/home.css), read as part of the link
           (p.awardStamp
             ? '<img class="sheet__award sheet__award--stamp award-stamp" src="' + p.awardStamp + '" alt="' + (p.award || 'Award').replace(/\n/g, ' ').replace(/"/g, '&quot;') + '" draggable="false">'
-            : p.award ? '<span class="sheet__award award-tag text-label">' + p.award.replace(/</g, '&lt;') + '</span>' : '') +
+            : p.award && !p.awardPlain ? '<span class="sheet__award award-tag text-label">' + p.award.replace(/</g, '&lt;') + '</span>' : '') +
           // three columns: number | title (wraps within its own column) | role (right)
           '<div class="sheet__caption">' +
             '<span class="sheet__num text-label">' + num + '</span>' +

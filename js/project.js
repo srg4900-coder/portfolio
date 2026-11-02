@@ -52,6 +52,17 @@
     if (text) node.textContent = text;
     return node;
   }
+  // the button's little mark, drawn as an icon: the arrow and play
+  // characters (↗ ▶) turn into colour emoji on iPhones
+  function actionIcon(name) {
+    var path = name === 'play'
+      ? '<path d="M4 2.5v11l9-5.5z" fill="currentColor"/>'
+      : '<path d="M4.5 11.5l7-7M5.5 4.5h6v6" fill="none" stroke="currentColor" stroke-width="1.3"/>';
+    var span = el('span', 'cs-action__arrow');
+    span.setAttribute('aria-hidden', 'true');
+    span.innerHTML = '<svg viewBox="0 0 16 16" width="16" height="16">' + path + '</svg>';
+    return span;
+  }
   function list(v) {
     if (Array.isArray(v)) return v.map(function (s) { return String(s).trim(); }).filter(Boolean);
     return v ? [String(v).trim()] : [];
@@ -430,6 +441,26 @@
     } else {
       heroFig.appendChild(missing(heroData.label || 'Hero image', 'cs-hero__img'));
     }
+    // action.hero: true makes the hero image itself the action too: the
+    // cursor reads the action's label ("View Site") and a click follows it.
+    // Until the url is filled in, the cursor says so and nothing happens.
+    var heroAct = data.action || {};
+    if (heroAct.hero && heroAct.label && heroData.src && !heroData.video) {
+      if (heroAct.url) {
+        var heroLink = el('a', 'cs-hero__link');
+        heroLink.href = heroAct.url;
+        if (/^https?:/.test(heroAct.url)) {
+          heroLink.target = '_blank';
+          heroLink.rel = 'noopener';
+        }
+        heroLink.setAttribute('aria-label', heroAct.label + ' (opens in a new tab)');
+        heroLink.setAttribute('data-cursor-label', heroAct.label);
+        heroLink.appendChild(heroFig.firstChild);
+        heroFig.insertBefore(heroLink, heroFig.firstChild);
+      } else {
+        heroFig.setAttribute('data-cursor-label', heroAct.soon || 'Site coming soon');
+      }
+    }
     hero.appendChild(heroFig);
 
     var info = el('div', 'cs-hero__info grid');
@@ -467,9 +498,14 @@
     if (meta.children.length) info.appendChild(meta);
 
     var act = data.action || {};
-    if (act.label && (act.url || act.video)) {
+    if (act.label) {
       var action;
-      if (act.video) {
+      if (!act.url && !act.video) {
+        // no address yet: shown greyed out and inert, like the site's other
+        // not-ready links (Resume, social icons), so it's visibly coming
+        action = el('span', 'cs-action is-unavailable', act.label);
+        action.setAttribute('aria-disabled', 'true');
+      } else if (act.video) {
         // plays right here, in the viewer, with sound and controls
         action = el('button', 'cs-action', act.label);
         action.type = 'button';
@@ -478,18 +514,18 @@
         action.setAttribute('data-src', heroData.src || '');
         action.setAttribute('data-alt', data.title);
         action.setAttribute('data-label', data.title);
-        action.appendChild(el('span', 'cs-action__arrow', ' ▶'));
+        action.appendChild(actionIcon('play'));
       } else {
         action = el('a', 'cs-action', act.label);
         action.href = act.url;
         if (/^https?:/.test(act.url)) {
           action.target = '_blank';
           action.rel = 'noopener';
-          action.appendChild(el('span', 'cs-action__arrow', ' ↗'));
+          action.appendChild(actionIcon('out'));
           action.setAttribute('aria-label', act.label + ' (opens in a new tab)');
         }
       }
-      action.setAttribute('data-cursor-solid', 'white');
+      if (act.url || act.video) action.setAttribute('data-cursor-solid', 'white');
       info.appendChild(action);
     }
     if (info.children.length) hero.appendChild(info);
@@ -615,7 +651,18 @@
     var creditList = el('dl', 'cs-meta cs-meta--credits');
     var dur = duration(data.duration);
     metaRow(creditList, 'Duration', dur || '');
-    metaRow(creditList, 'Award', data.award, { tag: true, award: true, stamp: data.awardStamp });
+    if (data.awardPlain && data.award) {
+      // a plain line of text, not a tag, with **word** shown bold
+      var awardRow = el('div', 'cs-meta__row');
+      awardRow.appendChild(el('dt', 'text-label', 'Award'));
+      var awardDd = awardRow.appendChild(el('dd'));
+      data.award.replace(/\n/g, ' ').split(/\*\*(.+?)\*\*/).forEach(function (part, k) {
+        if (part) awardDd.appendChild(k % 2 ? el('strong', 'cs-meta__strong', part) : document.createTextNode(part));
+      });
+      creditList.appendChild(awardRow);
+    } else {
+      metaRow(creditList, 'Award', data.award, { tag: true, award: true, stamp: data.awardStamp });
+    }
     // Released is hidden for now (Sadie, Oct 2026); the data stays in projects-data.js.
     // metaRow(creditList, 'Released', data.released);
     if (data.client && typeof data.client === 'object') clientRow(creditList, data.client);

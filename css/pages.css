@@ -26,6 +26,30 @@
   color: var(--text-soft);
 }
 .page__lede:empty { display: none; }
+/* Studio's top matches a project page's (css/project.css .cs-hero__name,
+   __subtitle, __hook): the name, its type as a small mono label, and the
+   quote at tagline size */
+.page__head--studio .page__name {
+  display: block;
+  font-size: clamp(52px, 7.2vw, 120px);
+  line-height: 1.02;
+}
+.page__kind {
+  display: block;
+  margin-top: var(--space-item);
+  font-family: var(--font-mono);
+  font-size: clamp(13px, 1vw, 16px);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-soft);
+}
+.page__head--studio .page__lede {
+  margin-top: var(--space-block);
+  max-width: 40ch;
+  font-size: clamp(20px, 1.9vw, 30px);
+  line-height: 1.3;
+}
 /* bold word in the Studio intro: the heaviest loaded weight, not a faked bold */
 .page__lede strong { font-weight: 500; color: var(--text-strong); }
 
@@ -157,6 +181,145 @@
   .studio__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+/* ---------- Studio sketchbook (js/studio.js) ---------- */
+/* Sits beside the painting, taking the next two columns so it has room to
+   open into a two-page spread without moving anything sideways; opening
+   only makes the row taller. --pw is one page's width: the closed book is
+   a small cover, the open book two full pages. The columns and --pw ease
+   together, so the book grows and the page below glides down. Leaves turn
+   on the spine (the right column's left edge) in 3D. */
+@property --pw {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 170px;
+}
+.studio__book { grid-column: span 2; }
+@media (max-width: 1200px) {
+  .studio__book { grid-column: 1 / -1; }   /* its own row under the painting */
+}
+.sketchbook {
+  --pw: var(--pw-closed, 170px);
+  --book-ease: cubic-bezier(0.65, 0, 0.35, 1);
+  display: grid;
+  grid-template-columns: 0px var(--pw);
+  width: max-content;
+  height: calc(var(--pw) * 4 / 3);
+  perspective: 2400px;
+  cursor: pointer;
+  outline-offset: 8px;
+  transition:
+    --pw 850ms var(--book-ease),
+    grid-template-columns 850ms var(--book-ease),
+    translate var(--duration-base) var(--ease-smooth);
+}
+.sketchbook.is-open {
+  --pw: var(--pw-open, 380px);
+  grid-template-columns: var(--pw) var(--pw);
+  cursor: default;
+}
+/* closing past the last page: shut on the left, then it resets */
+.sketchbook.is-open.is-closing-back {
+  --pw: var(--pw-closed, 170px);
+  grid-template-columns: var(--pw) 0px;
+}
+.sketchbook.no-anim,
+.sketchbook.no-anim * { transition: none !important; }
+.sketchbook__right {
+  position: relative;
+  transform-style: preserve-3d;
+}
+.sketchbook__leaf {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--pw);
+  height: 100%;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transition: transform 900ms var(--book-ease);
+}
+.sketchbook__leaf.is-flipped { transform: rotateY(-180deg); }
+.sketchbook__leaf.is-fast { transition-duration: 450ms; }
+.sketchbook__face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.sketchbook__face--back { transform: rotateY(180deg); }
+
+/* paper pages: the sketch sits on the page, darker toward the spine */
+.sketchbook__page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7%;
+  background: #FBF8F3;
+  box-shadow: 0 1px 2px rgba(29, 27, 24, 0.12);
+}
+.sketchbook__page img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  user-select: none;
+}
+.sketchbook__page::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.sketchbook__page--right::after { background: linear-gradient(to right, rgba(29, 27, 24, 0.14), rgba(29, 27, 24, 0) 12%); }
+.sketchbook__page--left::after { background: linear-gradient(to left, rgba(29, 27, 24, 0.14), rgba(29, 27, 24, 0) 12%); }
+/* a turning page catches a little shadow mid-turn */
+.sketchbook__leaf.is-turning .sketchbook__page::after { animation: page-shade 900ms var(--book-ease); }
+.sketchbook__leaf.is-turning.is-fast .sketchbook__page::after { animation-duration: 450ms; }
+@keyframes page-shade {
+  50% { background-color: rgba(29, 27, 24, 0.12); }
+}
+
+/* the covers: black, with an elastic band down the right edge */
+.sketchbook__cover {
+  display: flex;
+  align-items: flex-end;
+  padding: 10%;
+  background: #141312;
+  border-radius: 2px 6px 6px 2px;
+  box-shadow: 0 10px 24px rgba(29, 27, 24, 0.22), 0 2px 6px rgba(29, 27, 24, 0.18);
+}
+.sketchbook__face--back.sketchbook__cover { border-radius: 6px 2px 2px 6px; }
+.sketchbook__title {
+  font-size: calc(var(--pw) * 0.085);
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: rgba(253, 249, 245, 0.62);
+}
+.sketchbook__band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 11%;
+  width: 4%;
+  background: #2A2724;
+}
+.sketchbook__face--back .sketchbook__band { right: auto; left: 11%; }
+.sketchbook__endpaper { background: #26231F; }
+
+/* closed, on hover: the cover eases open a touch, showing the first page */
+.sketchbook:not(.is-open):hover,
+.sketchbook:not(.is-open):focus-visible { translate: 0 -3px; }
+.sketchbook:not(.is-open):hover .sketchbook__leaf--cover,
+.sketchbook:not(.is-open):focus-visible .sketchbook__leaf--cover {
+  transform: rotateY(-24deg);
+  transition-duration: 600ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sketchbook, .sketchbook * { transition: none !important; animation: none !important; }
+}
+
 @media (max-width: 760px) {
   .about { grid-template-columns: 1fr; }
   /* phones: the portrait sits above the name, smaller */
@@ -195,12 +358,24 @@
 @keyframes chunk-line {
   from { opacity: 0; }
 }
+/* pieces of work (Studio) arrive a little further and slower than text */
+.chunk--piece {
+  animation-name: chunk-piece;
+  animation-duration: 1000ms;
+}
+@keyframes chunk-piece {
+  from { opacity: 0; transform: translateY(36px); }
+}
+
 /* held at the start (invisible, nothing shifting underneath) until the
-   bio is built and the font has loaded; about.html removes .is-loading.
-   The nav fades in with the first chunk instead of popping in */
+   page is built and the font (and on Studio the first pieces) have
+   loaded; about.html / js/studio.js remove .is-loading. The nav fades in
+   with the first chunk instead of popping in */
 .is-loading .chunk { animation-play-state: paused; }
-[data-page="about"] .site-nav { transition: opacity 400ms ease; }
-.is-loading body[data-page="about"] .site-nav { opacity: 0; }
+[data-page="about"] .site-nav,
+[data-page="studio"] .site-nav { transition: opacity 400ms ease; }
+.is-loading body[data-page="about"] .site-nav,
+.is-loading body[data-page="studio"] .site-nav { opacity: 0; }
 @media (prefers-reduced-motion: reduce) {
   .chunk { animation: none; }
 }
