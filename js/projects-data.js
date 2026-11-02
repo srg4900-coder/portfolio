@@ -46,6 +46,8 @@
     duration: '6 weeks',                   // a number + day/week/month/year, or 'Ongoing'
     status: 'Live',                        // Live / In Production / In Progress / Concept
     award: 'Gold ADDY',                    // short: gold tag on the homepage print + credits; \n starts a new line
+    awardStamp: 'assets/awards/x.png',     // optional: a stamp graphic instead of the gold tag (award text = its alt);
+                                           //   white ink on transparent, it flips dark/light against what's under it
     released: 'Sep. 2026',
     client: 'Client name',                 // or { name, url, instagram }: the name links, with an Instagram icon
     course: 'Course, Professor',
@@ -199,6 +201,7 @@ window.PROJECTS = {
     disciplines: ['Motion Design', 'Illustration', 'Hand Animation'],
     duration: '5 weeks',
     award: 'AAF ADDY Gold\nAward Winner',
+    awardStamp: 'assets/awards/aaf-gold-addy-stamp.png?v=3',   // bump ?v= when the file is replaced
     course: 'Motion Design, Prof. Austin Shaw',
     collaborators: ['Lana Del Rey, Music'],
     tools: ['Procreate', 'After Effects', 'Hand-drawn sketch'],
@@ -212,10 +215,15 @@ window.PROJECTS = {
     },
     idea: {
       copy: 'Opening credits for Netflix\u2019s A Series of Unfortunate Events. I wanted viewers to feel the show\u2019s themes while only hinting at the plot. Storybook paper cutouts nod to its roots as a children\u2019s novel and give it an eerie, academic edge. Every vignette hides metaphors and easter eggs that only surface after a few rewatches.',
+      // process, in order: first doodles, the cast and props, then the
+      // storyboards (early scenes, later scenes), the moodboard, and the
+      // easter egg still to come. (The trolley frame lives in 03 Work.)
       images: [
-        { src: 'assets/case-studies/title-sequence/process/ts-sketches-storyboards.jpg', contain: true, label: 'Early sketch', alt: 'Process book page of pencil character sketches and storyboards' },
+        { src: 'assets/case-studies/title-sequence/process/ts-sketch-1-concepts.webp', contain: true, label: 'First concept sketches', alt: 'Pencil doodles: early character ideas, a fish, a vintage car, flames, and eyes with a note to zoom in on an eye' },
+        { src: 'assets/case-studies/title-sequence/process/ts-sketch-2-characters-props.webp', contain: true, label: 'Characters and props', alt: 'Pencil character sheet labeled Squalor, Violet, Klaus, Sunny, Olaf and Jacqueline, with a sugar bowl, a book and a spyglass' },
+        { src: 'assets/case-studies/title-sequence/process/ts-sketch-3-storyboard-early-scenes.webp', contain: true, label: 'Storyboard: trolley, hedge maze, gold cage', alt: 'Pencil storyboard page: a trolley under cherry blossoms, a hedge maze shaped like a key, and a black snake in a gold cage' },
+        { src: 'assets/case-studies/title-sequence/process/ts-sketch-4-storyboard-late-scenes.webp', contain: true, label: 'Storyboard: darts, opera, fire', alt: 'Pencil storyboard page: darts falling, a figure at the opera, the shadow of a fire with the sugar bowl, a car, and a final hallway' },
         { src: 'assets/case-studies/title-sequence/references/ts-graphical-inspiration.webp', contain: true, label: 'Graphical inspiration', alt: 'Moodboard of 1930s posters and illustration: a hedge maze, an ocean liner, Harper\u2019s Bazaar, art deco cars' },
-        { src: 'assets/case-studies/title-sequence/frames/ts-01-trolley.jpg', label: 'Paper cutout style frame', alt: 'Paper cutout style frame: a trolley on tracks between torn pink cliffs' },
         { label: 'Easter egg, revealed', alt: '' }
       ]
     },

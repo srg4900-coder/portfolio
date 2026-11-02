@@ -17,7 +17,13 @@
     return node;
   }
 
-  if (data.intro) document.querySelector('.page__lede').textContent = data.intro;
+  // intro: plain text, with **word** shown bold
+  if (data.intro) {
+    var lede = document.querySelector('.page__lede');
+    data.intro.split(/\*\*(.+?)\*\*/).forEach(function (part, i) {
+      if (part) lede.appendChild(i % 2 ? el('strong', '', part) : document.createTextNode(part));
+    });
+  }
 
   var groups = (data.groups || []).filter(function (g) {
     return g.items && g.items.some(function (i) { return i && i.src; });

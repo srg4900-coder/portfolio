@@ -20,22 +20,47 @@
   var INSTAGRAM_URL = 'https://www.instagram.com/sadiegold.co/';
   var LINKEDIN_URL = 'https://www.linkedin.com/in/sadie-goldberg-653534205';
 
-  // Each inner array = one paragraph; each string = one line.
+  // Each string = one line. The location isn't in the popup any more, but
+  // the About page still shows it (about.html reads SITE_COPY.location).
+  var LOCATION = 'Based in NYC. Available Worldwide';
   var META_LINES = [
-    'Based in NYC. Available Worldwide',
-    'Brand Designer. Creative Problem Solver. Very Hirable ;)'
+    'Brand Designer. Creative Problem Solver.'
   ];
-  // Four even lines (~67 chars — Sadie's call to flow better than the
-  // 50-char rule), rebalanced with no widows after adding the last sentence.
+  // One sentence per line (text-wrap: balance evens any that wrap). The
+  // popup ends the last line with a "studio →" link (STUDIO below);
+  // the About page shows these sentences without it.
   var BIO_LINES = [
-    'Sadie is an adventurer and artist. She\u2019s been curious since birth',
-    'and never stops learning. She loves to sail, snowboard, surf, dance,',
-    'and sing badly in her car. She loves a challenging problem or puzzle',
-    'and won\u2019t stop until it\u2019s solved. She likes to think holistically.'
+    'Sadie has a BFA from RIT in New Media Design with a concentration in Philosophy and Psychology.',
+    'She likes to think holistically when designing and loves to show the process.',
+    'She’s always learning new techniques and ways to express her art.'
   ];
+  var STUDIO = { lead: 'Check out her ', label: 'studio', url: '/studio.html' };
 
   // shared with the About page (about.html), so the bio has one copy
-  window.SITE_COPY = { email: CONTACT_EMAIL, resume: RESUME_URL, meta: META_LINES, bio: BIO_LINES };
+  // Every email link on the site: on a computer it opens a Gmail compose
+  // window in a new tab, prefilled; on phones and tablets it's a plain
+  // mailto:, which opens their mail app (the Gmail app, if that's theirs)
+  // instead of a browser sign-in.
+  function mailLink(a, subject) {
+    var su = subject ? encodeURIComponent(subject) : '';
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      a.href = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(CONTACT_EMAIL) + (su ? '&su=' + su : '');
+      a.target = '_blank';
+      a.rel = 'noopener';
+    } else {
+      a.href = 'mailto:' + CONTACT_EMAIL + (su ? '?subject=' + su : '');
+    }
+    return a;
+  }
+
+  window.SITE_COPY = { email: CONTACT_EMAIL, resume: RESUME_URL, location: LOCATION, meta: META_LINES, bio: BIO_LINES };
+  // the Instagram / LinkedIn icon links (built below) for other pages too: about.html
+  window.SITE_COPY.mailLink = mailLink;   // about.html
+  window.SITE_COPY.social = function (name) {
+    return name === 'linkedin'
+      ? social('linkedin', 'LinkedIn (opens in a new tab)', LINKEDIN_URL)
+      : social('instagram', 'Instagram (opens in a new tab)', INSTAGRAM_URL);
+  };
 
   var modal = document.querySelector('.contact-modal');
   if (!modal) return;
@@ -58,9 +83,7 @@
   var content = el('div', 'contact-modal__content');
 
   var emailLink = el('a', 'contact-modal__email', CONTACT_EMAIL);
-  emailLink.href = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(CONTACT_EMAIL);
-  emailLink.target = '_blank';
-  emailLink.rel = 'noopener';
+  mailLink(emailLink, 'Hi Sadie');
 
   var resume = el('a', 'contact-modal__resume', 'Resume');
   resume.href = RESUME_URL;
@@ -116,7 +139,18 @@
 
   content.appendChild(emailLink);
   content.appendChild(lines('contact-modal__meta', META_LINES));
-  content.appendChild(lines('contact-modal__bio', BIO_LINES));
+  var bio = lines('contact-modal__bio', BIO_LINES);
+  // last line: "... her art. Check out her studio →" (the link darkens and
+  // its arrow nudges right on hover, css/components.css)
+  var studio = el('a', 'contact-modal__studio');
+  studio.href = STUDIO.url;
+  studio.appendChild(el('span', '', STUDIO.label));
+  studio.appendChild(el('span', 'contact-modal__arrow', '\u2192'));
+  studio.lastChild.setAttribute('aria-hidden', 'true');
+  var last = bio.lastChild;
+  last.appendChild(document.createTextNode(' ' + STUDIO.lead));
+  last.appendChild(studio);
+  content.appendChild(bio);
   content.appendChild(actions);
   paper.appendChild(closeBtn);
   paper.appendChild(content);

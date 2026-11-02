@@ -97,6 +97,7 @@
   --z-paper-active: 100;
   --z-title: 200;
   --z-nav: 600;
+  --z-frame: 650;      /* the light box's edge, over everything that scrolls (home) */
   --z-dragging: 800;
   --z-modal: 1000;
   --z-cursor-label: 1100;

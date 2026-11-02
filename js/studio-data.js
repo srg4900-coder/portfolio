@@ -11,12 +11,12 @@
       year: 2025,
       award: ''                             // optional, e.g. 'Best in Show, ...'
     }
-  Studio isn't in the main nav on purpose: it's linked from About, under
-  the homepage prints and in the footer. Copy rules: no em dashes;
-  placeholders in [brackets].
+  Studio isn't in the main nav on purpose: it's linked from the footer and
+  the contact popup. Copy rules: no em dashes; placeholders in [brackets].
+  In the intro, **word** shows bold.
 */
 window.STUDIO = {
-  intro: '[One-line intro]',
+  intro: '\u201Cjack of all trades, master of none, but often better than master of **one**\u201D',
   groups: [
     {
       name: 'Paintings',

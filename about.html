@@ -16,9 +16,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500&family=Cutive+Mono&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/tokens.css?v=37">
-<link rel="stylesheet" href="css/components.css?v=37">
-<link rel="stylesheet" href="css/pages.css?v=37">
+<link rel="stylesheet" href="css/tokens.css?v=71">
+<link rel="stylesheet" href="css/components.css?v=71">
+<link rel="stylesheet" href="css/pages.css?v=71">
+<!-- hold the page's entrance until its text is built and the font is in
+     (released by the script at the end of the page; this timer is only a
+     safety net), so it plays as one clean sequence with nothing jumping -->
+<script>
+  document.documentElement.classList.add('is-loading');
+  setTimeout(function () { document.documentElement.classList.remove('is-loading'); }, 1500);
+</script>
 </head>
 <body class="page" data-page="about">
 
@@ -27,39 +34,38 @@
   </header>
 
   <main class="page__main">
-    <header class="page__head">
-      <p class="page__eyebrow load-rise">About</p>
-      <h1 class="text-title load-rise" style="--load-delay: 80ms;">Sadie Gold</h1>
-      <p class="page__lede load-rise" style="--load-delay: 160ms;">Brand Designer</p>
+    <header class="page__head page__head--about">
+      <!-- portrait: an empty box for now. TODO(Sadie): drop a photo in as
+           <img src="assets/about/portrait.jpg" alt="Sadie Gold"> (any size;
+           it crops to fill the 3:4 box) and remove aria-hidden -->
+      <div class="about__portrait chunk" style="--chunk: 1" aria-hidden="true"></div>
+      <p class="page__eyebrow chunk" style="--chunk: 0">About</p>
+      <h1 class="text-title chunk" style="--chunk: 1">Sadie Gold</h1>
+      <p class="page__lede chunk" style="--chunk: 2">Brand Designer</p>
     </header>
 
-    <div class="about load-rise" style="--load-delay: 260ms;">
+    <!-- each .chunk arrives in turn (--chunk = its place in line, css/pages.css);
+         the bio's sentences come in one by one (script below) -->
+    <div class="about">
       <div class="about__bio text-project-body" data-about-bio></div>
 
       <dl class="about__facts">
-        <div>
+        <div class="chunk" style="--chunk: 8">
           <dt class="text-label">Education</dt>
           <dd>New Media Design BFA, graduating spring 2027</dd>
         </div>
-        <div data-about-meta hidden>
+        <div class="chunk" style="--chunk: 9" data-about-meta hidden>
           <dt class="text-label">Based</dt>
           <dd></dd>
         </div>
       </dl>
 
-      <!-- the nudge into Studio: a quiet card, not a headline -->
-      <a class="about__studio" href="studio.html" data-cursor-label="Studio">
-        <img class="about__studio-img" src="assets/studio/paintings/master-work.jpg" alt="" loading="lazy">
-        <span class="about__studio-text">
-          <span class="about__studio-kicker">Off the clock</span>
-          <span>Paintings, sketches and sewing live in the Studio &rarr;</span>
-        </span>
-      </a>
-
-      <div class="about__links">
+      <div class="about__links chunk" style="--chunk: 10">
         <a class="cs-link" data-about-email href="#">Email</a>
-        <a class="cs-link" data-about-resume href="#" target="_blank" rel="noopener">Resume</a>
-        <button class="cs-link" type="button" data-open-contact data-cursor-solid="white">Contact</button>
+        <span class="about__resume">
+          <a class="cs-link" data-about-resume href="#" target="_blank" rel="noopener">Resume</a>
+          <!-- Instagram + LinkedIn icons added here by the script below -->
+        </span>
       </div>
     </div>
   </main>
@@ -67,6 +73,7 @@
   <footer class="site-footer">
     <p class="text-label">&copy; Sadie Gold 2026</p>
     <nav class="site-footer__links" aria-label="More">
+      <button class="text-label" type="button" data-open-contact data-cursor-solid="white">Contact</button>
       <a class="text-label" href="studio.html">Studio</a>
       <a class="text-label" href="/mindcloud/">MindCloud</a>
     </nav>
@@ -74,25 +81,135 @@
 
   <div class="contact-modal"></div>
 
-  <script src="js/nav.js?v=37"></script>
-  <script src="js/cursor.js?v=37"></script>
-  <script src="js/contact.js?v=37"></script>
-  <script src="js/touch.js?v=37"></script>
+  <script src="js/nav.js?v=71"></script>
+  <script src="js/cursor.js?v=71"></script>
+  <script src="js/contact.js?v=71"></script>
+  <script src="js/touch.js?v=71"></script>
   <script>
     (function () {
       var copy = window.SITE_COPY;
       if (!copy) return;
-      document.querySelector('[data-about-bio]').textContent = copy.bio.join(' ');
-      // first META line is the location ("Based in NYC. Available Worldwide")
+      // the bio, one sentence at a time (chunks 3 to 7): the BFA sentence
+      // on its own line, the rest running on together ("She's ready..." is
+      // About-only), then "Say hi ->" (an email link) on a line of its own.
+      // Sentences are grouped (.about__para) so on phones each group starts
+      // its own line (css/pages.css), giving the left edge a scannable column.
+      var bio = document.querySelector('[data-about-bio]');
+      var groups = [[copy.bio[0]], [copy.bio[1]], [copy.bio[2], 'She\u2019s ready for a team that sweats the details.']];
+      var k = 0;
+      var put = function (parent, node) {
+        var span = parent.appendChild(document.createElement('span'));
+        span.className = 'chunk chunk--line';
+        span.style.setProperty('--chunk', 3 + k++);
+        if (typeof node === 'string') span.textContent = node; else span.appendChild(node);
+        return span;
+      };
+      // blocks: the BFA sentence, then everything else run together, then
+      // Say hi. Each block wraps on its own, so no word is left alone on
+      // its last line (text-wrap in css/pages.css)
+      var block = function () {
+        var b = bio.appendChild(document.createElement('span'));
+        b.className = 'about__block';
+        return b;
+      };
+      var blocks = [block(), block()];
+      groups.forEach(function (sentences, g) {
+        var into = blocks[g ? 1 : 0];
+        if (g > 1) into.appendChild(document.createTextNode(' '));
+        var para = into.appendChild(document.createElement('span'));
+        para.className = 'about__para';
+        sentences.forEach(function (line, j) {
+          if (j) para.appendChild(document.createTextNode(' '));
+          put(para, line);
+        });
+      });
+      put(block(), sayHi(copy.email)).classList.add('about__hi-line');
+      // "Say hi ->": on hover (mouse) the words lift away letter by letter,
+      // left to right, as the email rises in from below; leaving swaps them
+      // back the same way (email lifts off, "Say hi" rises in). A click
+      // opens a prefilled email. On touch, the tap plays the swap first,
+      // then opens the email. Styles: .about__hi in css/pages.css.
+      function sayHi(email) {
+        var a = document.createElement('a');
+        a.className = 'about__hi';
+        copy.mailLink(a, 'Hi Sadie');   // Gmail on a computer, the mail app on phones (js/contact.js)
+        a.setAttribute('aria-label', 'Say hi: email ' + email);
+        var swap = a.appendChild(document.createElement('span'));
+        swap.className = 'about__hi-swap';
+        swap.setAttribute('aria-hidden', 'true');
+        var layer = function (text, cls) {
+          var l = swap.appendChild(document.createElement('span'));
+          l.className = 'about__hi-layer ' + cls;
+          text.split('').forEach(function (ch, k) {
+            var c = l.appendChild(document.createElement('span'));
+            c.textContent = ch;
+            c.style.setProperty('--i', k);
+          });
+          return l;
+        };
+        var say = layer('Say hi', '');
+        var mail = layer(email, 'is-below');
+        var arrow = a.appendChild(document.createElement('span'));
+        arrow.className = 'about__hi-arrow';
+        arrow.setAttribute('aria-hidden', 'true');
+        arrow.textContent = '\u2192';
+
+        var showing = say;
+        var fit = function () { swap.style.width = showing.scrollWidth + 'px'; };
+        // bring `inn` up from below, send `out` up and away
+        var show = function (inn, out) {
+          if (showing === inn) return;
+          showing = inn;
+          inn.classList.add('is-still', 'is-below');
+          inn.classList.remove('is-above');
+          inn.getBoundingClientRect();
+          inn.classList.remove('is-still', 'is-below');
+          out.classList.add('is-above');
+          fit();
+        };
+        if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+          a.addEventListener('mouseenter', function () { show(mail, say); });
+          a.addEventListener('mouseleave', function () { show(say, mail); });
+          a.addEventListener('focus', function () { show(mail, say); });
+          a.addEventListener('blur', function () { show(say, mail); });
+        } else {
+          a.addEventListener('click', function (e) {
+            if (showing === mail) return;            // already showing: open the email
+            e.preventDefault();
+            show(mail, say);
+            setTimeout(function () { window.location.href = a.href; }, 650);
+          });
+        }
+        requestAnimationFrame(fit);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+        window.addEventListener('resize', fit);
+        return a;
+      }
+
+      // the location ("Based in NYC. Available Worldwide")
       var meta = document.querySelector('[data-about-meta]');
-      if (copy.meta[0]) {
-        meta.querySelector('dd').textContent = copy.meta[0].replace(/^Based in /, '');
+      if (copy.location) {
+        meta.querySelector('dd').textContent = copy.location.replace(/^Based in /, '');
         meta.hidden = false;
       }
       var email = document.querySelector('[data-about-email]');
       email.textContent = copy.email;
-      email.href = 'mailto:' + copy.email;
+      copy.mailLink(email, 'Hi Sadie');
       document.querySelector('[data-about-resume]').href = copy.resume;
+      // Instagram + LinkedIn, right of Resume (same icons as the Contact popup)
+      var group = document.querySelector('.about__resume');
+      if (copy.social) ['instagram', 'linkedin'].forEach(function (name) {
+        var icon = copy.social(name);
+        icon.classList.add('about__social');
+        group.appendChild(icon);
+      });
+
+      // everything's built: once the font is in (or after 700ms at most,
+      // so a slow connection never stalls the page), let the entrance play
+      var fontsIn = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+      Promise.race([fontsIn, new Promise(function (r) { setTimeout(r, 700); })]).then(function () {
+        requestAnimationFrame(function () { document.documentElement.classList.remove('is-loading'); });
+      });
     })();
   </script>
 </body>

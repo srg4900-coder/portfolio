@@ -30,14 +30,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500&family=Cutive+Mono&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/tokens.css?v=37">
-<link rel="stylesheet" href="css/components.css?v=37">
-<link rel="stylesheet" href="css/home.css?v=37">
+<link rel="stylesheet" href="css/tokens.css?v=71">
+<link rel="stylesheet" href="css/components.css?v=71">
+<link rel="stylesheet" href="css/home.css?v=71">
 </head>
 <body class="home">
 
   <!-- light-box background image (assets/lightbox/), homepage only -->
   <div class="lightbox" aria-hidden="true"></div>
+  <div class="lightbox__edge" aria-hidden="true"></div>
 
   <header class="site-nav site-nav--fade-in">
     <a class="logo-button" href="index.html">SG</a>
@@ -45,7 +46,7 @@
 
   <main>
     <section class="hero" id="hero">
-      <!-- each word glides up into the corner logo on scroll (js/home.js, TITLE -> LOGO) -->
+      <!-- the S and G glide up into the corner logo on scroll (js/home.js, TITLE -> SG) -->
       <h1 class="hero__title text-title"><span><span class="hero__word">Sadie</span></span><span><span class="hero__word">Gold</span></span></h1>
       <p class="hero__role">Brand Designer</p>
     </section>
@@ -54,17 +55,12 @@
       <!-- one .sheet per project, in the portfolio order (js/order.js), built by js/home.js -->
     </section>
 
-    <!-- the quiet way into Studio: under the prints, not in the nav -->
-    <aside class="studio-nudge">
-      <a class="studio-nudge__link text-label" href="studio.html" data-cursor-solid="white">
-        <span>Off the clock: paintings, sketches, sewing</span><span aria-hidden="true">Studio &rarr;</span>
-      </a>
-    </aside>
   </main>
 
   <footer class="site-footer">
     <p class="text-label">&copy; Sadie Gold 2026</p>
     <nav class="site-footer__links" aria-label="More">
+      <button class="text-label" type="button" data-open-contact data-cursor-solid="white">Contact</button>
       <a class="text-label" href="studio.html">Studio</a>
       <a class="text-label" href="/mindcloud/">MindCloud</a>
     </nav>
@@ -73,13 +69,13 @@
   <!-- contents built by js/contact.js -->
   <div class="contact-modal"></div>
 
-  <script src="js/nav.js?v=37"></script>
-  <script src="js/cursor.js?v=37"></script>
-  <script src="js/contact.js?v=37"></script>
-  <script src="js/projects-data.js?v=37"></script>
-  <script src="js/order.js?v=37"></script>
-  <script src="js/references-data.js?v=37"></script>
-  <script src="js/home.js?v=37"></script>
-  <script src="js/touch.js?v=37"></script>
+  <script src="js/nav.js?v=71"></script>
+  <script src="js/cursor.js?v=71"></script>
+  <script src="js/contact.js?v=71"></script>
+  <script src="js/projects-data.js?v=71"></script>
+  <script src="js/order.js?v=71"></script>
+  <script src="js/references-data.js?v=71"></script>
+  <script src="js/home.js?v=71"></script>
+  <script src="js/touch.js?v=71"></script>
 </body>
 </html>

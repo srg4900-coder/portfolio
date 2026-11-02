@@ -60,8 +60,9 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   TYPE RULE (case studies, About, Studio, footer; the homepage prints keep
   their captions as designed):
     Cutive Mono   only for  numbers (02 / 04, section numbers 01 02 03),
-                            small field labels (ROLE, CLIENT, EDUCATION)
-                            and tags (status, award)
+                            small field labels (ROLE, CLIENT, EDUCATION),
+                            tags (status, award) and a project's type
+                            under its name (TITLE SEQUENCE)
     Albert Sans   everything else: titles, section names, body, buttons,
                             links, captions, footer
   Cutive Mono has one thin weight: keep it uppercase, tracked, >=13px, near full opacity.
@@ -126,18 +127,13 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .nav-left { display: flex; align-items: center; }
 
 .logo-button {
-  font-size: var(--text-small-size);
+  font-size: calc(var(--text-small-size) * 1.6);   /* the SG mark, 60% up from the nav links so it holds the bar */
+  line-height: 1;
   font-weight: 400;
   color: var(--text-strong);
   transition: opacity var(--duration-fast) ease;
 }
 .logo-button:hover { opacity: 0.6; }
-/* "SG" on phones, the full name once there's room (js/nav.js) */
-.logo-button__name { display: none; }
-@media (min-width: 640px) {
-  .logo-button span:first-child { display: none; }
-  .logo-button__name { display: inline; }
-}
 
 .nav-right {
   display: flex;
@@ -172,6 +168,17 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 }
 .cs-link:hover { opacity: 0.55; }
 
+/* ---------- About page turn (js/nav.js) ---------- */
+/* the canvas the page turn is drawn on, over everything but the cursor */
+.page-turn {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: calc(var(--z-modal) + 50);
+  pointer-events: none;
+}
+
 /* ---------- light-box background (homepage only) ---------- */
 /*
   Sadie's light-box image, fixed behind everything as the page's solid
@@ -191,6 +198,28 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   background: var(--lightbox-surface);
   background-clip: padding-box;
 }
+
+/* the light box's edge drawn again ON TOP of the page, so prints scrolling
+   up and down slide under the frame instead of over it. ::before lays a
+   solid surface band (the frame PNG's edge is partly see-through, so
+   nothing peeks through it); ::after draws the bevel on top of that. */
+.lightbox__edge {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-frame);
+  pointer-events: none;
+}
+.lightbox__edge::before,
+.lightbox__edge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: var(--lightbox-edge) solid var(--lightbox-surface);
+}
+.lightbox__edge::after {
+  border-image: url('../assets/lightbox/lightbox-frame.png') 40 / var(--lightbox-edge) stretch;
+}
+@media print { .lightbox__edge { display: none; } }
 
 /* pages without the light box (every page but home): no frame offset */
 body:not(.home) { --frame-width: 0px; }
@@ -566,6 +595,24 @@ html.is-touch .contact-modal__resume:active {
   text-wrap: balance;
 }
 
+/* "studio ->" at the end of the bio: a touch lighter than the bio at rest
+   (the paragraph's own opacity caps how dark it can get), darkening and
+   nudging its arrow right on hover */
+.contact-modal__studio {
+  color: var(--text-soft);
+  white-space: nowrap;
+  transition: color var(--duration-base) var(--ease-smooth);
+}
+.contact-modal__arrow {
+  display: inline-block;
+  margin-left: 0.3em;
+  transition: transform var(--duration-base) var(--ease-smooth);
+}
+.contact-modal__studio:hover,
+.contact-modal__studio:focus-visible { color: var(--color-ink); }
+.contact-modal__studio:hover .contact-modal__arrow,
+.contact-modal__studio:focus-visible .contact-modal__arrow { transform: translateX(4px); }
+
 /* Resume + Instagram + LinkedIn: one row, even gaps, all the same height */
 .contact-modal__actions {
   display: flex;
@@ -657,7 +704,8 @@ html.is-touch .contact-modal__resume:active {
 }
 
 .site-footer p,
-.site-footer a {
+.site-footer a,
+.site-footer button {
   font-family: var(--font-display);
   font-size: var(--text-small-size);
   font-weight: 400;
@@ -666,7 +714,9 @@ html.is-touch .contact-modal__resume:active {
   opacity: 0.6;
   transition: opacity var(--duration-fast) ease;
 }
-.site-footer a:hover { opacity: 1; }
+.site-footer button { padding: 0; border: 0; background: none; color: inherit; cursor: pointer; }
+.site-footer a:hover,
+.site-footer button:hover { opacity: 1; }
 .site-footer__links { display: flex; gap: var(--space-block); }
 
 /* ---------- award tag (a project's `award` field: homepage print + case-study hero) ---------- */
@@ -680,6 +730,21 @@ html.is-touch .contact-modal__resume:active {
   line-height: 1.35;
   text-align: left;
   box-shadow: var(--shadow-paper);
+}
+
+/* award stamp (a project's `awardStamp`: homepage print + credits). White
+   ink on transparent, blended with difference so it flips against
+   whatever it's stamped on: light ink on a dark photo, dark ink on light
+   paper. (Multiply would hide white ink entirely; a black-ink version,
+   aaf-gold-addy-stamp-black.png, is kept for multiply on light-only use.)
+   Sits turned 8deg to the left, like a hand-pressed rubber stamp. */
+.award-stamp {
+  display: block;
+  height: auto;
+  mix-blend-mode: difference;
+  transform: rotate(-8deg);
+  pointer-events: none;
+  user-select: none;
 }
 
 /* ---------- missing-asset stand-in (js/project.js, js/studio.js) ---------- */

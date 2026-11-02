@@ -52,10 +52,14 @@
         '<a class="sheet__link" href="' + Order.link('project.html?project=' + slug) + '" data-cursor-label="View">' +
           '<div class="sheet__paper' + (isCard ? ' sheet__paper--card' : '') + '">' + media + '</div>' +
           // award tag pinned to the print's corner (css/home.css), read as part of the link
-          (p.award ? '<span class="sheet__award award-tag text-label">' + p.award.replace(/</g, '&lt;') + '</span>' : '') +
+          (p.awardStamp
+            ? '<img class="sheet__award sheet__award--stamp award-stamp" src="' + p.awardStamp + '" alt="' + (p.award || 'Award').replace(/\n/g, ' ').replace(/"/g, '&quot;') + '" draggable="false">'
+            : p.award ? '<span class="sheet__award award-tag text-label">' + p.award.replace(/</g, '&lt;') + '</span>' : '') +
+          // three columns: number | title (wraps within its own column) | role (right)
           '<div class="sheet__caption">' +
-            '<span class="text-label">' + num + ' &nbsp;' + p.title.split(': ')[0].replace(/</g, '&lt;') + '</span>' +
-            '<span class="text-label">' + (p.role || '') + '</span>' +
+            '<span class="sheet__num text-label">' + num + '</span>' +
+            '<span class="sheet__title text-label">' + p.title.split(': ')[0].replace(/</g, '&lt;') + '</span>' +
+            '<span class="sheet__role text-label">' + (p.role || '') + '</span>' +
           '</div>' +
         '</a>';
       root.appendChild(sheet);
@@ -64,23 +68,33 @@
     var sheets = Array.prototype.slice.call(root.querySelectorAll('.sheet'));
 
     // ---------- references (js/references-data.js) ----------
-    // Little papers that end up tucked behind the prints. placeRefs puts each
-    // one at its resting spot relative to the print it belongs behind.
-    var REFS = (window.REFERENCES || []).filter(function (r) { return r && (r.src || r.text); });
+    // Little cards scattered on the light box at the top of the page. They
+    // drift with the prints and fade out quickly as the page heads to the
+    // work, so the grid below stays clean. Each one links to MindCloud,
+    // with a quiet "References" label on hover (css/home.css).
+    // An image reference with no src shows as a plain grey card.
+    var REFS = (window.REFERENCES || []).filter(function (r) { return r && (r.type === 'image' || r.text); });
     var refs = REFS.map(function (r) {
-      var el = document.createElement('div');
+      var el = document.createElement('a');
+      el.href = '/mindcloud/';
       el.className = 'ref ref--' + (r.type === 'note' ? 'note' : 'image');
+      el.setAttribute('aria-label', 'References, opens MindCloud');
       el.style.setProperty('--tilt', (r.tilt || 0) + 'deg');
       if (r.type === 'note') {
         el.appendChild(document.createElement('p')).textContent = r.text;
-      } else {
+      } else if (r.src) {
         var img = el.appendChild(document.createElement('img'));
         img.src = r.src;
         img.alt = r.alt || '';
         img.loading = 'lazy';
         img.decoding = 'async';
         img.draggable = false;
+      } else {
+        el.classList.add('ref--blank');
+        el.style.setProperty('--ratio', r.ratio || '4 / 5');
       }
+      el.appendChild(document.createElement('span')).className = 'ref__label';
+      el.lastChild.textContent = 'References';
       root.appendChild(el);
       return el;
     });
@@ -119,11 +133,14 @@
     if (nav) requestAnimationFrame(function () { nav.classList.add('is-in'); });
 
     // ---------- Work links (#work) ----------
-    // Arriving from a Work link, or clicking Work while here, lands on the
-    // settled grid: the scatter motion below reads scrollY, so jumping past
-    // the hero means every sheet is already in its cell. onJump lets the
-    // smoothing skip its catch-up glide.
+    // Arriving from a Work link lands on the settled grid: the scatter
+    // motion below reads scrollY, so jumping past the hero means every
+    // sheet is already in its cell. onJump lets the smoothing skip its
+    // catch-up glide. Clicking Work while still up in the hero instead
+    // glides down exactly like the first scroll does (glideDown, set by
+    // the snap section below; it says false when it doesn't apply).
     var onJump = function () {};
+    var glideDown = function () { return false; };
     function jumpToWork() {
       root.scrollIntoView({ block: 'start', behavior: 'instant' });
       onJump();
@@ -134,13 +151,12 @@
       if (!link || here(link.pathname) !== here(location.pathname)) return;
       e.preventDefault();
       history.replaceState(null, '', location.search + '#work');
-      jumpToWork();
+      if (!glideDown()) jumpToWork();
     });
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      placeRefs();
-      window.addEventListener('resize', placeRefs);
-      window.addEventListener('load', placeRefs);
+      // no scatter, so the references would only crowd the grid
+      refs.forEach(function (el) { el.style.display = 'none'; });
       if (location.hash === '#work') jumpToWork();
       return;
     }
@@ -170,50 +186,68 @@
     var refCells = [];
     var vw = 0, vh = 0, span = 1;
 
-    // ---------- TITLE -> LOGO ----------
-    // The logo (top-left) starts hidden. As the page scrolls, each word of
-    // the big title travels to its own word in the logo ("Sadie Gold", or
-    // the "S" / "G" of "SG" on phones), shrinking to the logo's size; in the
-    // last stretch the title fades and the real logo fades in, so it becomes
-    // the working home link. Scrolling back reverses it. Same smoothed
-    // scroll value and ease as the prints, so it moves with the page.
-    var words = Array.prototype.slice.call(hero.querySelectorAll('.hero__word'));
+    // ---------- TITLE -> SG ----------
+    // The logo (top-left, "SG") starts hidden. As the page scrolls, the "S"
+    // of Sadie and the "G" of Gold glide up into it and shrink to its size,
+    // while the other letters lift away one after another and fade.
+    // Scrolling back reverses it: the letters drop back into place.
+    // The title is pinned (position: fixed) for the whole trip, so only
+    // this animation moves it. (Before, it rode the page's scroll while JS
+    // pulled it back toward the logo; the two ran on different clocks and
+    // jittered against each other.) A spacer keeps its place in the hero.
+    // Same smoothed scroll value and slow-quick-slow ease as the prints.
+    var title = hero.querySelector('.hero__title');
     var role = hero.querySelector('.hero__role');
     var logo = document.querySelector('.logo-button');
-    var morph = [];
+    var caps = [], letters = [], morph = [];
+    var spacer = document.createElement('div');
+    spacer.setAttribute('aria-hidden', 'true');
+    title.parentNode.insertBefore(spacer, title);
+    title.setAttribute('aria-label', title.textContent);
+    hero.querySelectorAll('.hero__word').forEach(function (w) {
+      var text = w.textContent;
+      w.textContent = '';
+      w.setAttribute('aria-hidden', 'true');
+      text.split('').forEach(function (ch, k) {
+        var l = w.appendChild(document.createElement('span'));
+        l.className = k ? 'hero__letter' : 'hero__letter hero__cap';
+        l.textContent = ch;
+        (k ? letters : caps).push(l);
+      });
+    });
 
+    // where each letter of the logo's "SG" sits on screen
     function logoTargets() {
-      var name = logo.querySelector('.logo-button__name');
-      var showName = name && getComputedStyle(name).display !== 'none';
-      var node = (showName ? name : logo.querySelector('span')).firstChild;
-      var parts = showName ? [[0, 5], [6, 10]] : [[0, 1], [1, 2]];
-      return parts.map(function (p) {
+      var node = logo.firstChild;
+      while (node && node.nodeType !== 3) node = node.firstChild;
+      return [0, 1].map(function (k) {
         var range = document.createRange();
-        range.setStart(node, p[0]);
-        range.setEnd(node, Math.min(p[1], node.length));
+        range.setStart(node, k);
+        range.setEnd(node, k + 1);
         var b = range.getBoundingClientRect();
         return { left: b.left, top: b.top, h: b.height };
       });
     }
 
     function measureMorph() {
-      if (!logo || !words.length) return;
-      var sy = window.scrollY;
+      if (!logo || !caps.length) return;
+      // back in the flow to read where the title sits at the top of the page
+      spacer.style.height = '0px';
+      title.removeAttribute('style');
+      var r = title.getBoundingClientRect();
+      var top = r.top + window.scrollY;
+      spacer.style.height = r.height + 'px';
+      title.style.cssText = 'position:fixed;margin:0;top:' + top + 'px;left:' + r.left + 'px;width:' + r.width + 'px';
       var targets = logoTargets();
-      var ratio = parseFloat(getComputedStyle(logo).fontSize) / parseFloat(getComputedStyle(words[0]).fontSize);
-      morph = words.map(function (w, i) {
-        var prev = w.style.transform;
-        w.style.transform = 'none';
-        var r = w.getBoundingClientRect();
-        w.style.transform = prev;
+      var ratio = parseFloat(getComputedStyle(logo).fontSize) / parseFloat(getComputedStyle(title).fontSize);
+      morph = caps.map(function (c, i) {
+        // offsets, not the on-screen box: they ignore the lines' rise-in
+        // animation, so measuring mid-animation can't throw the target off.
+        // Summed up to the title (each animated line counts as a parent).
+        var x = r.left, y = top, h = c.offsetHeight;
+        for (var n = c; n && n !== title; n = n.offsetParent) { x += n.offsetLeft; y += n.offsetTop; }
         var t = targets[i] || targets[0];
-        return {
-          left: r.left,
-          top: r.top + sy,                                // where it sits at scroll 0
-          s: ratio,
-          tl: t.left,
-          tt: t.top + t.h / 2 - (r.height * ratio) / 2   // centred on the logo word
-        };
+        return { dx: t.left - x, dy: t.top + t.h / 2 - (y + h * ratio / 2), s: ratio };
       });
     }
 
@@ -265,19 +299,23 @@
         role.style.opacity = Math.max(0, 1 - progress * 3.5).toFixed(3); // gone before it reaches the logo
       }
 
-      // title -> logo, over the first part of the scroll
-      var e = ease(clamp01(y / (span * 0.55)));
+      // title -> SG, over the first part of the scroll
+      var raw = clamp01(y / (span * 0.55));
+      var e = ease(raw);
       morph.forEach(function (m, i) {
-        var vx = m.left + (m.tl - m.left) * e;
-        var vy = m.top + (m.tt - m.top) * e;             // wanted on-screen position
-        var tx = vx - m.left;
-        var ty = vy - (m.top - window.scrollY);          // minus where the page has carried it
         var sc = 1 + (m.s - 1) * e;
-        words[i].style.transform = 'translate3d(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px,0) scale(' + sc.toFixed(4) + ')';
-        words[i].style.opacity = clamp01((1 - e) / 0.12).toFixed(3);
+        caps[i].style.transform = 'translate3d(' + (m.dx * e).toFixed(2) + 'px,' + (m.dy * e).toFixed(2) + 'px,0) scale(' + sc.toFixed(4) + ')';
+        caps[i].style.opacity = clamp01((1 - e) / 0.1).toFixed(3);
       });
+      // the other letters lift and fade one after another, done by mid-trip
+      letters.forEach(function (l, j) {
+        var t = ease(clamp01((raw - j * 0.035) / 0.4));
+        l.style.transform = 'translate3d(0,' + (-0.45 * t).toFixed(3) + 'em,0)';
+        l.style.opacity = (1 - t).toFixed(3);
+      });
+      title.style.visibility = e >= 1 ? 'hidden' : '';
       if (logo && morph.length) {
-        var shown = clamp01((e - 0.88) / 0.12);
+        var shown = clamp01((e - 0.9) / 0.1);   // the real SG takes over as the letters land
         logo.style.opacity = shown.toFixed(3);
         logo.style.pointerEvents = shown > 0.5 ? '' : 'none';
       }
@@ -312,15 +350,19 @@
         el.style.zIndex = progress < 1 ? 30 + ((i * 7) % n) : '';
       });
 
-      // references: same path as the prints, a beat behind, ending tucked
-      // under them at their resting tilt
+      // references: same path as the prints, a beat behind, fading out
+      // early so they're gone by the time the grid settles
       refs.forEach(function (el, i) {
         var c = refCells[i], r = REFS[i];
         if (!c || el.style.display === 'none') return;
+        var fade = 1 - clamp01(progress / 0.3);
+        el.style.opacity = fade.toFixed(3);
+        el.style.visibility = fade > 0 ? '' : 'hidden';
+        el.style.pointerEvents = fade > 0.6 ? 'auto' : 'none';
+        if (!fade) return;
         var t = ease(clamp01((progress - 0.05 - i * 0.04) / 0.75));
         var k = 1 - t;
         var tilt = (r.tilt || 0) + 'deg';
-        if (k < 0.001) { el.style.transform = 'rotate(' + tilt + ')'; return; }
         var st = r.start || [1.1, 0.5];
         var tx = (st[0] * vw - c.x) * (st[0] > 0.98 ? slideLate(t) : k);
         var ty = (st[1] * vh + window.scrollY - c.y) * k;
@@ -340,6 +382,89 @@
     function relayout() { measure(); request(); }
 
     onJump = function () { current = window.scrollY; relayout(); };
+
+    // ---------- snap: hero <-> work ----------
+    // From anywhere in the hero, the first scroll down glides the page to the
+    // top of the work, and a scroll up glides back to the title. One wheel
+    // flick, trackpad swipe, touch drag or key press is enough. A sideways
+    // swipe (trackpad or touch) counts as "show me the work" too, since the
+    // page doesn't scroll sideways. The rest of that gesture (trackpad
+    // momentum) is swallowed so it can't run on past the snap.
+    // Below the top of the work the page scrolls normally.
+    var SNAP_MS = 1100;
+    var snapping = false, holdGesture = false, lastWheel = 0, touch = null;
+
+    function workTop() {
+      var margin = parseFloat(getComputedStyle(root).scrollMarginTop) || 0;
+      var top = Math.round(root.getBoundingClientRect().top + window.scrollY - margin);
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      return Math.min(max, Math.max(top, Math.ceil(span)));   // never short of the settled grid
+    }
+    function inHero() { return window.scrollY < workTop() - 2; }
+
+    // the way down lands with a gentle bounce: it sails a touch past the top
+    // of the work (about 2% of the trip) and settles back. The way up can't
+    // overshoot the top of the page, so it just eases in.
+    function settle(t) {
+      var c1 = 0.7, c3 = c1 + 1;
+      return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+    }
+
+    function glideTo(to) {
+      var from = window.scrollY, dist = to - from;
+      if (Math.abs(dist) < 2) return;
+      var curve = dist > 0 ? settle : ease;
+      snapping = true;
+      var t0 = performance.now();
+      (function step(now) {
+        var t = clamp01((now - t0) / SNAP_MS);
+        window.scrollTo(0, from + dist * curve(t));
+        if (t < 1) requestAnimationFrame(step);
+        else { snapping = false; holdGesture = true; }
+      })(t0);
+    }
+    function snap(down) {
+      if (snapping) return true;
+      if (!inHero()) return false;
+      if (!down && window.scrollY < 2) return false;
+      glideTo(down ? workTop() : 0);
+      return true;
+    }
+    glideDown = function () { return snap(true); };   // the nav's Work link (above)
+
+    window.addEventListener('wheel', function (e) {
+      var now = performance.now();
+      var sameGesture = now - lastWheel < 160;
+      lastWheel = now;
+      if (snapping || (holdGesture && sameGesture)) { e.preventDefault(); return; }
+      holdGesture = false;
+      if (e.ctrlKey) return;                                    // ctrlKey = pinch zoom
+      var ax = Math.abs(e.deltaX), ay = Math.abs(e.deltaY);
+      if (ax < 1 && ay < 1) return;
+      var down = ax > ay ? true : e.deltaY > 0;                 // sideways = down to the work
+      if (snap(down)) e.preventDefault();
+    }, { passive: false });
+
+    window.addEventListener('touchstart', function (e) {
+      touch = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null;
+    }, { passive: true });
+    window.addEventListener('touchmove', function (e) {
+      if (snapping) { e.preventDefault(); return; }
+      if (!touch) return;
+      var dx = touch.x - e.touches[0].clientX, dy = touch.y - e.touches[0].clientY;
+      if (Math.abs(dx) < 10 && Math.abs(dy) < 8) return;
+      touch = null;
+      var down = Math.abs(dx) > Math.abs(dy) ? true : dy > 0;   // sideways = down to the work
+      if (snap(down)) e.preventDefault();
+    }, { passive: false });
+
+    window.addEventListener('keydown', function (e) {
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
+      var down = e.key === 'ArrowDown' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey);
+      var up = e.key === 'ArrowUp' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey);
+      if ((down || up) && snap(down)) e.preventDefault();
+    });
 
     window.addEventListener('scroll', request, { passive: true });
     window.addEventListener('resize', relayout);

@@ -9,10 +9,9 @@
 /* transparent so the light-box background (.lightbox, components.css) shows through */
 body.home { background: transparent; }
 
-/* the nav's fade matches the light-box surface instead of the paper color */
-.home .site-nav {
-  background: linear-gradient(to bottom, var(--lightbox-surface) 45%, rgba(247, 245, 244, 0));
-}
+/* the nav is solid light-box surface, so prints scroll cleanly under it
+   (a fade let them show through its lower half) */
+.home .site-nav { background: var(--lightbox-surface); }
 
 .home {
   /* the grid's margin starts inside the light-box frame */
@@ -42,8 +41,10 @@ body.home { background: transparent; }
 }
 .hero__title > span + span { animation-delay: 90ms; }
 
-/* the words that travel into the logo (js/home.js); scaled from their top-left */
-.hero__word {
+/* the letters of the title (split by js/home.js): the S and G travel
+   into the logo, scaled from their top-left; the rest lift away */
+.hero__word { display: inline-block; }
+.hero__letter {
   display: inline-block;
   transform-origin: 0 0;
   will-change: transform, opacity;
@@ -72,17 +73,14 @@ body.home { background: transparent; }
 /* ---------- sheets: the organized grid ---------- */
 /*
   Gallery wall (kept as designed, not forced onto the 8 columns): two
-  columns, left a little narrower than right, every print in a row the
-  same height. It sits inside the shared page margins. Images crop to fit
-  (object-fit: cover), so any source image lands uniform. Left prints are
-  4:3; right prints' ratio is derived so both columns share one height.
+  equal columns, every print the same size (4:3). It sits inside the
+  shared page margins. Images crop to fit (object-fit: cover), so any
+  source image lands uniform.
 */
 .sheets {
-  --ratio-l: 4 / 3;
-  --ratio-r: 1.569; /* (4 / 3) / 0.85: same height as the left column */
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   column-gap: clamp(32px, 9vw, 120px);
   row-gap: clamp(48px, 8vw, 104px);
   padding: clamp(24px, 6vh, 64px) clamp(0px, 3vw, 48px) clamp(96px, 16vh, 200px);
@@ -96,9 +94,8 @@ body.home { background: transparent; }
   transform-origin: 0 0;
   will-change: transform;
   z-index: var(--z-paper-front);
-  --ratio: var(--ratio-l);
+  --ratio: 4 / 3;
 }
-.sheet:nth-child(even) { --ratio: var(--ratio-r); }
 
 .sheet__link {
   display: block;
@@ -177,37 +174,82 @@ body.home { background: transparent; }
 .sheet__link:focus-visible .sheet__award {
   transform: translateY(-4px) rotate(-4deg);
 }
+/* stamped a touch carelessly: hangs a few px off the print's top-left
+   corner. Difference only shows over the print, so the bit that misses
+   the paper fades into the light box, like ink that didn't catch */
+.sheet__award--stamp {
+  top: -7px;
+  left: -9px;
+  width: clamp(72px, 22%, 150px);
+  transform: rotate(-8deg);
+}
+.sheet__link:hover .sheet__award--stamp,
+.sheet__link:focus-visible .sheet__award--stamp {
+  transform: translateY(-4px) rotate(-8deg);
+}
 
-/* ---------- references: little papers behind the prints (js/home.js, js/references-data.js) ---------- */
+/* ---------- references: little cards on the light box (js/home.js, js/references-data.js) ---------- */
+/* scattered at the top of the page, faded out (inline opacity) before the
+   grid settles. Each links to MindCloud; hover lifts it a touch and shows a
+   quiet "References" label above it (the first card peeks up from the
+   bottom edge, so a label under it would be off screen). */
 .ref {
   position: absolute;
   z-index: var(--z-paper-back);   /* always under the prints */
   transform: rotate(var(--tilt, 0deg));
-  will-change: transform;
-  pointer-events: none;
+  will-change: transform, opacity;
   background: var(--color-white);
   box-shadow: var(--shadow-paper);
+  color: inherit;
+  text-decoration: none;
+  transition: translate var(--duration-base) var(--ease-smooth);
 }
 .ref--image { padding: 6px; }
 .ref--image img { display: block; width: 100%; height: auto; }
+/* no image yet: a plain grey card */
+.ref--blank { padding: 0; aspect-ratio: var(--ratio, 4 / 5); background: var(--color-missing); }
 .ref--note {
   padding: 12px 14px 16px;
   font-size: var(--text-label-size);
   line-height: 1.4;
   color: var(--text-soft);
 }
-/* phones: one print per row leaves no room to peek from behind, so no refs */
+.ref__label {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  margin-bottom: 8px;
+  font-size: var(--text-label-size);
+  line-height: 1;
+  color: var(--text-muted);
+  white-space: nowrap;
+  opacity: 0;
+  translate: 0 3px;
+  transition: opacity var(--duration-fast) ease, translate var(--duration-base) var(--ease-smooth);
+  pointer-events: none;
+}
+.ref:hover,
+.ref:focus-visible { translate: 0 -4px; }
+.ref:hover .ref__label,
+.ref:focus-visible .ref__label { opacity: 1; translate: 0 0; }
+/* phones: no room on the light box, so no refs */
 @media (max-width: 640px) { .ref { display: none; } }
 
 /* caption: fades in as the sheet lands (--settle set by home.js) */
+/* number | title | role. The title wraps inside its own column, so a long
+   name stays lined up to the right of the number; the role sits flush with
+   the print's right edge, lighter */
 .sheet__caption {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 16px;
+  align-items: start;
   margin-top: var(--space-item);
   opacity: var(--settle, 1);
 }
-.sheet__caption .text-label:last-child { color: var(--text-muted); }
+.sheet__num { color: var(--color-ink); }
+.sheet__title { color: var(--text-soft); }
+.sheet__role { color: var(--text-strong); opacity: 0.45; text-align: right; }
 
 @keyframes deal {
   from { opacity: 0; translate: 12vw 4vh; rotate: 6deg; }
@@ -221,42 +263,16 @@ body.home { background: transparent; }
   border: 0;
 }
 
-/* ---------- Studio nudge, under the prints (lines up with the right column) ---------- */
-.studio-nudge {
-  display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
-  column-gap: clamp(32px, 9vw, 120px);
-  max-width: 1320px;
-  margin: calc(clamp(96px, 16vh, 200px) * -0.5) auto 0;
-  padding: 0 clamp(0px, 3vw, 48px) var(--space-section);
-}
-.studio-nudge__link {
-  grid-column: 2;
-  display: flex;
-  justify-content: space-between;
-  gap: var(--grid-gutter);
-  padding-top: var(--space-item);
-  border-top: 1px solid rgba(29, 27, 24, 0.2);
-  color: var(--text-soft);
-  transition: color var(--duration-fast) ease;
-}
-.studio-nudge__link:hover { color: var(--text-strong); }
-
 /* ---------- tablet ---------- */
 @media (max-width: 1024px) {
-  .sheets,
-  .studio-nudge { column-gap: 40px; padding-left: 0; padding-right: 0; }
+  .sheets { column-gap: 40px; padding-left: 0; padding-right: 0; }
 }
 
-/* ---------- phone: one column, every print 4:3 ---------- */
+/* ---------- phone: one column ---------- */
 @media (max-width: 640px) {
   .hero { min-height: 92svh; }
-  .sheets,
-  .studio-nudge { grid-template-columns: 1fr; }
+  .sheets { grid-template-columns: 1fr; }
   .sheets { row-gap: 48px; }
-  .sheet,
-  .sheet:nth-child(even) { --ratio: 4 / 3; }
-  .studio-nudge__link { grid-column: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {

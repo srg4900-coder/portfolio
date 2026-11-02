@@ -444,7 +444,12 @@
       var row = el('div', 'cs-meta__row' + (opts.stacked ? ' cs-meta__row--wide' : ''));
       row.appendChild(el('dt', 'text-label', label));
       var dd = el('dd');
-      if (opts.tag) dd.appendChild(el('span', (opts.award ? 'award-tag' : 'cs-tag') + ' text-label', items[0]));
+      if (opts.stamp) {
+        var stamp = dd.appendChild(el('img', 'award-stamp cs-award-stamp'));
+        stamp.src = opts.stamp;
+        stamp.alt = items[0].replace(/\n/g, ' ');
+      }
+      else if (opts.tag) dd.appendChild(el('span', (opts.award ? 'award-tag' : 'cs-tag') + ' text-label', items[0]));
       else if (opts.stacked) items.forEach(function (i) {
         var line = el('span', 'cs-meta__line');
         var cut = i.indexOf(', ');
@@ -610,7 +615,7 @@
     var creditList = el('dl', 'cs-meta cs-meta--credits');
     var dur = duration(data.duration);
     metaRow(creditList, 'Duration', dur || '');
-    metaRow(creditList, 'Award', data.award, { tag: true, award: true });
+    metaRow(creditList, 'Award', data.award, { tag: true, award: true, stamp: data.awardStamp });
     // Released is hidden for now (Sadie, Oct 2026); the data stays in projects-data.js.
     // metaRow(creditList, 'Released', data.released);
     if (data.client && typeof data.client === 'object') clientRow(creditList, data.client);
