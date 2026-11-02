@@ -159,7 +159,8 @@ window.PROJECTS = {
     duration: 'Ongoing',
     status: 'In Progress',
     tools: ['Figma', 'Sony A6100', 'Lightroom', 'JavaScript, AI-assisted development', 'Sewing machine'],
-    // TODO(Sadie): add { label: 'Shop the Drop', url: '...' } once the storefront is live
+    // TODO(Sadie): paste the site address into url; the button stays hidden until it has one
+    action: { label: 'View Site', url: '' },
     hero: { src: 'assets/case-studies/boys-club/bc-02.jpg', bw: true, alt: 'Black and white editorial: the model on a leather sofa beside a white dog, Boy’s Club B mark overlaid' },
     idea: {
       copy: 'Sketched in a three hour train delay in Italy. The premise: a girl who wears the clothes taken from the men she holds close. The core image: rigid menswear worn for years until its lines loosen, cut and cloth intact, structure softened into her lines. Drop one blends 1920s athletic wear, vintage collegiate, and 60s rock and roll.',
@@ -217,14 +218,15 @@ window.PROJECTS = {
       copy: 'Opening credits for Netflix\u2019s A Series of Unfortunate Events. I wanted viewers to feel the show\u2019s themes while only hinting at the plot. Storybook paper cutouts nod to its roots as a children\u2019s novel and give it an eerie, academic edge. Every vignette hides metaphors and easter eggs that only surface after a few rewatches.',
       // process, in order: first doodles, the cast and props, then the
       // storyboards (early scenes, later scenes), the moodboard, and the
-      // easter egg still to come. (The trolley frame lives in 03 Work.)
+      // finished cutouts where the easter eggs show. (The trolley frame
+      // lives in 03 Work.)
       images: [
         { src: 'assets/case-studies/title-sequence/process/ts-sketch-1-concepts.webp', contain: true, label: 'First concept sketches', alt: 'Pencil doodles: early character ideas, a fish, a vintage car, flames, and eyes with a note to zoom in on an eye' },
         { src: 'assets/case-studies/title-sequence/process/ts-sketch-2-characters-props.webp', contain: true, label: 'Characters and props', alt: 'Pencil character sheet labeled Squalor, Violet, Klaus, Sunny, Olaf and Jacqueline, with a sugar bowl, a book and a spyglass' },
         { src: 'assets/case-studies/title-sequence/process/ts-sketch-3-storyboard-early-scenes.webp', contain: true, label: 'Storyboard: trolley, hedge maze, gold cage', alt: 'Pencil storyboard page: a trolley under cherry blossoms, a hedge maze shaped like a key, and a black snake in a gold cage' },
         { src: 'assets/case-studies/title-sequence/process/ts-sketch-4-storyboard-late-scenes.webp', contain: true, label: 'Storyboard: darts, opera, fire', alt: 'Pencil storyboard page: darts falling, a figure at the opera, the shadow of a fire with the sugar bowl, a car, and a final hallway' },
         { src: 'assets/case-studies/title-sequence/references/ts-graphical-inspiration.webp', contain: true, label: 'Graphical inspiration', alt: 'Moodboard of 1930s posters and illustration: a hedge maze, an ocean liner, Harper\u2019s Bazaar, art deco cars' },
-        { label: 'Easter egg, revealed', alt: '' }
+        { src: 'assets/case-studies/title-sequence/process/ts-easter-eggs-revealed.webp', contain: true, label: 'Easter egg, revealed', alt: 'Finished cutout illustrations: darts, a gold statue holding a spyglass, a brass spyglass, a tall silhouette, a gilded birdcage with a snake, dark leaves, a Briny Beach trolley, and three children in silhouette' }
       ]
     },
     friction: {
