@@ -212,11 +212,10 @@
 @media (prefers-reduced-motion: reduce) {
   .skill, .skill__icon, .skill__name > span { transition: none; }
 }
-/* phones only: every icon on the page (skills, Instagram, LinkedIn) gets
-   its name in very small, light mono print, centred beneath it. The
+/* phones only: every skill icon gets its name in very small, light mono
+   print, centred beneath it (Instagram / LinkedIn stay unlabelled). The
    skills become an even grid of cells wide enough for the names. */
-.skill__label,
-.about__social-label { display: none; }
+.skill__label { display: none; }
 @media (max-width: 760px) {
   .skills {
     display: grid;
@@ -224,8 +223,7 @@
     gap: 12px 4px;
   }
   .skill { display: flex; flex-direction: column; align-items: center; }
-  .skill__label,
-  .about__social-label {
+  .skill__label {
     display: block;
     font-family: var(--font-mono);
     font-size: 8px;
@@ -234,17 +232,8 @@
     text-align: center;
     color: var(--color-ink);
     opacity: 0.35;
-  }
-  .skill__label { margin-top: 2px; max-width: 100%; }
-  .about__resume { gap: 16px; }   /* room for the two names */
-  .about__social { position: relative; }
-  .about__social-label {
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
     margin-top: 2px;
-    white-space: nowrap;
+    max-width: 100%;
   }
 }
 
@@ -454,25 +443,9 @@
 
 @media (max-width: 760px) {
   .about { grid-template-columns: 1fr; }
-  /* phones: the portrait drops below the text to the right edge, its
-     bottom level with the email / Resume / icons row (the .about's
-     bottom padding above the end of the page). The facts and links keep
-     clear of it. It arrives last, after the links. */
-  .page__main--about { position: relative; }
+  /* phones: no portrait for now */
   .page__head--about { grid-template-columns: 1fr; }
-  .page__head--about > .about__portrait {
-    position: absolute;
-    right: var(--grid-margin);
-    bottom: clamp(64px, 10vw, 140px);
-    width: 76px;
-    aspect-ratio: 3 / 4;
-    margin: 0;
-    --chunk: 12 !important;
-  }
-  /* the photo already fills the small frame's height: no nudge */
-  .about__portrait img { object-position: 45% 50%; }
-  .about__facts,
-  .about__links { padding-right: calc(76px + 16px); }
+  .page__head--about > .about__portrait { display: none; }
   /* phones: short lines (50 characters max) and every sentence on a line
      of its own, so the left edge is a column you can scan down (F-shape)
      instead of a block to wade through */

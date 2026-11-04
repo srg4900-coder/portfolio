@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FDF9F5">
 <meta name="description" content="About Sadie Gold, product &amp; brand designer.">
 <title>About | Sadie Gold</title>
 
@@ -16,9 +17,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500&family=Cutive+Mono&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/tokens.css?v=105">
-<link rel="stylesheet" href="css/components.css?v=105">
-<link rel="stylesheet" href="css/pages.css?v=105">
+<link rel="stylesheet" href="css/tokens.css?v=107">
+<link rel="stylesheet" href="css/components.css?v=107">
+<link rel="stylesheet" href="css/pages.css?v=107">
 <!-- hold the page's entrance until its text is built and the font is in
      (released by the script at the end of the page; this timer is only a
      safety net), so it plays as one clean sequence with nothing jumping -->
@@ -85,13 +86,13 @@
 
   <div class="contact-modal"></div>
 
-  <script src="js/nav.js?v=105"></script>
-  <script src="js/cursor.js?v=105"></script>
-  <script src="js/contact.js?v=105"></script>
-  <script src="js/touch.js?v=105"></script>
-  <script src="js/order.js?v=105"></script>
-  <script src="js/skills-data.js?v=105"></script>
-  <script src="js/skills.js?v=105"></script>
+  <script src="js/nav.js?v=107"></script>
+  <script src="js/cursor.js?v=107"></script>
+  <script src="js/contact.js?v=107"></script>
+  <script src="js/touch.js?v=107"></script>
+  <script src="js/order.js?v=107"></script>
+  <script src="js/skills-data.js?v=107"></script>
+  <script src="js/skills.js?v=107"></script>
   <script>
     (function () {
       var copy = window.SITE_COPY;
@@ -171,11 +172,6 @@
       if (copy.social) ['instagram', 'linkedin'].forEach(function (name) {
         var icon = copy.social(name);
         icon.classList.add('about__social');
-        // phones only: the name in small print under the icon (css/pages.css)
-        var label = icon.appendChild(document.createElement('span'));
-        label.className = 'about__social-label';
-        label.setAttribute('aria-hidden', 'true');
-        label.textContent = name === 'linkedin' ? 'LinkedIn' : 'Instagram';
         group.appendChild(icon);
       });
 

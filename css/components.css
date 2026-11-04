@@ -286,6 +286,12 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 
 /* pages without the light box (every page but home): no frame offset */
 body:not(.home) { --frame-width: 0px; }
+/* iPhone Safari colours its top bar from the solid element it finds at
+   the top of the screen, and skips anything that ignores taps. The nav
+   is solid paper on these pages, so it takes taps everywhere (nothing
+   under it is reachable anyway) and Safari paints the bar paper too,
+   instead of letting the page show through above it. */
+body:not(.home) .site-nav { pointer-events: auto; }
 
 @media print { .lightbox { display: none; } }
 
