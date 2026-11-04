@@ -268,24 +268,21 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 
 /* iPhone Safari draws the page on under the status bar and the bottom
    toolbar, past where fixed things (the frame, the nav) reach. A solid
-   band hangs off the top and bottom of the screen on every page, so
-   anything scrolling stays under the frame and never shows past it. */
-body::before,
-body::after {
-  content: '';
+   band (added by js/nav.js) hangs off the top and the bottom of the screen
+   on every page, 1px onto it, so anything scrolling stays under the
+   frame and never shows past it. */
+.edge-band {
   position: fixed;
   left: 0;
   right: 0;
-  height: 50vh;
+  height: calc(50vh + 1px);
   z-index: var(--z-frame);
   background: var(--color-paper);
-  pointer-events: none;
 }
-body::before { bottom: 100%; }
-body::after { top: 100%; }
-body.home::before,
-body.home::after { background: var(--lightbox-surface); }
-@media print { body::before, body::after { display: none; } }
+.edge-band--top { bottom: calc(100% - 1px); }
+.edge-band--bottom { top: calc(100% - 1px); }
+.home .edge-band { background: var(--lightbox-surface); }
+@media print { .edge-band { display: none; } }
 
 /* pages without the light box (every page but home): no frame offset */
 body:not(.home) { --frame-width: 0px; }

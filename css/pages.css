@@ -322,14 +322,21 @@
 
 @media (max-width: 760px) {
   .about { grid-template-columns: 1fr; }
-  /* phones: the portrait sits above the name, smaller */
+  /* phones: the portrait drops below the text to the right edge, its
+     bottom level with the email / Resume / icons row (the .about's
+     bottom padding above the end of the page). The facts and links keep
+     clear of it. It arrives last, after the links. */
+  .page__main--about { position: relative; }
   .page__head--about { grid-template-columns: 1fr; }
   .page__head--about > .about__portrait {
-    grid-column: 1;
-    grid-row: auto;
-    width: 88px;
-    margin-bottom: clamp(20px, 5vw, 32px);
+    position: absolute;
+    right: var(--grid-margin);
+    bottom: clamp(64px, 10vw, 140px);
+    width: 76px;
+    --chunk: 11 !important;
   }
+  .about__facts,
+  .about__links { padding-right: calc(76px + 16px); }
   /* phones: short lines (50 characters max) and every sentence on a line
      of its own, so the left edge is a column you can scan down (F-shape)
      instead of a block to wade through */

@@ -20,6 +20,18 @@
     { label: 'About', href: 'about.html', page: 'about' }
   ];
 
+  // iPhone Safari draws the page on under the status bar and the bottom
+  // toolbar. Two solid bands (css/components.css) hang off the top and
+  // bottom of the screen, nudged 1px onto it: Safari colours its bars from
+  // a solid fixed strip it finds touching the screen edge, so it shows
+  // paper there instead of whatever is scrolling past
+  ['top', 'bottom'].forEach(function (side) {
+    var band = document.createElement('div');
+    band.className = 'edge-band edge-band--' + side;
+    band.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(band);
+  });
+
   var header = document.querySelector('.site-nav');
   if (!header) return;
 

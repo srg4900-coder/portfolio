@@ -16,9 +16,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500&family=Cutive+Mono&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/tokens.css?v=87">
-<link rel="stylesheet" href="css/components.css?v=87">
-<link rel="stylesheet" href="css/pages.css?v=87">
+<link rel="stylesheet" href="css/tokens.css?v=88">
+<link rel="stylesheet" href="css/components.css?v=88">
+<link rel="stylesheet" href="css/pages.css?v=88">
 <!-- hold the page's entrance until its text is built and the font is in
      (released by the script at the end of the page; this timer is only a
      safety net), so it plays as one clean sequence with nothing jumping -->
@@ -33,12 +33,13 @@
     <a class="logo-button" href="index.html">SG</a>
   </header>
 
-  <main class="page__main">
+  <main class="page__main page__main--about">
     <header class="page__head page__head--about">
-      <!-- portrait: an empty box for now. TODO(Sadie): drop a photo in as
-           <img src="assets/about/portrait.jpg" alt="Sadie Gold"> (any size;
-           it crops to fill the 3:4 box) and remove aria-hidden -->
-      <div class="about__portrait chunk" style="--chunk: 1" aria-hidden="true"></div>
+      <!-- portrait: any size works, it crops to fill the 3:4 box. On phones
+           it moves down beside the email / Resume row (css/pages.css) -->
+      <div class="about__portrait chunk" style="--chunk: 1">
+        <img src="assets/about/portrait.webp" alt="Sadie Gold" width="600" height="815" decoding="async">
+      </div>
       <p class="page__eyebrow chunk" style="--chunk: 0">About</p>
       <h1 class="text-title chunk" style="--chunk: 1">Sadie Gold</h1>
       <p class="page__lede chunk" style="--chunk: 2">Brand Designer</p>
@@ -81,10 +82,10 @@
 
   <div class="contact-modal"></div>
 
-  <script src="js/nav.js?v=87"></script>
-  <script src="js/cursor.js?v=87"></script>
-  <script src="js/contact.js?v=87"></script>
-  <script src="js/touch.js?v=87"></script>
+  <script src="js/nav.js?v=88"></script>
+  <script src="js/cursor.js?v=88"></script>
+  <script src="js/contact.js?v=88"></script>
+  <script src="js/touch.js?v=88"></script>
   <script>
     (function () {
       var copy = window.SITE_COPY;

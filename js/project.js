@@ -283,8 +283,19 @@
     if (!wide.matches) {
       list.forEach(function (p) { p.style.left = p.style.top = p.style.width = p.style.zIndex = ''; });
       wrap.style.height = '';
+      // phones: an even grid (css/project.css). Wide sheets (moodboards,
+      // slides) run the full width, the rest pair up two across; a last
+      // one left on its own runs full width too, so no row has a gap
+      var singles = [];
+      list.forEach(function (p) {
+        var isWide = shape(p) > 1.15;
+        p.classList.toggle('is-wide', isWide);
+        if (!isWide) singles.push(p);
+      });
+      if (singles.length % 2) singles[singles.length - 1].classList.add('is-wide');
       return;
     }
+    list.forEach(function (p) { p.classList.remove('is-wide'); });
     var rand = seeded(slug);
     var W = wrap.clientWidth;
     var n = list.length;

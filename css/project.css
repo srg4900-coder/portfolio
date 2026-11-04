@@ -543,6 +543,20 @@ body.project-page {
     width: auto !important;
     cursor: zoom-in;
   }
+  /* an even grid: every image fills its column, cropped to one shape
+     (4:5 two across, 3:2 full width for wide sheets, js/project.js).
+     dense lets a later pair fill the gap beside a full-width sheet.
+     A tap still opens the whole, uncropped image */
+  .cs-papers { grid-auto-flow: row dense; }
+  .cs-paper.is-wide { grid-column: 1 / -1; }
+  .cs-paper .cs-paper__img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    transform: none;
+  }
+  .cs-paper.is-wide .cs-paper__img { aspect-ratio: 3 / 2; }
+  .cs-paper.is-cutout .cs-paper__img { object-fit: contain; }
 }
 
 /* ---------- credits (end of the page, left-aligned) ---------- */
