@@ -17,9 +17,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500&family=Cutive+Mono&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/tokens.css?v=107">
-<link rel="stylesheet" href="css/components.css?v=107">
-<link rel="stylesheet" href="css/pages.css?v=107">
+<link rel="stylesheet" href="css/tokens.css?v=109">
+<link rel="stylesheet" href="css/components.css?v=109">
+<link rel="stylesheet" href="css/pages.css?v=109">
 <!-- hold the page's entrance until its text is built and the font is in
      (released by the script at the end of the page; this timer is only a
      safety net), so it plays as one clean sequence with nothing jumping -->
@@ -69,6 +69,9 @@
       <div class="about__links chunk" style="--chunk: 11">
         <a class="cs-link" data-about-email href="#">Email</a>
         <span class="about__resume">
+          <!-- phones only (css/pages.css): on a computer the resume comes
+               with the bio's "grab my resume" link -->
+          <a class="cs-link about__resume-link" data-about-resume href="#" download="Sadie-Gold-Resume.pdf">Resume</a>
           <!-- Instagram + LinkedIn icons added here by the script below -->
         </span>
       </div>
@@ -86,50 +89,60 @@
 
   <div class="contact-modal"></div>
 
-  <script src="js/nav.js?v=107"></script>
-  <script src="js/cursor.js?v=107"></script>
-  <script src="js/contact.js?v=107"></script>
-  <script src="js/touch.js?v=107"></script>
-  <script src="js/order.js?v=107"></script>
-  <script src="js/skills-data.js?v=107"></script>
-  <script src="js/skills.js?v=107"></script>
+  <script src="js/nav.js?v=109"></script>
+  <script src="js/cursor.js?v=109"></script>
+  <script src="js/contact.js?v=109"></script>
+  <script src="js/touch.js?v=109"></script>
+  <script src="js/order.js?v=109"></script>
+  <script src="js/skills-data.js?v=109"></script>
+  <script src="js/skills.js?v=109"></script>
   <script>
     (function () {
       var copy = window.SITE_COPY;
       if (!copy) return;
       // the bio: four paragraphs, each arriving in turn (chunks 3 to 6).
-      // The last ends in the call to action (a bold link): one click
-      // downloads the resume and opens a Gmail compose window to Sadie.
+      // Paragraph breaks differ by screen: each sentence says whether a
+      // new paragraph starts before it on a computer (desk) and on a phone
+      // (phone); css/pages.css shows only that screen's breaks. The last
+      // paragraph ends in the call to action (a bold link).
       var BIO = [
-        ['I always start with how people feel.'],
-        ['I\u2019m a systems thinker, and every system I build starts with humans.',
-         'Emotions are physical and feelings are shared.',
-         'Whether it\u2019s an interface, a product, or a whole brand, I begin with research: where do users hesitate, lean in, or leave, and why?',
-         'I prototype until they feel without being told to.'],
-        ['I show my process because my thinking is half the work.',
-         'Artistry, motion, and code are how I make things.',
-         'Philosophy and psychology are how I make sense of the people I make them for.'],
-        ['I\u2019m looking for an intense team that goes deep fast, sweats the details, and builds together.',
-         'If that\u2019s yours,']
+        { t: 'I always start with how people feel.' },
+        { t: 'I\u2019m a systems thinker, and every system I build starts with humans.', desk: true },
+        { t: 'Emotions are physical and feelings are shared.', phone: true },
+        { t: 'Whether it\u2019s an interface, a product, or a whole brand, I begin with research: where do users hesitate, lean in, or leave, and why?' },
+        { t: 'I prototype until they feel without being told to.' },
+        { t: 'I show my process because my thinking is half the work.', desk: true, phone: true },
+        { t: 'Artistry, motion, and code are how I make things.' },
+        { t: 'Philosophy and psychology are how I make sense of the people I make them for.' },
+        { t: 'I\u2019m looking for an intense team that goes deep fast, sweats the details, and builds together.', desk: true, phone: true },
+        { t: 'If that\u2019s yours,' }
       ];
       var bio = document.querySelector('[data-about-bio]');
-      BIO.forEach(function (sentences, g) {
-        var b = bio.appendChild(document.createElement('span'));
-        b.className = 'about__block chunk chunk--line';
-        b.style.setProperty('--chunk', 3 + g);
-        sentences.forEach(function (line, j) {
-          var para = b.appendChild(document.createElement('span'));
-          para.className = 'about__para';
-          para.textContent = (j ? ' ' : '') + line;
-        });
-        if (g === BIO.length - 1) {
-          b.lastChild.appendChild(document.createTextNode(' '));
-          b.lastChild.appendChild(resumeLink());
+      var group = 0;
+      BIO.forEach(function (s, i) {
+        if (i) {
+          if (s.desk || s.phone) {
+            var br = bio.appendChild(document.createElement('span'));
+            br.className = 'about__break' + (s.desk ? ' is-desk' : '') + (s.phone ? ' is-phone' : '');
+          }
+          if (s.desk) group++;
+          if (!(s.desk && s.phone)) bio.appendChild(document.createTextNode(' '));
+        }
+        var line = bio.appendChild(document.createElement('span'));
+        line.className = 'chunk chunk--line';
+        line.style.setProperty('--chunk', 3 + group);
+        line.textContent = s.t;
+        if (i === BIO.length - 1) {
+          line.appendChild(document.createTextNode(' '));
+          line.appendChild(resumeLink());
         }
       });
 
       // "grab my resume and let's talk ->": downloads the PDF and opens a
-      // Gmail compose window (always Gmail, on phones too) in a new tab
+      // Gmail compose window (always Gmail, on phones too) in a new tab.
+      // Phones skip the download (it gets lost there): they have the
+      // Resume link in the row below instead.
+      var phone = window.matchMedia('(max-width: 760px)');
       function resumeLink() {
         var a = document.createElement('a');
         a.className = 'about__cta';
@@ -144,6 +157,7 @@
         arrow.setAttribute('aria-hidden', 'true');
         arrow.textContent = '\u2192';
         a.addEventListener('click', function () {
+          if (phone.matches) return;
           var dl = document.createElement('a');
           dl.href = copy.resume;
           dl.setAttribute('download', 'Sadie-Gold-Resume.pdf');
@@ -167,6 +181,7 @@
       var email = document.querySelector('[data-about-email]');
       email.textContent = copy.email;
       copy.mailLink(email, 'Hi Sadie');
+      document.querySelector('[data-about-resume]').href = copy.resume;
       // Instagram + LinkedIn, right of the email (same icons as the Contact popup)
       var group = document.querySelector('.about__resume');
       if (copy.social) ['instagram', 'linkedin'].forEach(function (name) {

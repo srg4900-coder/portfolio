@@ -280,7 +280,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   background: var(--color-paper);
 }
 .edge-band--top { bottom: calc(100% - 1px); }
-.edge-band--bottom { top: calc(100% - 1px); }
+.edge-band--bottom { top: 100%; }   /* no overlap at the bottom: it drew a 1px paper line over the page */
 .home .edge-band { background: var(--lightbox-surface); }
 @media print { .edge-band { display: none; } }
 

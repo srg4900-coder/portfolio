@@ -113,8 +113,11 @@
 }
 
 .about__bio { max-width: 39ch; }   /* 55 characters a line at most */
-.about__block { display: block; text-wrap: pretty; }   /* pretty: no lone word on a last line */
-.about__block + .about__block { margin-top: 0.8em; }   /* paragraph breaks */
+.about__bio { text-wrap: pretty; }   /* pretty: no lone word on a last line */
+/* paragraph breaks (about.html): each screen shows only its own */
+.about__break { display: none; height: 0.8em; }
+@media (min-width: 761px) { .about__break.is-desk { display: block; } }
+@media (max-width: 760px) { .about__break.is-phone { display: block; } }
 
 .about__facts {
   display: flex;
@@ -138,6 +141,9 @@
 }
 /* the Instagram + LinkedIn icons, right after the email */
 .about__resume { display: inline-flex; align-items: center; gap: 4px; }
+/* Resume sits before the icons on phones only */
+.about__resume-link { display: none; margin-right: 10px; }
+@media (max-width: 760px) { .about__resume-link { display: inline; } }
 .about__social { width: 32px; height: 32px; }
 .about__social svg { width: 20px; height: 20px; }
 /* the email reads in full, not shouted in caps */
@@ -446,12 +452,8 @@
   /* phones: no portrait for now */
   .page__head--about { grid-template-columns: 1fr; }
   .page__head--about > .about__portrait { display: none; }
-  /* phones: short lines (50 characters max) and every sentence on a line
-     of its own, so the left edge is a column you can scan down (F-shape)
-     instead of a block to wade through */
+  /* phones: short lines (about 50 characters) */
   .about__bio { max-width: 42ch; }
-  .about__para { display: block; text-wrap: balance; }   /* no one-word last lines */
-  .about__para + .about__para { margin-top: 0.55em; }
   /* phone: one piece per line */
   .studio__grid { grid-template-columns: 1fr; }
 }
