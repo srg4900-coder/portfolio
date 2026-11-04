@@ -22,13 +22,13 @@
 
   // Each string = one line. The location isn't in the popup any more, but
   // the About page still shows it (about.html reads SITE_COPY.location).
-  var LOCATION = 'Based in NYC. Available Worldwide';
+  var LOCATION = ['NYC', 'Available Worldwide, Full-time, Summer 2027'];
   var META_LINES = [
-    'Brand Designer. Creative Problem Solver.'
+    'Product & Brand Designer. Creative Problem Solver.'
   ];
   // One sentence per line (text-wrap: balance evens any that wrap). The
   // popup ends the last line with a "studio →" link (STUDIO below);
-  // the About page shows these sentences without it.
+  // popup only: the About page has its own first-person blurb (about.html).
   var BIO_LINES = [
     'Sadie has a BFA from RIT in New Media Design with a concentration in Philosophy and Psychology.',
     'She likes to think holistically when designing and loves to show the process.',

@@ -12,8 +12,13 @@
   this browser saw for that name is used, else the default, so a link
   never breaks into an empty page.
 
+  The same link can also carry a Skills group order (About page,
+  js/skills.js): saved alongside it in /admin/, cached the same way.
+
   window.PortfolioOrder:
     ready         Promise resolving to the list of slugs to show
+    skills        Promise resolving to the link's skill group ids (in
+                  order), or [] for the default
     key           the ?for= name, or null
     link(url)     url with ?for= added (unchanged when there's no key)
     defaultOrder  HOME_ORDER, cleaned
@@ -40,28 +45,43 @@
     return base + (base.indexOf('?') > -1 ? '&' : '?') + 'for=' + encodeURIComponent(key) + hash;
   }
 
-  var ready;
+  var ready, skills;
   if (!key) {
     ready = Promise.resolve(defaultOrder);
+    skills = Promise.resolve([]);
   } else {
     var CACHE_KEY = 'sg-order:' + key;
-    var fromCache = function () {
-      try {
-        var cached = clean(JSON.parse(localStorage.getItem(CACHE_KEY)));
-        if (cached.length) return cached;
-      } catch (e) {}
-      return defaultOrder;
+    var SKILLS_KEY = 'sg-skills:' + key;
+    var cached = function (name) {
+      try { return JSON.parse(localStorage.getItem(name)); } catch (e) { return null; }
     };
-    var request = fetch('/api/order/' + encodeURIComponent(key), { headers: { Accept: 'application/json' } })
-      .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
-      .then(function (data) {
-        var order = clean(data.order);
-        if (!order.length) throw new Error('empty');
-        try { localStorage.setItem(CACHE_KEY, JSON.stringify(order)); } catch (e) {}
-        return order;
-      });
+    var store = function (name, value) {
+      try { localStorage.setItem(name, JSON.stringify(value)); } catch (e) {}
+    };
+    var fromCache = function () {
+      var order = clean(cached(CACHE_KEY));
+      return order.length ? order : defaultOrder;
+    };
+    var cleanSkills = function (list) {
+      return (Array.isArray(list) ? list : []).filter(function (id) { return /^[a-z0-9-]{1,32}$/.test(id); });
+    };
     var timeout = new Promise(function (_, reject) { setTimeout(reject, TIMEOUT_MS); });
-    ready = Promise.race([request, timeout]).catch(fromCache);
+    var request = Promise.race([
+      fetch('/api/order/' + encodeURIComponent(key), { headers: { Accept: 'application/json' } })
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); }),
+      timeout
+    ]);
+    ready = request.then(function (data) {
+      var order = clean(data.order);
+      if (!order.length) throw new Error('empty');
+      store(CACHE_KEY, order);
+      return order;
+    }).catch(fromCache);
+    skills = request.then(function (data) {
+      var list = cleanSkills(data.skills);
+      store(SKILLS_KEY, list);
+      return list;
+    }).catch(function () { return cleanSkills(cached(SKILLS_KEY)); });
   }
 
   // keep ?for= on internal page links (nav, footer, cards) as they're followed
@@ -76,5 +96,5 @@
     }, true);
   }
 
-  window.PortfolioOrder = { ready: ready, key: key, link: link, defaultOrder: defaultOrder };
+  window.PortfolioOrder = { ready: ready, skills: skills, key: key, link: link, defaultOrder: defaultOrder };
 })();

@@ -55,9 +55,9 @@
 
 /* ---------- about ---------- */
 
-/* the header shares the content's two columns: name on the left, a small
-   portrait (3:4) at the top of the right column, lined up with the
-   Education / Based facts below it */
+/* the header shares the content's two columns: name on the left, the
+   portrait filling the right column, lined up with the Education / Based
+   facts below it */
 .page__head--about {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
@@ -65,17 +65,44 @@
   align-items: start;
 }
 .page__head--about > * { grid-column: 1; }
+/* desktop / tablet: the portrait fills the right column's width, a wide
+   frame running from the top of the "Sadie Gold" letters down to the
+   baseline of "Product & Brand Designer" (the em offsets trim each line's
+   spacing above / below the letters), its photo cropped to fill */
+/* no eyebrow: the name's letters start where the old "About" eyebrow's
+   letters did (0.21 of the small size down), minus the title's own space
+   above its capitals (0.089em) */
+.page__head--about h1 { margin-top: calc(var(--text-small-size) * 0.21 - 0.089em); }
+/* About sits 56px lower under the nav than the other pages, and its
+   subtitle 24px further below the name (the portrait stretches to match) */
+.page__head--about { padding-top: 56px; }
+.page__head--about .page__lede { margin-top: calc(clamp(14px, 2vw, 24px) + 24px); }
 .page__head--about > .about__portrait {
   grid-column: 2;
-  grid-row: 1 / span 3;
+  grid-row: 1 / span 2;
+  align-self: stretch;
+  justify-self: stretch;
+  width: auto;
+  aspect-ratio: auto;
+  margin-top: calc(var(--text-small-size) * 0.21);
+  margin-bottom: calc(var(--text-h1-size) * 0.23);
 }
 .about__portrait {
+  position: relative;
   width: clamp(96px, 10vw, 150px);
   aspect-ratio: 3 / 4;
   background: var(--color-missing);
   overflow: hidden;
 }
-.about__portrait img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.about__portrait img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 45% calc(48% + 20px);   /* the face centred in the wide frame, nudged 20px down */
+}
 
 .about {
   display: grid;
@@ -87,6 +114,7 @@
 
 .about__bio { max-width: 39ch; }   /* 55 characters a line at most */
 .about__block { display: block; text-wrap: pretty; }   /* pretty: no lone word on a last line */
+.about__block + .about__block { margin-top: 0.8em; }   /* paragraph breaks */
 
 .about__facts {
   display: flex;
@@ -108,13 +136,117 @@
   align-items: center;
   gap: 20px clamp(24px, 4vw, 48px);
 }
-/* Resume with the Instagram + LinkedIn icons right beside it */
+/* the Instagram + LinkedIn icons, right after the email */
 .about__resume { display: inline-flex; align-items: center; gap: 4px; }
-.about__resume .cs-link { margin-right: 10px; }
 .about__social { width: 32px; height: 32px; }
 .about__social svg { width: 20px; height: 20px; }
 /* the email reads in full, not shouted in caps */
 .about__links [data-about-email] { text-transform: none; letter-spacing: 0.02em; }
+
+/* Skills (js/skills.js): app icons the size of the Instagram / LinkedIn
+   ones, evenly spaced. The active one's icon fades as its name rises in
+   letter by letter (same swap as "Say hi"); the icons on its line slide
+   aside (inline transform). The row clips sideways, so an icon pushed
+   past its edge slides out of view and back. */
+.about__facts dd[data-skills] { margin-top: 10px; }
+.about__sub { color: var(--text-muted); }
+.skills {
+  position: relative;   /* the offsets js/skills.js measures are the row's own */
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  clip-path: inset(-16px 0);
+}
+.skill { transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1); }
+.skill__btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+.skill__icon { display: flex; transition: opacity 240ms ease, transform 320ms cubic-bezier(0.22, 1, 0.36, 1); }
+.skill__icon.is-out { opacity: 0; transform: translateY(-0.4em); }
+.skill__icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  overflow: visible;
+}
+.skill__icon .dot { fill: currentColor; stroke: none; }
+.skill__icon text {
+  fill: currentColor;
+  stroke: none;
+  font-family: var(--font-display);
+  font-size: 8.5px;
+  font-weight: 500;
+}
+.skill__name {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  white-space: pre;
+  font-size: var(--text-small-size);
+  font-weight: 400;
+  pointer-events: none;
+}
+.skill__name > span {
+  display: inline-block;
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease;
+  transition-delay: calc(var(--i, 0) * 16ms);
+}
+.skill__name.is-below > span { transform: translateY(0.6em); opacity: 0; }
+.skill__name.is-above > span { transform: translateY(-0.6em); opacity: 0; transition-delay: calc(var(--i, 0) * 12ms); }
+.skill__name.is-still > span { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .skill, .skill__icon, .skill__name > span { transition: none; }
+}
+/* phones only: every icon on the page (skills, Instagram, LinkedIn) gets
+   its name in very small, light mono print, centred beneath it. The
+   skills become an even grid of cells wide enough for the names. */
+.skill__label,
+.about__social-label { display: none; }
+@media (max-width: 760px) {
+  .skills {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
+    gap: 12px 4px;
+  }
+  .skill { display: flex; flex-direction: column; align-items: center; }
+  .skill__label,
+  .about__social-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    text-align: center;
+    color: var(--color-ink);
+    opacity: 0.35;
+  }
+  .skill__label { margin-top: 2px; max-width: 100%; }
+  .about__resume { gap: 16px; }   /* room for the two names */
+  .about__social { position: relative; }
+  .about__social-label {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+}
 
 /* ---------- studio ---------- */
 
@@ -333,8 +465,12 @@
     right: var(--grid-margin);
     bottom: clamp(64px, 10vw, 140px);
     width: 76px;
-    --chunk: 11 !important;
+    aspect-ratio: 3 / 4;
+    margin: 0;
+    --chunk: 12 !important;
   }
+  /* the photo already fills the small frame's height: no nudge */
+  .about__portrait img { object-position: 45% 50%; }
   .about__facts,
   .about__links { padding-right: calc(76px + 16px); }
   /* phones: short lines (50 characters max) and every sentence on a line
@@ -342,7 +478,6 @@
      instead of a block to wade through */
   .about__bio { max-width: 42ch; }
   .about__para { display: block; text-wrap: balance; }   /* no one-word last lines */
-  .about__block + .about__block,
   .about__para + .about__para { margin-top: 0.55em; }
   /* phone: one piece per line */
   .studio__grid { grid-template-columns: 1fr; }
@@ -387,46 +522,19 @@
   .chunk { animation: none; }
 }
 
-/* "Say hi ->" at the end of the bio (about.html): two stacked layers,
-   "Say hi" and the email, swapped letter by letter on hover (tap on
-   touch). Letters leave upward and arrive from below, left to right, a
-   beat apart (--i); the swap's width glides between the two words. No
-   underline, just the arrow, which nudges right on hover. */
-.about__hi {
-  white-space: nowrap;
+/* "grab my resume and let's talk ->" at the end of the bio (about.html):
+   bold, no underline, the arrow nudging right on hover */
+.about__cta {
+  font-weight: 500;   /* the heaviest loaded weight, not a faked bold */
   color: var(--text-strong);
   transition: color var(--duration-base) var(--ease-smooth);
 }
-.about__hi:hover,
-.about__hi:focus-visible { color: var(--color-ink); }
-.about__hi-swap {
-  display: inline-grid;
-  vertical-align: bottom;
-  transition: width 420ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-.about__hi-layer {
-  grid-area: 1 / 1;
-  justify-self: start;   /* its own width, so the swap can measure each word */
-  white-space: pre;
-}
-.about__hi-layer > span {
-  display: inline-block;
-  transition:
-    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 240ms ease;
-  transition-delay: calc(var(--i, 0) * 16ms);
-}
-.about__hi-layer.is-below > span { transform: translateY(0.6em); opacity: 0; }
-.about__hi-layer.is-above > span { transform: translateY(-0.6em); opacity: 0; }
-.about__hi-layer.is-above > span { transition-delay: calc(var(--i, 0) * 12ms); }   /* leaving: a touch quicker */
-.about__hi-layer.is-still > span { transition: none; }
-.about__hi-arrow {
+.about__cta:hover,
+.about__cta:focus-visible { color: var(--color-ink); }
+.about__cta-arrow {
   display: inline-block;
   margin-left: 0.3em;
   transition: transform var(--duration-base) var(--ease-smooth);
 }
-.about__hi:hover .about__hi-arrow,
-.about__hi:focus-visible .about__hi-arrow { transform: translateX(4px); }
-@media (prefers-reduced-motion: reduce) {
-  .about__hi-layer > span, .about__hi-swap { transition: none; }
-}
+.about__cta:hover .about__cta-arrow,
+.about__cta:focus-visible .about__cta-arrow { transform: translateX(4px); }

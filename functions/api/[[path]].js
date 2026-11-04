@@ -13,12 +13,14 @@
     GET  /api/login    { ok } if the current cookie is still valid
 
   PORTFOLIO ORDERS (company links, managed at /admin/; see js/order.js):
-    GET    /api/order/<key>    public — { order: [slugs] } for ?for=<key>
+    GET    /api/order/<key>    public — { order: [slugs], skills: [group ids] } for ?for=<key>
     GET    /api/orders         PIN session required — every saved link
-    PUT    /api/orders/<key>   PIN session required — save { label, order }
+    PUT    /api/orders/<key>   PIN session required — save { label, order, skills }
     DELETE /api/orders/<key>   PIN session required — remove a link
   Stored in the same D1 database; the portfolio_orders table creates
-  itself on first save, so there's no extra dashboard setup.
+  itself on first save (and gains its skill_order column the same way),
+  so there's no extra dashboard setup. `skills` is the About page's
+  Skills group order (js/skills-data.js ids); [] means the default.
 
   Cloudflare dashboard setup this needs (see MINDCLOUD_SETUP.md):
     - a D1 database bound to this Pages project as  DB
@@ -141,34 +143,48 @@ async function login(request, env) {
 
 const ORDER_KEY = /^[a-z0-9-]{1,48}$/;   // the ?for= part of a company link
 const PROJECT_SLUG = /^[a-z0-9-]{1,64}$/;
+const SKILL_GROUP = /^[a-z0-9-]{1,32}$/;
+
+function skillList(raw) {
+  try {
+    const list = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return Array.isArray(list) ? list.map(String).filter(s => SKILL_GROUP.test(s)).slice(0, 20) : [];
+  } catch {
+    return [];
+  }
+}
 
 async function ensureOrdersTable(env) {
   await env.DB.prepare(
-    'CREATE TABLE IF NOT EXISTS portfolio_orders (key TEXT PRIMARY KEY, label TEXT NOT NULL, project_order TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)'
+    'CREATE TABLE IF NOT EXISTS portfolio_orders (key TEXT PRIMARY KEY, label TEXT NOT NULL, project_order TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, skill_order TEXT)'
   ).run();
+  // tables made before Skills existed: add the column (already there = fine)
+  try {
+    await env.DB.prepare('ALTER TABLE portfolio_orders ADD COLUMN skill_order TEXT').run();
+  } catch {}
 }
 
 async function getOrder(env, key) {
   if (!ORDER_KEY.test(key)) return json(404, { ok: false, error: 'not found' });
   let row = null;
   try {
-    row = await env.DB.prepare('SELECT project_order FROM portfolio_orders WHERE key = ?').bind(key).first();
+    row = await env.DB.prepare('SELECT * FROM portfolio_orders WHERE key = ?').bind(key).first();
   } catch {
     // table doesn't exist yet (nothing saved): same as an unknown link
   }
   if (!row) return json(404, { ok: false, error: 'not found' });
-  return json(200, { ok: true, order: JSON.parse(row.project_order) });
+  return json(200, { ok: true, order: JSON.parse(row.project_order), skills: skillList(row.skill_order) });
 }
 
 async function listOrders(request, env) {
   if (!(await isAuthed(request, env))) return json(401, { ok: false, error: 'not authenticated' });
   await ensureOrdersTable(env);
   const { results } = await env.DB
-    .prepare('SELECT key, label, project_order, updated_at AS updatedAt FROM portfolio_orders ORDER BY updated_at DESC')
+    .prepare('SELECT key, label, project_order, skill_order, updated_at AS updatedAt FROM portfolio_orders ORDER BY updated_at DESC')
     .all();
   return json(200, {
     ok: true,
-    orders: results.map(r => ({ key: r.key, label: r.label, order: JSON.parse(r.project_order), updatedAt: r.updatedAt })),
+    orders: results.map(r => ({ key: r.key, label: r.label, order: JSON.parse(r.project_order), skills: skillList(r.skill_order), updatedAt: r.updatedAt })),
   });
 }
 
@@ -179,13 +195,14 @@ async function saveOrder(request, env, key) {
   const label = String(data.label || '').trim().slice(0, 80) || key;
   const order = Array.isArray(data.order) ? data.order.map(String).filter(s => PROJECT_SLUG.test(s)).slice(0, 50) : [];
   if (!order.length) return json(400, { ok: false, error: 'pick at least one project' });
+  const skills = skillList(data.skills);
   await ensureOrdersTable(env);
   const now = new Date().toISOString();
   await env.DB.prepare(
-    'INSERT INTO portfolio_orders (key, label, project_order, created_at, updated_at) VALUES (?, ?, ?, ?, ?) ' +
-    'ON CONFLICT(key) DO UPDATE SET label = excluded.label, project_order = excluded.project_order, updated_at = excluded.updated_at'
-  ).bind(key, label, JSON.stringify(order), now, now).run();
-  return json(200, { ok: true, key, label, order });
+    'INSERT INTO portfolio_orders (key, label, project_order, skill_order, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?) ' +
+    'ON CONFLICT(key) DO UPDATE SET label = excluded.label, project_order = excluded.project_order, skill_order = excluded.skill_order, updated_at = excluded.updated_at'
+  ).bind(key, label, JSON.stringify(order), JSON.stringify(skills), now, now).run();
+  return json(200, { ok: true, key, label, order, skills });
 }
 
 async function deleteOrder(request, env, key) {

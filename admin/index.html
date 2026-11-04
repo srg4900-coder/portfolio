@@ -12,6 +12,8 @@
     - sign in with the MindCloud PIN (same session cookie, 30 days)
     - project titles come from js/projects-data.js, the default order from
       its HOME_ORDER
+    - each link can also set the About page's Skills group order: pick a
+      preset (SKILL_PRESETS in js/skills-data.js) or move groups by hand
     - saved in the Cloudflare D1 database by functions/api ([[path]].js):
       PUT /api/orders/<name>, DELETE /api/orders/<name>, GET /api/orders
   Not linked from anywhere on the site, and marked noindex.
@@ -97,6 +99,12 @@
     width: 30px; height: 30px; border: 1px solid rgba(29, 27, 24, 0.2); background: none; cursor: pointer;
   }
 
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: var(--space-item); }
+  .presets .btn { padding: 8px 14px; }
+  .presets .btn.is-on { background: var(--color-ink); color: var(--color-paper); }
+  .order--skills li { grid-template-columns: 28px minmax(0, 1fr) auto; cursor: default; }
+  .order__items { display: block; font-size: 12px; color: var(--text-muted); }
+
   .result {
     margin-top: var(--space-item);
     padding: 12px;
@@ -148,6 +156,10 @@
       <p class="label" id="order-label">Order <span class="muted">(drag, or use the arrows; uncheck to hide)</span></p>
       <ol class="order" id="order" aria-labelledby="order-label"></ol>
 
+      <p class="label" id="skills-label">Skills order <span class="muted">(About page; pick a starting point, then adjust)</span></p>
+      <div class="presets" id="presets" role="group" aria-label="Skills presets"></div>
+      <ol class="order order--skills" id="skills" aria-labelledby="skills-label"></ol>
+
       <div class="row">
         <button class="btn btn--solid" id="save" type="button">Save link</button>
         <button class="btn" id="reset" type="button">Reset to default</button>
@@ -173,11 +185,17 @@
   </main>
 
   <script src="/js/projects-data.js?v=8"></script>
+  <script src="/js/skills-data.js?v=5"></script>
   <script>
   (function () {
     var PROJECTS = window.PROJECTS || {};
     var DEFAULT = (window.HOME_ORDER || []).filter(function (s) { return PROJECTS[s]; });
     var ALL = DEFAULT.concat(Object.keys(PROJECTS).filter(function (s) { return DEFAULT.indexOf(s) === -1; }));
+
+    var GROUPS = window.SKILL_GROUPS || [];
+    var PRESETS = window.SKILL_PRESETS || [];
+    var SKILL_DEFAULT = GROUPS.map(function (g) { return g.id; });
+    var skillRows = SKILL_DEFAULT.slice();   // group ids in display order
 
     var $ = function (id) { return document.getElementById(id); };
     var rows = [];        // [{ slug, on }] in display order
@@ -278,6 +296,68 @@
     });
     $('order').addEventListener('dragend', function () { dragFrom = null; renderRows(); });
 
+    // ---------- skills group order ----------
+    function group(id) { return GROUPS.filter(function (g) { return g.id === id; })[0]; }
+    function setSkills(order) {
+      var known = (order || []).filter(function (id, i, all) { return group(id) && all.indexOf(id) === i; });
+      skillRows = known.concat(SKILL_DEFAULT.filter(function (id) { return known.indexOf(id) === -1; }));
+      renderSkills();
+    }
+    function renderSkills() {
+      var list = $('skills');
+      list.innerHTML = '';
+      skillRows.forEach(function (id, i) {
+        var g = group(id);
+        var li = document.createElement('li');
+        var num = document.createElement('span');
+        num.className = 'order__num label';
+        num.textContent = String(i + 1).padStart(2, '0');
+        var name = document.createElement('span');
+        name.className = 'order__title';
+        name.textContent = g.label;
+        var items = document.createElement('span');
+        items.className = 'order__items';
+        items.textContent = g.items.filter(function (it) { return !it.hide; }).map(function (it) { return it.name; }).join(', ');
+        name.appendChild(items);
+        var moves = document.createElement('span');
+        moves.className = 'order__moves row';
+        [['\u2191', -1, 'up'], ['\u2193', 1, 'down']].forEach(function (m) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.textContent = m[0];
+          b.setAttribute('aria-label', 'Move ' + g.label + ' ' + m[2]);
+          b.disabled = (m[1] < 0 && i === 0) || (m[1] > 0 && i === skillRows.length - 1);
+          b.addEventListener('click', function () {
+            var to = i + m[1];
+            skillRows.splice(to, 0, skillRows.splice(i, 1)[0]);
+            renderSkills();
+            var btn = $('skills').children[to].querySelectorAll('.order__moves button')[m[1] < 0 ? 0 : 1];
+            if (btn && !btn.disabled) btn.focus();
+          });
+          moves.appendChild(b);
+        });
+        li.appendChild(num); li.appendChild(name); li.appendChild(moves);
+        list.appendChild(li);
+      });
+      // light up the preset this order matches, if any
+      Array.prototype.forEach.call($('presets').children, function (b, k) {
+        var on = PRESETS[k] && PRESETS[k].order.join() === skillRows.slice(0, PRESETS[k].order.length).join();
+        b.classList.toggle('is-on', !!on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    }
+    PRESETS.forEach(function (preset) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn';
+      b.textContent = preset.label;
+      b.addEventListener('click', function () { setSkills(preset.order); });
+      $('presets').appendChild(b);
+    });
+    function skillNames(ids) {
+      return (ids && ids.length ? ids : SKILL_DEFAULT).map(function (id) { var g = group(id); return g ? g.label : id; }).join(', ');
+    }
+
     // ---------- editor ----------
     function startNew() {
       $('editor-title').textContent = 'New link';
@@ -288,6 +368,7 @@
       $('result').hidden = true;
       $('save-error').textContent = '';
       setRows(DEFAULT);
+      setSkills(SKILL_DEFAULT);
     }
     function edit(link) {
       $('editor-title').textContent = 'Edit link';
@@ -298,6 +379,7 @@
       $('result').hidden = true;
       $('save-error').textContent = '';
       setRows(link.order);
+      setSkills(link.skills);
       $('label').focus();
     }
 
@@ -308,7 +390,7 @@
       }
     });
     $('key').addEventListener('input', function () { keyTouched = true; });
-    $('reset').addEventListener('click', function () { setRows(DEFAULT); });
+    $('reset').addEventListener('click', function () { setRows(DEFAULT); setSkills(SKILL_DEFAULT); });
     $('new').addEventListener('click', startNew);
 
     $('save').addEventListener('click', function () {
@@ -318,7 +400,7 @@
       if (!/^[a-z0-9-]{1,48}$/.test(key)) { $('save-error').textContent = 'Link name: lowercase letters, numbers and dashes only.'; return; }
       if (!order.length) { $('save-error').textContent = 'Pick at least one project.'; return; }
       $('save').disabled = true;
-      api('PUT', 'orders/' + key, { label: $('label').value.trim() || key, order: order })
+      api('PUT', 'orders/' + key, { label: $('label').value.trim() || key, order: order, skills: skillRows })
         .then(function () {
           var url = linkFor(key);
           $('result-url').textContent = url;
@@ -380,7 +462,10 @@
             api('DELETE', 'orders/' + link.key).then(loadLinks);
           });
           actions.appendChild(copy); actions.appendChild(editBtn); actions.appendChild(del);
-          li.appendChild(head); li.appendChild(order); li.appendChild(actions);
+          var skillLine = document.createElement('span');
+          skillLine.className = 'links__order';
+          skillLine.textContent = 'Skills: ' + skillNames(link.skills);
+          li.appendChild(head); li.appendChild(order); li.appendChild(skillLine); li.appendChild(actions);
           list.appendChild(li);
         });
       });
