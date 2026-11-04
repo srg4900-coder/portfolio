@@ -202,4 +202,70 @@
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') close();
   });
+
+  // Phones and tablets: pull the sheet down to put it away, like an iOS
+  // sheet. From the top of the popup (not mid-scroll) the paper follows
+  // the finger; let go past a quarter of the screen, or with a quick
+  // flick, and it slides off the bottom and closes. Otherwise it springs
+  // back. The grabber bar up top shows it can be pulled.
+  if (window.matchMedia('(hover: none), (pointer: coarse)').matches) {
+    var grabber = el('span', 'contact-modal__grabber');
+    grabber.setAttribute('aria-hidden', 'true');
+    paper.insertBefore(grabber, paper.firstChild);
+
+    var SHEET = 'transform 380ms cubic-bezier(0.32, 0.72, 0, 1)';   // iOS sheet curve
+    var startY = 0, lastY = 0, lastT = 0, speed = 0, pulling = false, tracking = false;
+    var settle = function (y, done) {
+      paper.style.transition = SHEET;
+      paper.style.transform = 'translateY(' + y + ')';
+      var end = function (e) {
+        if (e && e.target !== paper) return;
+        paper.removeEventListener('transitionend', end);
+        clearTimeout(t);
+        if (done) done();
+      };
+      var t = setTimeout(end, 450);
+      paper.addEventListener('transitionend', end);
+    };
+    paper.addEventListener('touchstart', function (e) {
+      if (e.touches.length !== 1 || paper.scrollTop > 0) { tracking = false; return; }
+      tracking = true; pulling = false;
+      startY = lastY = e.touches[0].clientY;
+      lastT = e.timeStamp; speed = 0;
+    }, { passive: true });
+    paper.addEventListener('touchmove', function (e) {
+      if (!tracking) return;
+      var y = e.touches[0].clientY, dy = y - startY;
+      if (!pulling) {
+        if (dy < 6) { if (dy < -6) tracking = false; return; }   // scrolling up the popup instead
+        pulling = true;
+        paper.style.transition = 'none';
+      }
+      e.preventDefault();   // the paper moves, not the page
+      speed = (y - lastY) / Math.max(1, e.timeStamp - lastT);
+      lastY = y; lastT = e.timeStamp;
+      paper.style.transform = 'translateY(' + Math.max(0, dy) + 'px)';
+    }, { passive: false });
+    var release = function () {
+      if (!pulling) { tracking = false; return; }
+      tracking = pulling = false;
+      var dy = lastY - startY;
+      if (dy > window.innerHeight * 0.25 || speed > 0.5) {
+        settle('100%', function () {
+          close();
+          // back in place, unseen, for next time (after the fade)
+          setTimeout(function () {
+            paper.style.transition = 'none';
+            paper.style.transform = '';
+            paper.offsetWidth;
+            paper.style.transition = '';
+          }, 400);
+        });
+      } else {
+        settle('0px', function () { paper.style.transition = ''; paper.style.transform = ''; });
+      }
+    };
+    paper.addEventListener('touchend', release);
+    paper.addEventListener('touchcancel', release);
+  }
 })();

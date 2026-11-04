@@ -751,6 +751,20 @@ html.is-touch .contact-modal__resume:active {
   cursor: pointer;
 }
 
+/* touch only (js/contact.js): the pull-down handle, like an iOS sheet */
+.contact-modal__grabber {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  width: 36px;
+  height: 4px;
+  margin-left: -18px;
+  border-radius: 2px;
+  background: var(--color-blue);
+  opacity: 0.25;
+  pointer-events: none;
+}
+
 /* ---------- site footer (identical on every page) ---------- */
 
 .site-footer {
