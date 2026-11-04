@@ -17,9 +17,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500&family=Cutive+Mono&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/tokens.css?v=109">
-<link rel="stylesheet" href="css/components.css?v=109">
-<link rel="stylesheet" href="css/pages.css?v=109">
+<link rel="stylesheet" href="css/tokens.css?v=114">
+<link rel="stylesheet" href="css/components.css?v=114">
+<link rel="stylesheet" href="css/pages.css?v=114">
 <!-- hold the page's entrance until its text is built and the font is in
      (released by the script at the end of the page; this timer is only a
      safety net), so it plays as one clean sequence with nothing jumping -->
@@ -89,13 +89,13 @@
 
   <div class="contact-modal"></div>
 
-  <script src="js/nav.js?v=109"></script>
-  <script src="js/cursor.js?v=109"></script>
-  <script src="js/contact.js?v=109"></script>
-  <script src="js/touch.js?v=109"></script>
-  <script src="js/order.js?v=109"></script>
-  <script src="js/skills-data.js?v=109"></script>
-  <script src="js/skills.js?v=109"></script>
+  <script src="js/nav.js?v=114"></script>
+  <script src="js/cursor.js?v=114"></script>
+  <script src="js/contact.js?v=114"></script>
+  <script src="js/touch.js?v=114"></script>
+  <script src="js/order.js?v=114"></script>
+  <script src="js/skills-data.js?v=114"></script>
+  <script src="js/skills.js?v=114"></script>
   <script>
     (function () {
       var copy = window.SITE_COPY;
@@ -151,7 +151,9 @@
         a.target = '_blank';
         a.rel = 'noopener';
         a.setAttribute('aria-label', 'Download my resume and email me in Gmail');
-        a.appendChild(document.createTextNode('grab my resume and let\u2019s talk'));
+        var label = 'grab my resume and let\u2019s talk';
+        if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) rolling(a, label);
+        else a.appendChild(document.createTextNode(label));
         var arrow = a.appendChild(document.createElement('span'));
         arrow.className = 'about__cta-arrow';
         arrow.setAttribute('aria-hidden', 'true');
@@ -166,6 +168,40 @@
           dl.remove();
         });
         return a;
+      }
+
+      // computers: the words roll up letter by letter, left to right, on
+      // hover and again on leaving: the letters lift away as the same
+      // words rise in from below. Two stacked copies take turns.
+      // Styles: .about__cta-swap in css/pages.css.
+      function rolling(a, text) {
+        var swap = a.appendChild(document.createElement('span'));
+        swap.className = 'about__cta-swap';
+        swap.setAttribute('aria-hidden', 'true');
+        var layer = function (cls) {
+          var l = swap.appendChild(document.createElement('span'));
+          l.className = 'about__cta-layer' + cls;
+          text.split('').forEach(function (ch, k) {
+            var c = l.appendChild(document.createElement('span'));
+            c.textContent = ch;
+            c.style.setProperty('--i', k);
+          });
+          return l;
+        };
+        var showing = layer('');
+        var waiting = layer(' is-below');
+        var roll = function () {
+          var inn = waiting, out = showing;
+          inn.classList.add('is-still', 'is-below');
+          inn.classList.remove('is-above');
+          inn.getBoundingClientRect();
+          inn.classList.remove('is-still', 'is-below');
+          out.classList.add('is-above');
+          showing = inn;
+          waiting = out;
+        };
+        a.addEventListener('mouseenter', roll);
+        a.addEventListener('mouseleave', roll);
       }
 
       // the location: each array entry is its own line

@@ -52,6 +52,7 @@ window.SKILL_GROUPS = [
     items: [
       { name: 'Nano Banana Pro', icon: 'banana' },
       { name: 'Midjourney', icon: 'midjourney' },
+      { name: 'Firefly', icon: 'firefly' },
       { name: 'Figma Weave', icon: 'weave' },
       { name: 'ComfyUI', icon: 'comfy' }
     ]

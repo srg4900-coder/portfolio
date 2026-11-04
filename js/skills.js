@@ -31,6 +31,7 @@
     ae: tile('Ae'),
     pr: tile('Pr'),
     lr: tile('Lr'),
+    firefly: tile('Ff'),
     fusion: tile('F'),
     td: tile('TD'),
     webgl: tile('GL'),
@@ -135,28 +136,75 @@
     }
   }
 
-  // Centre the name on its icon (kept inside the row), then slide the
-  // icons on the same line out of its way: those before it as one group
-  // to the left, those after it to the right
+  // Centre the name on its icon (kept inside the row), then make room on
+  // its line like an accordion: the icons on each side close up toward
+  // the row's edge, the gaps shrinking evenly, so nothing is pushed out
+  // of the row. When a side is too crowded for full-size icons, those
+  // icons also shrink a little to fit.
   function makeRoom(li, name) {
     var GAP = 12;
     var W = list.clientWidth;
     var items = Array.prototype.slice.call(list.children);
     var line = items.filter(function (s) { return s.offsetTop === li.offsetTop; });
-    var w = name._w || name.scrollWidth;
-    // the button's box (on phones it sits centred in a wider cell, over its label)
-    var btn = li.querySelector('.skill__btn');
-    var left = btn.offsetLeft, iw = btn.offsetWidth;
-    var textLeft = Math.max(0, Math.min(W - w, left + iw / 2 - w / 2));
-    name.style.left = (textLeft - left) + 'px';
     var i = line.indexOf(li);
-    var before = line[i - 1], after = line[i + 1];
-    var shiftL = before ? Math.min(0, textLeft - GAP - (before.offsetLeft + before.offsetWidth)) : 0;
-    var shiftR = after ? Math.max(0, textLeft + w + GAP - after.offsetLeft) : 0;
-    items.forEach(function (s) {
-      var j = line.indexOf(s);
-      s.style.transform = j < 0 || j === i ? '' :
-        'translateX(' + (j < i ? shiftL : shiftR) + 'px)';
+    var btnOf = function (s) { return s.querySelector('.skill__btn'); };
+    var btn = btnOf(li);
+    var w = name._w || name.scrollWidth;
+    var left = btn.offsetLeft, iw = btn.offsetWidth;
+    var before = line.slice(0, i);
+    var after = line.slice(i + 1);
+    // the name sits centred on its icon, but never so far toward a crowded
+    // side that the icons there can't close up enough (each needs at least
+    // PITCH of the row, shrunk) or past the row's ends
+    var PITCH = 0.55 * iw + 2;
+    var lo = before.length ? (before.length - 1) * PITCH + iw + GAP : 0;
+    var hi = (after.length ? W - iw - (after.length - 1) * PITCH - GAP : W) - w;
+    lo = Math.max(0, lo);
+    hi = Math.min(W - w, hi);
+    var want = left + iw / 2 - w / 2;
+    var textLeft = lo <= hi ? Math.max(lo, Math.min(hi, want)) : Math.max(0, Math.min(W - w, want));
+    name.style.left = (textLeft - left) + 'px';
+
+    var moves = {};
+    // left side: icons from the row's start up to the name close up so
+    // the last one ends GAP before the name
+    if (before.length) {
+      var lastB = btnOf(before[before.length - 1]);
+      var R = lastB.offsetLeft;                         // last icon's left now
+      var Rn = Math.max(0, textLeft - GAP - lastB.offsetWidth);  // ...and after
+      if (Rn < R) {
+        var f = R > 0 ? Rn / R : 0;
+        before.forEach(function (s, k) {
+          var x = btnOf(s).offsetLeft;
+          moves[items.indexOf(s)] = { dx: x * f - x, n: before.length, pitch: before.length > 1 ? R * f / (before.length - 1) : Infinity };
+        });
+      }
+    }
+    // right side: icons from after the name to the row's end close up so
+    // the first one starts GAP after the name
+    if (after.length) {
+      var firstA = btnOf(after[0]);
+      var lastA = btnOf(after[after.length - 1]);
+      var end = Math.max(W - lastA.offsetWidth, lastA.offsetLeft);   // furthest an icon's left may go
+      var A = firstA.offsetLeft;
+      var An = Math.min(end, textLeft + w + GAP);
+      if (An > A) {
+        var span = end - A;
+        var g = span > 0 ? (end - An) / span : 0;
+        after.forEach(function (s) {
+          var x = btnOf(s).offsetLeft;
+          moves[items.indexOf(s)] = { dx: (An + (x - A) * g) - x, n: after.length, pitch: after.length > 1 ? (lastA.offsetLeft - A) * g / (after.length - 1) : Infinity };
+        });
+      }
+    }
+    items.forEach(function (s, j) {
+      var m = moves[j];
+      if (!m) { s.style.transform = ''; return; }
+      // icons closer together than their own width shrink to keep a hair
+      // of space between them
+      var size = btnOf(s).offsetWidth;
+      var k = Math.max(0.55, Math.min(1, (m.pitch - 2) / size));
+      s.style.transform = 'translateX(' + m.dx.toFixed(1) + 'px)' + (k < 1 ? ' scale(' + k.toFixed(3) + ')' : '');
     });
   }
 

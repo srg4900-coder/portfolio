@@ -37,19 +37,14 @@
   var STUDIO = { lead: 'Check out her ', label: 'studio', url: '/studio.html' };
 
   // shared with the About page (about.html), so the bio has one copy
-  // Every email link on the site: on a computer it opens a Gmail compose
-  // window in a new tab, prefilled; on phones and tablets it's a plain
-  // mailto:, which opens their mail app (the Gmail app, if that's theirs)
-  // instead of a browser sign-in.
+  // Every email link on the site opens a Gmail compose window in a new
+  // tab, prefilled, on every device (never the default mail app). On a
+  // phone with the Gmail app, the browser may hand it to the app.
   function mailLink(a, subject) {
     var su = subject ? encodeURIComponent(subject) : '';
-    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-      a.href = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(CONTACT_EMAIL) + (su ? '&su=' + su : '');
-      a.target = '_blank';
-      a.rel = 'noopener';
-    } else {
-      a.href = 'mailto:' + CONTACT_EMAIL + (su ? '?subject=' + su : '');
-    }
+    a.href = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(CONTACT_EMAIL) + (su ? '&su=' + su : '');
+    a.target = '_blank';
+    a.rel = 'noopener';
     return a;
   }
 
