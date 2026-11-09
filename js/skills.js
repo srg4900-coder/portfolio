@@ -5,8 +5,8 @@
   Instagram / LinkedIn icons. Hover (mouse), focus, or tap one and its
   icon fades as the app's name rises in letter by letter, the same swap
   as "Say hi". The icons on its line slide aside on both sides to make
-  room (only as far as the row allows; whatever won't fit slides out of
-  view at the row's edge). Mouse: back when the pointer leaves. Tap or
+  room on phones; on computers nothing moves, and the icons the name
+  covers fade out instead. Mouse: back when the pointer leaves. Tap or
   click: back after 2 seconds.
 
   Group order follows the company link (?for=, js/order.js) when one is
@@ -48,6 +48,7 @@
   };
 
   var mouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  var phone = window.matchMedia('(max-width: 760px)');   // phones keep the sliding row
   var list = document.createElement('ul');
   list.className = 'skills';
   host.appendChild(list);
@@ -132,7 +133,10 @@
     li.classList.remove('is-active');
     if (active === li) {
       active = null;
-      list.querySelectorAll('.skill').forEach(function (s) { s.style.transform = ''; });
+      list.querySelectorAll('.skill').forEach(function (s) {
+        s.style.transform = '';
+        s.classList.remove('is-faded');
+      });
     }
   }
 
@@ -141,7 +145,24 @@
   // the row's edge, the gaps shrinking evenly, so nothing is pushed out
   // of the row. When a side is too crowded for full-size icons, those
   // icons also shrink a little to fit.
+  // Computers: nothing moves. The name sits centred on its own icon and
+  // the icons it covers on that line fade out while it shows.
+  function fadeAround(li, name) {
+    var PAD = 6;
+    var btn = li.querySelector('.skill__btn');
+    var w = name._w || name.scrollWidth;
+    var textLeft = btn.offsetLeft + btn.offsetWidth / 2 - w / 2;
+    name.style.left = (textLeft - btn.offsetLeft) + 'px';
+    Array.prototype.forEach.call(list.children, function (s) {
+      var b = s.querySelector('.skill__btn');
+      var hit = s !== li && s.offsetTop === li.offsetTop &&
+        b.offsetLeft < textLeft + w + PAD && b.offsetLeft + b.offsetWidth > textLeft - PAD;
+      s.classList.toggle('is-faded', hit);
+    });
+  }
+
   function makeRoom(li, name) {
+    if (!phone.matches) return fadeAround(li, name);
     var GAP = 12;
     var W = list.clientWidth;
     var items = Array.prototype.slice.call(list.children);

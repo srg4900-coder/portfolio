@@ -162,9 +162,16 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px 14px;
-  clip-path: inset(-16px 0);
 }
-.skill { transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1); }
+/* phones: the row clips sideways, so an icon slid past its edge goes out
+   of view (computers centre names on their icons, so a name at the row's
+   end may run a little past it) */
+@media (max-width: 760px) { .skills { clip-path: inset(-16px 0); } }
+.skill { transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease; }
+/* computers: icons under a showing name fade out (js/skills.js) but keep
+   their hover spot, so running the pointer along a row names each icon
+   in turn, hidden or not */
+.skill.is-faded { opacity: 0; }
 .skill__btn {
   position: relative;
   display: flex;
