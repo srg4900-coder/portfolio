@@ -40,10 +40,10 @@
   TEMPLATE
   'my-project': {
     title: 'Project Name: Subtitle',       // text after ': ' sits smaller under the title
-    hook: '[Hook, under 10 words]',
+    hook: '[Hook, under 10 words]',        // wrap in *asterisks* for italics
     role: 'Art Direction',                 // required
     disciplines: ['Branding', 'Print'],
-    duration: '6 weeks',                   // a number + day/week/month/year, or 'Ongoing'
+    duration: '6 weeks',                   // a number + day/week/month/year (+ words: '3-day group sprint'), or 'Ongoing'
     status: 'Live',                        // Live / In Production / In Progress / Concept
     award: 'Gold ADDY',                    // short: gold tag on the homepage print + credits; \n starts a new line
     awardPlain: false,                     // optional: true = plain text in the credits (**word** bold), no tag anywhere
@@ -66,7 +66,7 @@ window.HOME_ORDER = [
   'grassroots',
   'boys-club',
   'title-sequence',
-  'special-olympics'
+  'gravity'
 ];
 
 // Old links that should still land on the right project.
@@ -259,7 +259,60 @@ window.PROJECTS = {
     }
   },
 
-  // ---------- Special Olympics New York: Site Redesign ----------
+  // ---------- Gravity ----------
+  // Facts from Sadie (Nov 2026). [Brackets] still need her words; grey
+  // boxes (no src) are images still to come.
+  'gravity': {
+    title: 'Gravity',
+    hook: '*What does gravity feel like?*',
+    role: 'Immersive Interaction Designer',
+    disciplines: ['Generative Code', 'After Effects', 'Figma', 'WebGL', 'Python', 'JavaScript'],
+    duration: '3-day group sprint',
+    status: 'Concept Completed',
+    course: 'New Media Creative Collision 2026',
+    tools: ['TouchDesigner', 'Claude Code', 'WebGL', 'Figma', 'Webcam', '70 in. display'],
+    // TODO(Sadie): the site isn't hosted yet; add url: 'https://...' when
+    // it is (until then the button shows greyed out)
+    action: { label: 'View Site' },
+    hero: {
+      video: 'assets/video/gravity.mp4',
+      src: 'assets/case-studies/gravity/gravity-arms-open.webp',
+      alt: 'A dancer\u2019s outline traced in glowing white particles, arms open, with bubbles drifting around them on a dark ground'
+    },
+    idea: {
+      copy: 'Creative Collision brings together New Media Design students of every year for a 3 day sprint on a new prompt. This year\u2019s prompt: Gravity. Our idea came from one question: how can we make people feel gravity through visual and audio interaction, at a large scale? The motion started as my preliminary work in TouchDesigner, which I converted into code with Claude Code.',
+      images: [
+        { src: 'assets/case-studies/gravity/gravity-whiteboard.webp', contain: true, label: 'Whiteboard plan', alt: 'Whiteboard sketches: a figure scattering particles labeled Interactive, three small frames moving from comfort to discomfort and back, and a task list: storyboards for video, sound files, build interaction (Sadie), weird experiments for the video' },
+        { src: 'assets/case-studies/gravity/gravity-touchdesigner.webp', contain: true, label: 'TouchDesigner mock-up', alt: 'TouchDesigner network: a webcam feed flipped, turned greyscale and leveled, compared against a background, thresholded into a black and white silhouette, then blurred into a soft presence map, with the blur settings open' },
+        { label: '[Process image 3]', alt: '' }
+      ]
+    },
+    friction: {
+      problem: 'Three days, a team of every skill level with me leading as a senior, and inspiration pulling in many directions, so a direction was hard to pin down fast.',
+      response: '[How you got the team moving: one line]',
+      result: '[What it led to: one line]',
+      images: [
+        { label: '[Problem and solution image]', alt: '' }
+      ]
+    },
+    work: {
+      ratio: '16 / 9',
+      images: [
+        { src: 'assets/case-studies/gravity/gravity-in-use.webp', video: 'assets/video/gravity-in-use.mp4', large: true, label: 'In use on the 70 in. display', alt: 'A person raises and sweeps their arms in front of a 70 inch display while Gravity traces their body in particles on screen' },
+        { src: 'assets/case-studies/gravity/gravity-controls.webp', label: 'Body mode and controls', alt: 'Gravity in body mode: a figure drawn in white particles and soft blobs on a dark ground, beside a settings panel for camera, mode, framing, ground, particles, trail, gravity, gusts, ink, motion sensitivity and timing' },
+        { src: 'assets/case-studies/gravity/gravity-light-ground.webp', label: 'Light ground', alt: 'Two dancers rendered as dark particle silhouettes, bubbles scattering off them, on a pale ground' },
+        { src: 'assets/case-studies/gravity/gravity-dark-ground.webp', label: 'Dark ground', alt: 'A figure built from soft white blobs drifting apart on a dark ground' },
+        { label: '[Work image 5]', alt: '' },
+        { label: '[Work image 6]', alt: '' }
+      ],
+      outcome: 'We completed the interaction and showed it at the showcase hosted by alum Greg Herman. The optimized site ran as we\u2019d hoped and immersed each person in a world of their own, with settings like color and sound to make it theirs.'
+    }
+  },
+
+  // ---------- ARCHIVED: Special Olympics New York: Site Redesign ----------
+  // Off the homepage and out of the order (Nov 2026), so it's a draft: still
+  // at project.html?project=special-olympics. To bring it back, add its slug
+  // to HOME_ORDER.
   // TODO(Sadie): not in the copy doc yet. Facts below come from the pitch
   // deck (Fall 2025, Graphical User Interface); everything in [brackets]
   // needs your words.

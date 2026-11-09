@@ -75,7 +75,8 @@
   // the one word "Ongoing". Plural is fixed automatically ("1 weeks" ->
   // "1 week"). Anything else returns null: it doesn't render, and the
   // console reminder below flags it.
-  var DURATION = /^(\d+)\s+(day|week|month|year)s?$/i;
+  // A hyphen and trailing words are kept as written: '3-day group sprint'.
+  var DURATION = /^(\d+)[\s-](day|week|month|year)s?(\s+[a-z ]+)?$/i;
   function duration(v) {
     var s = text(v);
     if (!s) return '';
@@ -83,6 +84,7 @@
     var m = s.match(DURATION);
     if (!m) return null;
     var n = Number(m[1]);
+    if (m[3]) return s;
     return n + ' ' + m[2].toLowerCase() + (n === 1 ? '' : 's');
   }
   function projectUrl(s) { return Order.link('project.html?project=' + encodeURIComponent(s)); }
@@ -423,7 +425,11 @@
     if (split > -1) h1.appendChild(el('span', 'cs-hero__subtitle load-rise', data.title.slice(split + 2)));
     head.appendChild(h1);
     if (text(data.hook)) {
-      var hook = el('p', 'cs-hero__hook load-rise', text(data.hook));
+      // a hook wrapped in *asterisks* is set in italics
+      var hookText = text(data.hook), italic = /^\*(.+)\*$/.exec(hookText);
+      var hook = el('p', 'cs-hero__hook load-rise');
+      if (italic) hook.appendChild(el('em', '', italic[1]));
+      else hook.textContent = hookText;
       hook.style.setProperty('--load-delay', '300ms');
       head.appendChild(hook);
     }
