@@ -425,11 +425,13 @@
     if (split > -1) h1.appendChild(el('span', 'cs-hero__subtitle load-rise', data.title.slice(split + 2)));
     head.appendChild(h1);
     if (text(data.hook)) {
-      // a hook wrapped in *asterisks* is set in italics
-      var hookText = text(data.hook), italic = /^\*(.+)\*$/.exec(hookText);
+      // words wrapped in *asterisks* are set in italics
       var hook = el('p', 'cs-hero__hook load-rise');
-      if (italic) hook.appendChild(el('em', '', italic[1]));
-      else hook.textContent = hookText;
+      text(data.hook).split(/(\*[^*]+\*)/).forEach(function (part) {
+        if (!part) return;
+        if (/^\*[^*]+\*$/.test(part)) hook.appendChild(el('em', '', part.slice(1, -1)));
+        else hook.appendChild(document.createTextNode(part));
+      });
       hook.style.setProperty('--load-delay', '300ms');
       head.appendChild(hook);
     }

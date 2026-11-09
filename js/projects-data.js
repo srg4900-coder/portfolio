@@ -40,7 +40,7 @@
   TEMPLATE
   'my-project': {
     title: 'Project Name: Subtitle',       // text after ': ' sits smaller under the title
-    hook: '[Hook, under 10 words]',        // wrap in *asterisks* for italics
+    hook: '[Hook, under 10 words]',        // wrap words in *asterisks* for italics
     role: 'Art Direction',                 // required
     disciplines: ['Branding', 'Print'],
     duration: '6 weeks',                   // a number + day/week/month/year (+ words: '3-day group sprint'), or 'Ongoing'
@@ -264,9 +264,9 @@ window.PROJECTS = {
   // boxes (no src) are images still to come.
   'gravity': {
     title: 'Gravity',
-    hook: '*What does gravity feel like?*',
+    hook: 'Comfort or discomfort? The *feeling* of gravity',
     role: 'Immersive Interaction Designer',
-    disciplines: ['Generative Code', 'After Effects', 'Figma', 'WebGL', 'Python', 'JavaScript'],
+    disciplines: ['Interaction Design', 'Immersive Experience Design', 'Creative Coding', 'UX/UI'],
     duration: '3-day group sprint',
     status: 'Concept Completed',
     course: 'New Media Creative Collision 2026',
