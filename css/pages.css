@@ -151,9 +151,8 @@
 
 /* Skills (js/skills.js): app icons the size of the Instagram / LinkedIn
    ones, evenly spaced. The active one's icon fades as its name rises in
-   letter by letter (same swap as "Say hi"); the icons on its line slide
-   aside (inline transform). The row clips sideways, so an icon pushed
-   past its edge slides out of view and back. */
+   letter by letter (same swap as "Say hi"), centred on it, and the icons
+   it covers fade (.is-faded). Computers only: phones show labels. */
 .about__facts dd[data-skills] { margin-top: 10px; }
 .about__sub { color: var(--text-muted); }
 .skills {
@@ -163,11 +162,9 @@
   flex-wrap: wrap;
   gap: 10px 14px;
 }
-/* phones: the row clips sideways, so an icon slid past its edge goes out
-   of view (computers centre names on their icons, so a name at the row's
-   end may run a little past it) */
-@media (max-width: 760px) { .skills { clip-path: inset(-16px 0); } }
-.skill { transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease; }
+/* phones: labelled icons, no swap (js/skills.js), so no tap cursor */
+@media (max-width: 760px) { .skill__btn { cursor: default; } }
+.skill { transition: opacity 240ms ease; }
 /* computers: icons under a showing name fade out (js/skills.js) but keep
    their hover spot, so running the pointer along a row names each icon
    in turn, hidden or not */

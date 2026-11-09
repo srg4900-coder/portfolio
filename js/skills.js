@@ -2,12 +2,16 @@
   SKILLS ROW — About page (data: js/skills-data.js; styles: css/pages.css).
 
   One even row of app icons, drawn in the same line style as the
-  Instagram / LinkedIn icons. Hover (mouse), focus, or tap one and its
-  icon fades as the app's name rises in letter by letter, the same swap
-  as "Say hi". The icons on its line slide aside on both sides to make
-  room on phones; on computers nothing moves, and the icons the name
-  covers fade out instead. Mouse: back when the pointer leaves. Tap or
-  click: back after 2 seconds.
+  Instagram / LinkedIn icons.
+
+  Computers: hover, focus, or click one and its icon fades as the app's
+  name rises in letter by letter (the same swap as "Say hi"), centred
+  on the icon; the icons the name covers fade out, and nothing moves.
+  Every icon keeps its own hover spot, faded or not. Mouse: back when the
+  pointer leaves. Click: back after 2 seconds.
+
+  Phones: each icon has its name printed small beneath it (css/pages.css),
+  so tapping does nothing.
 
   Group order follows the company link (?for=, js/order.js) when one is
   open, else SKILL_GROUPS order.
@@ -48,7 +52,7 @@
   };
 
   var mouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  var phone = window.matchMedia('(max-width: 760px)');   // phones keep the sliding row
+  var phone = window.matchMedia('(max-width: 760px)');   // phones: labels instead of the swap
   var list = document.createElement('ul');
   list.className = 'skills';
   host.appendChild(list);
@@ -102,7 +106,7 @@
     return li;
   }
 
-  // each name's width, for making room (after the font is in)
+  // each name's width, for centring it (after the font is in)
   function measure() {
     list.querySelectorAll('.skill__name').forEach(function (n) { n._w = n.scrollWidth; });
   }
@@ -111,6 +115,7 @@
   var active = null, timer = null;
 
   function show(li) {
+    if (phone.matches) return;   // phones: every icon is labelled already, no swap
     if (active === li) return;
     if (active) hide(active);
     active = li;
@@ -123,7 +128,7 @@
     name.classList.remove('is-still', 'is-below');
     icon.classList.add('is-out');
     li.classList.add('is-active');
-    makeRoom(li, name);
+    fadeAround(li, name);
   }
 
   function hide(li) {
@@ -133,20 +138,12 @@
     li.classList.remove('is-active');
     if (active === li) {
       active = null;
-      list.querySelectorAll('.skill').forEach(function (s) {
-        s.style.transform = '';
-        s.classList.remove('is-faded');
-      });
+      list.querySelectorAll('.skill').forEach(function (s) { s.classList.remove('is-faded'); });
     }
   }
 
-  // Centre the name on its icon (kept inside the row), then make room on
-  // its line like an accordion: the icons on each side close up toward
-  // the row's edge, the gaps shrinking evenly, so nothing is pushed out
-  // of the row. When a side is too crowded for full-size icons, those
-  // icons also shrink a little to fit.
-  // Computers: nothing moves. The name sits centred on its own icon and
-  // the icons it covers on that line fade out while it shows.
+  // The name sits centred on its own icon; the icons it covers on that
+  // line fade out while it shows. Nothing moves.
   function fadeAround(li, name) {
     var PAD = 6;
     var btn = li.querySelector('.skill__btn');
@@ -158,74 +155,6 @@
       var hit = s !== li && s.offsetTop === li.offsetTop &&
         b.offsetLeft < textLeft + w + PAD && b.offsetLeft + b.offsetWidth > textLeft - PAD;
       s.classList.toggle('is-faded', hit);
-    });
-  }
-
-  function makeRoom(li, name) {
-    if (!phone.matches) return fadeAround(li, name);
-    var GAP = 12;
-    var W = list.clientWidth;
-    var items = Array.prototype.slice.call(list.children);
-    var line = items.filter(function (s) { return s.offsetTop === li.offsetTop; });
-    var i = line.indexOf(li);
-    var btnOf = function (s) { return s.querySelector('.skill__btn'); };
-    var btn = btnOf(li);
-    var w = name._w || name.scrollWidth;
-    var left = btn.offsetLeft, iw = btn.offsetWidth;
-    var before = line.slice(0, i);
-    var after = line.slice(i + 1);
-    // the name sits centred on its icon, but never so far toward a crowded
-    // side that the icons there can't close up enough (each needs at least
-    // PITCH of the row, shrunk) or past the row's ends
-    var PITCH = 0.55 * iw + 2;
-    var lo = before.length ? (before.length - 1) * PITCH + iw + GAP : 0;
-    var hi = (after.length ? W - iw - (after.length - 1) * PITCH - GAP : W) - w;
-    lo = Math.max(0, lo);
-    hi = Math.min(W - w, hi);
-    var want = left + iw / 2 - w / 2;
-    var textLeft = lo <= hi ? Math.max(lo, Math.min(hi, want)) : Math.max(0, Math.min(W - w, want));
-    name.style.left = (textLeft - left) + 'px';
-
-    var moves = {};
-    // left side: icons from the row's start up to the name close up so
-    // the last one ends GAP before the name
-    if (before.length) {
-      var lastB = btnOf(before[before.length - 1]);
-      var R = lastB.offsetLeft;                         // last icon's left now
-      var Rn = Math.max(0, textLeft - GAP - lastB.offsetWidth);  // ...and after
-      if (Rn < R) {
-        var f = R > 0 ? Rn / R : 0;
-        before.forEach(function (s, k) {
-          var x = btnOf(s).offsetLeft;
-          moves[items.indexOf(s)] = { dx: x * f - x, n: before.length, pitch: before.length > 1 ? R * f / (before.length - 1) : Infinity };
-        });
-      }
-    }
-    // right side: icons from after the name to the row's end close up so
-    // the first one starts GAP after the name
-    if (after.length) {
-      var firstA = btnOf(after[0]);
-      var lastA = btnOf(after[after.length - 1]);
-      var end = Math.max(W - lastA.offsetWidth, lastA.offsetLeft);   // furthest an icon's left may go
-      var A = firstA.offsetLeft;
-      var An = Math.min(end, textLeft + w + GAP);
-      if (An > A) {
-        var span = end - A;
-        var g = span > 0 ? (end - An) / span : 0;
-        after.forEach(function (s) {
-          var x = btnOf(s).offsetLeft;
-          moves[items.indexOf(s)] = { dx: (An + (x - A) * g) - x, n: after.length, pitch: after.length > 1 ? (lastA.offsetLeft - A) * g / (after.length - 1) : Infinity };
-        });
-      }
-    }
-    items.forEach(function (s, j) {
-      var m = moves[j];
-      if (!m) { s.style.transform = ''; return; }
-      // icons closer together than their own width shrink to keep a hair
-      // of space between them
-      var size = btnOf(s).offsetWidth;
-      var k = Math.max(0.55, Math.min(1, (m.pitch - 2) / size));
-      s.style.transform = 'translateX(' + m.dx.toFixed(1) + 'px)' + (k < 1 ? ' scale(' + k.toFixed(3) + ')' : '');
     });
   }
 
