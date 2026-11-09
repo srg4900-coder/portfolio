@@ -660,6 +660,14 @@ html.is-touch .contact-modal__resume:active {
   display: block;
   text-wrap: balance;
 }
+.contact-modal__para { display: block; }
+/* phones: a paragraph's lines run on together, and the paragraphs and the
+   "Check out my studio" line sit apart, a blank line's space between */
+@media (max-width: 760px) {
+  .contact-modal__para .contact-modal__line { display: inline; }
+  .contact-modal__para + .contact-modal__para { margin-top: 1em; }
+  .contact-modal__studio-line { display: block; margin-top: 1em; }
+}
 
 /* "studio ->" at the end of the bio: a touch lighter than the bio at rest
    (the paragraph's own opacity caps how dark it can get), darkening and

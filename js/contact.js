@@ -36,6 +36,8 @@
     'I show my process because that\u2019s where the real thinking happens. I make things with artistry, motion, and code, and I lean on philosophy and psychology to understand the people I\u2019m designing for.'
   ];
   var STUDIO = { lead: 'Check out my ', label: 'studio', url: '/studio.html' };
+  // the paragraphs, by line number: phones space these apart
+  var BIO_GROUPS = [[0], [1], [2, 3]];
 
   // shared with the About page (about.html), so the bio has one copy
   // Every email link on the site opens a Gmail compose window in a new
@@ -135,17 +137,30 @@
 
   content.appendChild(emailLink);
   content.appendChild(lines('contact-modal__meta', META_LINES));
-  var bio = lines('contact-modal__bio', BIO_LINES);
-  // last line: "... her art. Check out her studio →" (the link darkens and
-  // its arrow nudges right on hover, css/components.css)
+  // The bio in paragraphs (BIO_GROUPS: which lines go together). On a
+  // computer every line still starts its own line; on phones a
+  // paragraph's lines run on together and the paragraphs, then the
+  // studio link, are spaced apart (css/components.css).
+  var bio = el('p', 'contact-modal__bio');
+  BIO_GROUPS.forEach(function (group) {
+    var para = bio.appendChild(el('span', 'contact-modal__para'));
+    group.forEach(function (n, k) {
+      if (k) para.appendChild(document.createTextNode(' '));
+      para.appendChild(el('span', 'contact-modal__line', BIO_LINES[n]));
+    });
+  });
+  // last: "Check out my studio ->" (the link darkens and its arrow nudges
+  // right on hover, css/components.css)
   var studio = el('a', 'contact-modal__studio');
   studio.href = STUDIO.url;
   studio.appendChild(el('span', '', STUDIO.label));
   studio.appendChild(el('span', 'contact-modal__arrow', '\u2192'));
   studio.lastChild.setAttribute('aria-hidden', 'true');
-  var last = bio.lastChild;
-  last.appendChild(document.createTextNode(' ' + STUDIO.lead));
-  last.appendChild(studio);
+  var studioLine = el('span', 'contact-modal__studio-line', STUDIO.lead);
+  studioLine.appendChild(studio);
+  var lastPara = bio.lastChild;
+  lastPara.lastChild.appendChild(document.createTextNode(' '));
+  lastPara.lastChild.appendChild(studioLine);
   content.appendChild(bio);
   content.appendChild(actions);
   paper.appendChild(closeBtn);
