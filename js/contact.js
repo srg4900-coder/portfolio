@@ -26,15 +26,16 @@
   var META_LINES = [
     'Product & Brand Designer. Creative Problem Solver.'
   ];
-  // One sentence per line (text-wrap: balance evens any that wrap). The
+  // One paragraph per line (text-wrap: balance evens any that wrap). The
   // popup ends the last line with a "studio →" link (STUDIO below);
   // popup only: the About page has its own first-person blurb (about.html).
   var BIO_LINES = [
-    'Sadie has a BFA from RIT in New Media Design with a concentration in Philosophy and Psychology.',
-    'She likes to think holistically when designing and loves to show the process.',
-    'She’s always learning new techniques and ways to express her art.'
+    'I always start with a feeling.',
+    'I\u2019m looking for an intense team that iterates fast, sweats the details, and builds together.',
+    'I think in systems, and mine are built around people. I design interfaces, products, and brands by asking where users hesitate, lean in, or leave, and why. I prototype until they feel it, not just see it.',
+    'I show my process because that\u2019s where the real thinking happens. I make things with artistry, motion, and code, and I lean on philosophy and psychology to understand the people I\u2019m designing for.'
   ];
-  var STUDIO = { lead: 'Check out her ', label: 'studio', url: '/studio.html' };
+  var STUDIO = { lead: 'Check out my ', label: 'studio', url: '/studio.html' };
 
   // shared with the About page (about.html), so the bio has one copy
   // Every email link on the site opens a Gmail compose window in a new

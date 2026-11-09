@@ -17,9 +17,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500&family=Cutive+Mono&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/tokens.css?v=116">
-<link rel="stylesheet" href="css/components.css?v=116">
-<link rel="stylesheet" href="css/pages.css?v=116">
+<link rel="stylesheet" href="css/tokens.css?v=117">
+<link rel="stylesheet" href="css/components.css?v=117">
+<link rel="stylesheet" href="css/pages.css?v=117">
 <!-- hold the page's entrance until its text is built and the font is in
      (released by the script at the end of the page; this timer is only a
      safety net), so it plays as one clean sequence with nothing jumping -->
@@ -89,33 +89,32 @@
 
   <div class="contact-modal"></div>
 
-  <script src="js/nav.js?v=116"></script>
-  <script src="js/cursor.js?v=116"></script>
-  <script src="js/contact.js?v=116"></script>
-  <script src="js/touch.js?v=116"></script>
-  <script src="js/order.js?v=116"></script>
-  <script src="js/skills-data.js?v=116"></script>
-  <script src="js/skills.js?v=116"></script>
+  <script src="js/nav.js?v=117"></script>
+  <script src="js/cursor.js?v=117"></script>
+  <script src="js/contact.js?v=117"></script>
+  <script src="js/touch.js?v=117"></script>
+  <script src="js/order.js?v=117"></script>
+  <script src="js/skills-data.js?v=117"></script>
+  <script src="js/skills.js?v=117"></script>
   <script>
     (function () {
       var copy = window.SITE_COPY;
       if (!copy) return;
-      // the bio: four paragraphs, each arriving in turn (chunks 3 to 6).
-      // Paragraph breaks differ by screen: each sentence says whether a
-      // new paragraph starts before it on a computer (desk) and on a phone
-      // (phone); css/pages.css shows only that screen's breaks. The last
-      // paragraph ends in the call to action (a bold link).
+      // the bio: five paragraphs, each arriving in turn (chunks 3 to 7).
+      // A sentence marked desk / phone starts a new paragraph on a computer
+      // / a phone (css/pages.css shows only that screen's breaks); here the
+      // paragraphs are the same on every screen. The last paragraph ends in
+      // the call to action (a bold link).
       var BIO = [
-        { t: 'I always start with how people feel.' },
-        { t: 'I\u2019m a systems thinker, and every system I build starts with humans.', desk: true },
-        { t: 'Emotions are physical and feelings are shared.', phone: true },
-        { t: 'Whether it\u2019s an interface, a product, or a whole brand, I begin with research: where do users hesitate, lean in, or leave, and why?' },
-        { t: 'I prototype until a feeling comes through.' },
-        { t: 'I show my process because my thinking is half the work.', desk: true, phone: true },
-        { t: 'Artistry, motion, and code are how I make things.' },
-        { t: 'Philosophy and psychology are how I make sense of the people I make them for.' },
-        { t: 'I\u2019m looking for an intense team that goes deep fast, sweats the details, and builds together.', desk: true, phone: true },
-        { t: 'If that\u2019s yours,' }
+        { t: 'I always start with a feeling.' },
+        { t: 'I\u2019m looking for an intense team that iterates fast, sweats the details, and builds together.', desk: true, phone: true },
+        { t: 'I think in systems, and mine are built around people.', desk: true, phone: true },
+        { t: 'I design interfaces, products, and brands by asking where users hesitate, lean in, or leave, and why.' },
+        { t: 'I prototype until they feel it, not just see it.' },
+        { t: 'I show my process because that\u2019s where the real thinking happens.', desk: true, phone: true },
+        { t: 'I make things with artistry, motion, and code, and I lean on philosophy and psychology to understand the people I\u2019m designing for.' },
+        { t: 'Sound like your team?', desk: true, phone: true },
+        { t: 'I\u2019d love to hear about it.' }
       ];
       var bio = document.querySelector('[data-about-bio]');
       var group = 0;
@@ -151,7 +150,7 @@
         a.target = '_blank';
         a.rel = 'noopener';
         a.setAttribute('aria-label', 'Download my resume and email me in Gmail');
-        var label = 'grab my resume and let\u2019s talk';
+        var label = 'Grab my resume and let\u2019s talk';
         if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) rolling(a, label);
         else a.appendChild(document.createTextNode(label));
         var arrow = a.appendChild(document.createElement('span'));
