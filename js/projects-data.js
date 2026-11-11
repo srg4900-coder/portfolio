@@ -273,7 +273,7 @@ window.PROJECTS = {
     role: '[Role]',
     disciplines: ['[Disciplines]'],
     status: 'In Progress',
-    course: 'UI and UX Strategy',
+    course: 'UX Design Strategies',
     // homepage only: in the hero pile the print is 3x as tall with the
     // image turned 90 degrees (the poster standing up); as it lands it
     // turns back and crops to the grid's shape, left-justified on the M.
@@ -285,34 +285,51 @@ window.PROJECTS = {
       image: 'assets/case-studies/mycourses/mycourses-home.jpg',
       alt: 'MyCourses poster: a dark shape like a stretched letter M with MYCOURSES at its end, beside the line The Implementation of the AI Agent'
     },
-    tools: ['[Tools]'],
-    // TODO(Sadie): the motion piece goes here: hero: { video: 'assets/video/...mp4', src: 'poster.webp', alt: '...' }
-    hero: { label: '[Motion piece]', alt: '' },
+    tools: ['Figma', 'Illustrator', 'Claude Code', 'Figma Motion', 'After Effects'],
+    // TODO(Sadie): the motion piece can replace this: hero: { video: 'assets/video/...mp4', src: 'poster.webp', alt: '...' }
+    hero: {
+      src: 'assets/case-studies/mycourses/mycourses-today.png',
+      position: '50% 0%',
+      cursor: 'Work In Progress',
+      alt: 'MyCourses Today screen in red: Hi Mimi, Thursday Oct. 28, a BIME 200 lab report due 11:59pm with a suggested work block, a gym session faded out, and each course\u2019s status'
+    },
     idea: {
       copy: 'A redesign of MyCourses, my school\u2019s page for reaching courses and submitting work, reimagined around an AI agent. [What the agent does and why, 40 to 60 words in all]',
       images: [
-        { label: '[Research]', alt: '' },
-        { label: '[Current MyCourses]', alt: '' },
-        { label: '[Sketches or flows]', alt: '' }
+        { src: 'assets/case-studies/mycourses/mycourses-moodboard.webp', alt: 'Moodboard titled clean and exciting: red agency sites, big type, Swiss layouts, product pages and posters' },
+        { src: 'assets/case-studies/mycourses/mycourses-ai-shift-mode.png', label: 'Earlier rendition, AI UI tool', alt: 'An earlier AI-tool rendition of Shift Mode: a grid of half-hour pads to drag three hours of homework across, agent picks outlined in red dashes' },
+        { src: 'assets/case-studies/mycourses/mycourses-ai-lockscreen.png', label: 'Earlier rendition, AI UI tool', alt: 'An earlier AI-tool rendition of a phone lock screen notification: Morning Mimi, 3 moved overnight, with a day bar and the moved classes' },
+        { src: 'assets/case-studies/mycourses/mycourses-deck-week.png', label: 'Earlier rendition, AI UI tool', alt: 'An earlier AI-tool rendition of the Deck, week view: a color-coded grid of lectures, gym and free time, a Next Up card for HW 4 and Need help? Just ask.' }
       ]
     },
+    // the earlier versions came from AI UI tools; the current design is by hand
     friction: {
-      problem: '[One line]',
-      response: '[One line]',
-      result: '[One line]',
+      problem: 'My earlier renditions came from AI UI tools, great for iterating ideas out quickly.',
+      response: 'I redesigned the screens by hand.',
+      result: 'A design that feels more human and intuitive.',
+      ratio: '4 / 3',
       images: [
-        { label: '[Before vs. after]', alt: '' }
+        { src: 'assets/case-studies/mycourses/mycourses-ai-today.png', label: 'Earlier rendition, AI UI tool', alt: 'An earlier AI-tool rendition of the Today page: Hello Mimi, a timeline of the day, a yellow Next Up card for an upload step, suggestions and things done overnight' },
+        { src: 'assets/case-studies/mycourses/mycourses-ai-shift-mode.png', label: 'Earlier rendition, AI UI tool', alt: 'An earlier AI-tool rendition of Shift Mode: a grid of half-hour pads to drag three hours of homework across, agent picks outlined in red dashes' },
+        { src: 'assets/case-studies/mycourses/mycourses-deck-week.png', label: 'Earlier rendition, AI UI tool', alt: 'An earlier AI-tool rendition of the Deck, week view: a color-coded grid of lectures, gym and free time, a Next Up card for HW 4 and Need help? Just ask.' },
+        { src: 'assets/case-studies/mycourses/mycourses-ai-lockscreen.png', contain: true, label: 'Earlier rendition, AI UI tool', alt: 'An earlier AI-tool rendition of a phone lock screen notification: Morning Mimi, 3 moved overnight, with a day bar and the moved classes' }
       ]
     },
     work: {
-      ratio: '16 / 10',
+      // same size as the screens (1440 x 1024), so nothing is cropped. The
+      // switcher sits beside the Today screen, then the four modes (the
+      // same screen in each color) together
+      ratio: '45 / 32',
       images: [
-        { label: '[Course access page]', alt: '', large: true },
-        { label: '[Submission flow]', alt: '' },
-        { label: '[AI agent]', alt: '' },
-        { label: '[Screen 4]', alt: '' },
-        { label: '[Screen 5]', alt: '' },
-        { label: '[Screen 6]', alt: '' }
+        { src: 'assets/case-studies/mycourses/mycourses-deck-day.png', large: true, alt: 'MyCourses Deck, day view: Hi Mimi, your day is set, a list of classes with a BIME 200 work block added at 8pm for Lab Report 2, beside Need help? Just ask.' },
+        { src: 'assets/case-studies/mycourses/mycourses-today.png', alt: 'MyCourses Today screen in red: Hi Mimi, a lab report due with a suggested work block and each course\u2019s status' },
+        { src: 'assets/case-studies/mycourses/mycourses-mode-switcher.png', contain: true, label: 'Mode switcher', alt: 'Four M-shaped cards, dark, cream, blue and yellow, each with a column of dots: picking a dot switches to Academic, Organize, Prep or Social' },
+        { src: 'assets/case-studies/mycourses/mycourses-mode-academic.png', label: 'Academic mode', alt: 'Academic Mode: the cream M mark on red' },
+        { src: 'assets/case-studies/mycourses/mycourses-mode-organize.png', label: 'Organize mode', alt: 'Organize Mode: the dark M mark on cream' },
+        { src: 'assets/case-studies/mycourses/mycourses-mode-prep.png', label: 'Prep mode', alt: 'Prep Mode: the cream M mark on blue' },
+        { src: 'assets/case-studies/mycourses/mycourses-mode-social.png', label: 'Social mode', alt: 'Social Mode: the dark M mark on yellow' },
+        { label: '[Motion piece]', alt: '' },
+        { label: '[Courses page]', alt: '' }
       ],
       outcome: '[Outcome line, under 25 words]'
     }
@@ -533,6 +550,8 @@ window.PROJECTS = {
     // TODO(Sadie): the site isn't hosted yet; add url: 'https://...' when
     // it is (until then the button shows greyed out)
     action: { label: 'View Site' },
+    // homepage print: a lighter copy of the hero film (640 x 360), looping
+    home: { video: 'assets/video/gravity-thumb.mp4', image: 'assets/case-studies/gravity/gravity-arms-open.webp' },
     hero: {
       video: 'assets/video/gravity.mp4',
       src: 'assets/case-studies/gravity/gravity-arms-open.webp',
