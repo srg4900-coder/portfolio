@@ -209,6 +209,197 @@
     return wrap;
   }
 
+  // ---------- 03 Work stages (work.groups) ----------
+  // One block per brand: the brand name in the left column, a STAGE (one
+  // large image or looping video, every stage the same shape) and, beside
+  // it, the brand's projects as a list. Picking a project puts its images
+  // on the stage and opens its copy and links.
+  //   Thumbnails: a uniform row under the stage. On a computer they slide
+  //   down into view while the pointer is over the stage (their space is
+  //   kept, so nothing below moves); on touch screens they always show.
+  //   Click a thumbnail (or press Left / Right while over the stage) to
+  //   step; swipe on touch.
+  //   Clicking the stage opens the full-size viewer on that project's set
+  //   (js/viewer.js: arrows, Esc or a click outside closes).
+  var stages = [], hoverStage = null;
+  document.addEventListener('keydown', function (e) {
+    if (document.documentElement.classList.contains('is-viewer-open')) return;
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    var tag = (document.activeElement && document.activeElement.tagName) || '';
+    if (/INPUT|TEXTAREA|SELECT/.test(tag)) return;
+    var st = hoverStage;
+    if (!st) stages.forEach(function (x) { if (x.root.contains(document.activeElement)) st = x; });
+    if (!st || st.count() < 2) return;
+    e.preventDefault();
+    st.step(e.key === 'ArrowLeft' ? -1 : 1);
+  });
+
+  function isInstagram(l) { return !!(l && l.url && /instagram\.com\//.test(l.url)); }
+
+  function brandStage(g) {
+    var projects = (g.projects || [{ links: g.links, ratio: g.ratio, images: g.images, copy: g.copy }])
+      .map(function (pr) { return { data: pr, imgs: usable(pr.images).filter(function (i) { return i.src; }) }; })
+      .filter(function (pr) { return pr.imgs.length || text(pr.data.title); });
+
+    var root = el('div', 'cs-stage');
+    var frame = el('button', 'cs-stage__frame');
+    frame.type = 'button';
+    var thumbs = el('div', 'cs-stage__thumbs');
+    var set = el('div', 'cs-stage__set');      // hidden: the viewer's set for the current project
+    set.setAttribute('data-viewer-group', '');
+    set.hidden = true;
+    // under the stage: the thumbnails, and on the right the project's
+    // Instagram post (the site's Instagram glyph; "View post" slides in
+    // beside it on hover)
+    var bar = el('div', 'cs-stage__bar');
+    var ig = el('a', 'cs-ig');
+    ig.target = '_blank';
+    ig.rel = 'noopener';
+    ig.setAttribute('aria-label', 'View the post on Instagram (opens in a new tab)');
+    ig.appendChild(el('span', 'cs-ig__text text-label', 'View post'));
+    var glyph = el('span', 'cs-ig__glyph');
+    glyph.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle class="dot" cx="17.3" cy="6.7" r="1.1"/></svg>';
+    ig.appendChild(glyph);
+    bar.appendChild(thumbs);
+    bar.appendChild(ig);
+    root.appendChild(frame);
+    root.appendChild(bar);
+    root.appendChild(set);
+
+    var list = el('div', 'cs-plist');
+    var cur = 0, idx = 0, entries = [];
+
+    projects.forEach(function (pr, n) {
+      var item = el('div', 'cs-pitem');
+      var headTag = projects.length > 1 ? 'button' : 'div';
+      var head = el(headTag, 'cs-pitem__head');
+      if (headTag === 'button') {
+        head.type = 'button';
+        head.addEventListener('click', function () { pick(n); });
+      }
+      head.appendChild(el('span', 'cs-pitem__title', text(pr.data.title) || text(g.title)));
+      if (text(pr.data.kind)) head.appendChild(el('span', 'cs-pitem__kind', text(pr.data.kind)));
+      item.appendChild(head);
+      var body = el('div', 'cs-pitem__body');
+      var inner = el('div', 'cs-pitem__inner');
+      // a line break in the copy (\n) starts a new paragraph
+      if (text(pr.data.copy)) text(pr.data.copy).split(/\n+/).forEach(function (para) {
+        if (para.trim()) inner.appendChild(el('p', 'cs-pitem__copy', para.trim()));
+      });
+      (pr.data.links || []).forEach(function (l) {
+        if (!l || !l.label || isInstagram(l)) return;   // that one sits under the stage
+        var a;
+        if (l.url) {
+          a = el('a', 'cs-group__link cs-link', l.label);
+          a.href = l.url;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          a.setAttribute('aria-label', l.label + ' (opens in a new tab)');
+          a.appendChild(actionIcon('out'));
+        } else {
+          a = el('span', 'cs-group__link cs-link is-unavailable', l.label);
+          a.setAttribute('aria-disabled', 'true');
+        }
+        inner.appendChild(a);
+      });
+      body.appendChild(inner);
+      item.appendChild(body);
+      list.appendChild(item);
+      entries.push({ item: item, head: head });
+    });
+
+    function show(i, dir) {
+      var imgs = projects[cur].imgs;
+      if (!imgs.length) { frame.innerHTML = ''; frame.appendChild(missing('', 'cs-stage__media')); return; }
+      idx = (i + imgs.length) % imgs.length;
+      var it = imgs[idx];
+      var node = media(it, 'cs-stage__media', true);
+      if (it.contain) node.classList.add('is-contain');
+      if (dir) node.style.setProperty('--from', (dir * 14) + 'px');
+      frame.innerHTML = '';
+      frame.appendChild(node);
+      frame.classList.toggle('is-contain', !!it.contain);
+      frame.setAttribute('aria-label', 'View larger: ' + (it.alt || it.label || 'image'));
+      if (it.label) {
+        var tag = el('span', 'cs-stage__label', it.label);
+        tag.setAttribute('aria-hidden', 'true');
+        frame.appendChild(tag);
+      }
+      if (imgs.length > 1) frame.appendChild(el('span', 'cs-stage__count text-label', (idx + 1) + ' / ' + imgs.length));
+      Array.prototype.forEach.call(thumbs.children, function (t, k) {
+        t.classList.toggle('is-active', k === idx);
+        t.setAttribute('aria-current', k === idx ? 'true' : 'false');
+      });
+    }
+
+    function pick(n) {
+      cur = n;
+      entries.forEach(function (e, k) {
+        e.item.classList.toggle('is-active', k === n);
+        if (e.head.tagName === 'BUTTON') e.head.setAttribute('aria-expanded', k === n ? 'true' : 'false');
+      });
+      var imgs = projects[n].imgs;
+      thumbs.innerHTML = '';
+      set.innerHTML = '';
+      imgs.forEach(function (it, k) {
+        var t = el('button', 'cs-stage__thumb');
+        t.type = 'button';
+        t.setAttribute('aria-label', 'Show image ' + (k + 1) + ' of ' + imgs.length);
+        t.style.setProperty('--k', k);
+        var im = el('img');
+        im.src = it.src;
+        im.alt = '';
+        im.loading = 'lazy';
+        im.decoding = 'async';
+        t.appendChild(im);
+        if (it.video) t.appendChild(el('span', 'cs-stage__play'));
+        t.addEventListener('click', function () { show(k, k > idx ? 1 : -1); });
+        thumbs.appendChild(t);
+        var v = el('span');
+        v.setAttribute('data-viewer', '');
+        v.setAttribute('data-viewer-manual', '');
+        v.setAttribute('data-src', it.src);
+        if (it.video) v.setAttribute('data-video', it.video);
+        v.setAttribute('data-alt', it.alt || '');
+        v.setAttribute('data-label', it.label || '');
+        set.appendChild(v);
+      });
+      root.classList.toggle('has-many', imgs.length > 1);
+      var post = (projects[n].data.links || []).filter(isInstagram)[0];
+      if (post) ig.href = post.url;
+      ig.hidden = !post;
+      show(0, 0);
+    }
+
+    frame.addEventListener('click', function () {
+      if (swiped) { swiped = false; return; }
+      var v = set.children[idx];
+      if (v && window.ImageViewer) window.ImageViewer.open(v);
+    });
+
+    // touch: a sideways swipe on the stage steps
+    var sx = 0, sy = 0, swiped = false;
+    frame.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; swiped = false; }, { passive: true });
+    frame.addEventListener('touchend', function (e) {
+      var t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.4 && projects[cur].imgs.length > 1) {
+        swiped = true;
+        show(idx + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
+      }
+    }, { passive: true });
+
+    var api = {
+      root: root,
+      count: function () { return projects[cur].imgs.length; },
+      step: function (d) { show(idx + d, d); }
+    };
+    root.addEventListener('mouseenter', function () { hoverStage = api; });
+    root.addEventListener('mouseleave', function () { if (hoverStage === api) hoverStage = null; });
+    stages.push(api);
+    pick(0);
+    return { stage: root, list: list };
+  }
+
   // entries worth rendering: a real image, or a labeled placeholder
   function usable(items) {
     return (items || []).filter(function (i) { return i && (i.src || i.label); });
@@ -224,6 +415,7 @@
     items.forEach(function (item) {
       var paper = el('div', 'paper cs-paper' + (item.cutout ? ' is-cutout' : ''));
       paper.setAttribute('data-draggable', '');
+      paper.setAttribute('data-cursor-solid', 'grab');   // the dot grows, solid white (js/cursor.js)
       if (item.scale) paper.setAttribute('data-scale', item.scale);
       var inner = el('div', 'paper__inner');
       if (item.src) {
@@ -480,6 +672,9 @@
         heroFig.setAttribute('data-cursor-label', heroAct.soon || 'Site coming soon');
       }
     }
+    // hero.cursor: a word the cursor shows over the hero, with no link
+    // (e.g. "In Progress"), the same tag as the Site coming soon one
+    else if (heroData.cursor && heroData.src) heroFig.setAttribute('data-cursor-label', heroData.cursor);
     hero.appendChild(heroFig);
 
     var info = el('div', 'cs-hero__info grid');
@@ -597,12 +792,27 @@
 
     var work = data.work || {};
     var workImages = usable(work.images);
-    if (workImages.length || text(work.outcome)) {
+    var workGroups = (work.groups || []).filter(function (g) { return g && text(g.title); });
+    if (workImages.length || workGroups.length || text(work.outcome)) {
       var workName = inProgress ? 'Work So Far' : 'Work';
       var workSec = section('work', '03', workName);
       // the outcome sits under the heading, small like the Idea / Friction copy
       if (text(work.outcome)) workSec.appendChild(el('p', 'cs-section__copy cs-outcome text-project-body', text(work.outcome)));
       if (workImages.length) workSec.appendChild(figures(workImages, 'cs-grid', work.ratio));
+      // groups: one block per brand: name left, stage, project list
+      // (brandStage() above)
+      workGroups.forEach(function (g) {
+        var block = el('div', 'cs-group subgrid');
+        var head = el('div', 'cs-group__head');
+        var h = el('h3', 'cs-group__title', text(g.title));
+        if (text(g.kind)) h.appendChild(el('span', 'cs-group__kind', text(g.kind)));
+        head.appendChild(h);
+        block.appendChild(head);
+        var b = brandStage(g);
+        block.appendChild(b.stage);
+        block.appendChild(b.list);
+        workSec.appendChild(block);
+      });
       sections.push({ node: workSec, num: '03', name: workName });
     }
 

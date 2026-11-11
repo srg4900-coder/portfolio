@@ -147,8 +147,10 @@ body.project-page {
   text-underline-offset: 4px;
   transition: text-decoration-color var(--duration-fast) ease;
 }
-.cs-client__name:hover,
-.cs-client__name:focus-visible { text-decoration-color: currentColor; }
+/* a linked name is always underlined, so it reads as a link */
+a.cs-client__name { text-decoration-color: currentColor; }
+a.cs-client__name:hover,
+a.cs-client__name:focus-visible { text-decoration-color: transparent; }
 .cs-client__ig {
   display: inline-flex;
   width: 18px;
@@ -484,6 +486,243 @@ body.project-page {
 .cs-fig--large .is-missing {
   position: absolute;
   inset: 0;
+}
+
+/* --- 03 Work groups (work.groups): one block per brand, a thin rule
+   above, the brand on the left like a section title, its projects as
+   cards to the right (three across, each a carousel plus a few lines) --- */
+.cs-group {
+  margin-top: var(--space-section);
+  padding-top: var(--space-block);
+  border-top: 1px solid var(--line-soft, rgba(29, 27, 24, 0.12));
+}
+.cs-group__head { grid-column: 1 / 3; }
+.cs-group__title {
+  font-size: var(--text-h2-size);
+  font-weight: 400;
+  line-height: 1.2;
+}
+.cs-group__kind {
+  display: block;
+  margin-top: 6px;
+  font-size: var(--text-small-size);
+  color: var(--text-muted);
+}
+.cs-group__copy { margin-top: 12px; }
+.cs-group__link {
+  display: inline-block;
+  margin-top: 12px;
+  margin-right: 20px;
+}
+.cs-group__link.is-unavailable { opacity: 0.35; cursor: default; }
+.cs-group__link .cs-action__arrow { margin-left: 6px; }
+
+/* the brand's stage: one large image or video, the same shape for every
+   brand, beside the project list (js/project.js brandStage) */
+.cs-stage { grid-column: 3 / 7; min-width: 0; }
+.cs-stage__frame {
+  position: relative;
+  display: block;
+  width: min(100%, calc(76vh * 0.8));
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--color-blush);
+  cursor: zoom-in;
+}
+.cs-stage__media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: stage-in 600ms var(--ease-smooth) both;
+}
+.cs-stage__media.is-contain { object-fit: contain; }
+@keyframes stage-in {
+  from { opacity: 0; transform: translateX(var(--from, 0px)) scale(0.99); }
+}
+.cs-stage__frame:hover .cs-stage__media { transform: scale(1.015); transition: transform var(--duration-slow) var(--ease-smooth); }
+/* label (only where an image has one) and the 1 / n count sit on the image */
+.cs-stage__label,
+.cs-stage__count {
+  position: absolute;
+  color: var(--color-white);
+  text-shadow: 0 1px 2px rgba(16, 14, 12, 0.45), 0 0 12px rgba(16, 14, 12, 0.35);
+  pointer-events: none;
+}
+.cs-stage__label { left: 14px; bottom: 12px; font-size: var(--text-small-size); }
+.cs-stage__count { right: 14px; top: 12px; }
+.cs-stage__frame.is-contain .cs-stage__label,
+.cs-stage__frame.is-contain .cs-stage__count { color: var(--color-ink); text-shadow: none; }
+
+/* under the stage: thumbnails (left) and the Instagram post (right) */
+.cs-stage__bar {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  width: min(100%, calc(76vh * 0.8));
+  margin-top: 10px;
+  min-height: 56px;
+}
+.cs-stage__thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.cs-stage:not(.has-many) .cs-stage__thumbs { visibility: hidden; }
+.cs-stage__thumb {
+  position: relative;
+  width: 44px;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--color-blush);
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity var(--duration-fast) ease, transform var(--duration-base) var(--ease-smooth);
+}
+.cs-stage__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.cs-stage__thumb:hover,
+.cs-stage__thumb.is-active { opacity: 1; }
+.cs-stage__thumb.is-active { box-shadow: 0 0 0 1px var(--color-ink); }
+/* a video thumbnail: a small play triangle */
+.cs-stage__play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-style: solid;
+  border-width: 5px 0 5px 8px;
+  border-color: transparent transparent transparent var(--color-white);
+  transform: translate(-40%, -50%);
+  filter: drop-shadow(0 1px 2px rgba(16, 14, 12, 0.5));
+}
+/* computers: the thumbnails slide down into view while the pointer is over
+   the stage (their space is kept, so nothing below moves) */
+@media (hover: hover) and (pointer: fine) {
+  .cs-stage__thumb,
+  .cs-stage__thumb.is-active {
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition-delay: calc(var(--k, 0) * 30ms);
+  }
+  .cs-stage:hover .cs-stage__thumb,
+  .cs-stage:focus-within .cs-stage__thumb { pointer-events: auto; }
+  .cs-stage:hover .cs-stage__thumb,
+  .cs-stage:focus-within .cs-stage__thumb { opacity: 0.55; transform: none; }
+  .cs-stage:hover .cs-stage__thumb:hover,
+  .cs-stage:hover .cs-stage__thumb.is-active,
+  .cs-stage:focus-within .cs-stage__thumb.is-active { opacity: 1; }
+}
+
+/* the Instagram post: the site's glyph, "View post" slides in on hover */
+.cs-ig {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+.cs-ig[hidden] { display: none; }
+.cs-ig__text {
+  opacity: 0;
+  transform: translateX(6px);
+  transition: opacity var(--duration-fast) ease, transform var(--duration-base) var(--ease-smooth);
+  white-space: nowrap;
+}
+.cs-ig__glyph {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--duration-base) var(--ease-smooth);
+}
+.cs-ig__glyph svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cs-ig__glyph .dot { fill: currentColor; stroke: none; }
+.cs-ig:hover .cs-ig__text,
+.cs-ig:focus-visible .cs-ig__text { opacity: 1; transform: none; }
+/* the same lift and tilt as the Contact popup's icons */
+.cs-ig:hover .cs-ig__glyph,
+.cs-ig:focus-visible .cs-ig__glyph { transform: translateY(-4px) rotate(-8deg) scale(1.1); }
+.cs-ig:active .cs-ig__glyph { transform: scale(0.92); }
+@media (hover: none) {
+  .cs-ig__text { opacity: 1; transform: none; }
+}
+
+/* the brand's projects, beside the stage: pick one to put it on stage */
+.cs-plist { grid-column: 7 / -1; min-width: 0; }
+.cs-pitem { border-top: 1px solid var(--line-soft, rgba(29, 27, 24, 0.12)); }
+.cs-pitem:first-child { border-top: 0; }
+.cs-pitem__head {
+  display: block;
+  width: 100%;
+  padding: 12px 0;
+  text-align: left;
+  color: var(--text-muted);
+  transition: color var(--duration-fast) ease;
+}
+.cs-pitem:first-child .cs-pitem__head { padding-top: 0; }
+button.cs-pitem__head { cursor: pointer; }
+button.cs-pitem__head:hover,
+.cs-pitem.is-active .cs-pitem__head { color: var(--text-strong, var(--color-ink)); }
+.cs-pitem__title {
+  display: block;
+  font-size: var(--text-body-size, 16px);
+  font-weight: 500;
+  line-height: 1.3;
+}
+.cs-pitem__kind {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--text-small-size);
+  font-weight: 400;
+  color: var(--text-muted);
+}
+/* the active project's copy and links open below its name */
+.cs-pitem__body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--duration-base) var(--ease-smooth);
+}
+.cs-pitem.is-active .cs-pitem__body { grid-template-rows: 1fr; }
+.cs-pitem__inner {
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity var(--duration-base) ease;
+}
+.cs-pitem.is-active .cs-pitem__inner { opacity: 1; }
+.cs-pitem__copy {
+  font-size: var(--text-small-size);
+  line-height: 1.55;
+  color: var(--text-soft, inherit);
+}
+.cs-pitem__inner > :last-child { margin-bottom: 16px; }
+.cs-pitem__copy + .cs-pitem__copy { margin-top: 10px; }
+
+@media (max-width: 1024px) {
+  .cs-group__head { grid-column: 1 / -1; margin-bottom: var(--space-block); }
+  .cs-stage { grid-column: 1 / 6; }
+  .cs-plist { grid-column: 6 / -1; }
+}
+@media (max-width: 760px) {
+  .cs-stage,
+  .cs-plist { grid-column: 1 / -1; }
+  .cs-stage__frame,
+  .cs-stage__bar { width: 100%; }
+  .cs-stage__bar { gap: 10px; }
+  .cs-stage__thumb { width: 38px; }
+  .cs-ig { gap: 6px; }
+  .cs-plist { margin-top: 16px; }
 }
 
 /* ---------- 01 Idea papers (js/project.js layoutPapers, paper.js, drag.js) ---------- */

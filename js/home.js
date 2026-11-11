@@ -36,6 +36,13 @@
       sheet.style.setProperty('--i', i);
       sheet.style.setProperty('--rest-rot', (i % 2 ? 0.6 : -0.5) + 'deg');
       if (home.position) sheet.style.setProperty('--pos', home.position);
+      // home.tall: in the hero pile the print is that many times taller
+      // (a full poster); as it lands it crops back to the grid's shape
+      // (render() below). Its grid cell never changes.
+      if (home.tall > 1) sheet.setAttribute('data-tall', home.tall);
+      // home.rotate: the image is turned that many degrees in the hero pile
+      // and turns back to 0 as it lands (stretch() below)
+      if (home.rotate) sheet.setAttribute('data-rotate', home.rotate);
 
       var media, isCard = false;
       if (video) {
@@ -189,8 +196,10 @@
     // ---------- TITLE -> SG ----------
     // The logo (top-left, "SG") starts hidden. As the page scrolls, the "S"
     // of Sadie and the "G" of Gold glide up into it and shrink to its size,
-    // while the other letters lift away one after another and fade.
-    // Scrolling back reverses it: the letters drop back into place.
+    // while the other letters, and the role line under them, are blown off
+    // the light table like paper cut-outs: a gust from the first print
+    // pushes them out in a fan away from it, spinning, all the way off
+    // screen (nearest letters go first). Scrolling back brings them home.
     // The title is pinned (position: fixed) for the whole trip, so only
     // this animation moves it. (Before, it rode the page's scroll while JS
     // pulled it back toward the logo; the two ran on different clocks and
@@ -215,6 +224,22 @@
         (k ? letters : caps).push(l);
       });
     });
+    // the role line: one cut-out per character (spaces stay plain text so
+    // the line wraps and spaces as before)
+    if (role) {
+      var roleText = role.textContent;
+      role.setAttribute('aria-label', roleText);
+      role.textContent = '';
+      roleText.split('').forEach(function (ch) {
+        if (ch === ' ') { role.appendChild(document.createTextNode(' ')); return; }
+        var l = role.appendChild(document.createElement('span'));
+        l.className = 'hero__letter hero__bit';
+        l.setAttribute('aria-hidden', 'true');
+        l.textContent = ch;
+        letters.push(l);
+      });
+    }
+    var blow = [];   // per letter: where it flies, how it spins, when it goes
 
     // where each letter of the logo's "SG" sits on screen
     function logoTargets() {
@@ -272,7 +297,46 @@
         el.style.transform = prev;
         return { x: r.left + sx, y: r.top + sy };
       });
+      measureBlow();
     }
+
+    // the gust starts at the first print's lower-left, where it sits in the
+    // pile; each letter flies straight away from that point (give or take a
+    // few degrees) far enough to clear the screen
+    function measureBlow() {
+      var s0 = (phone.matches ? SCATTER_PHONE : SCATTER_WIDE)[0];
+      var pw = (cells[0] ? cells[0].w : vw * 0.4) * s0.s;
+      var gx = s0.x * vw + pw * 0.1, gy = s0.y * vh + pw * 0.75 * 0.75;
+      var roleT = role ? role.style.transform : '';
+      if (role) role.style.transform = 'none';
+      var sy = window.scrollY;
+      var pts = letters.map(function (l) {
+        var prev = l.style.transform;
+        l.style.transform = 'none';
+        var b = l.getBoundingClientRect();
+        l.style.transform = prev;
+        // the title is pinned to the screen; the role line rides the page
+        var y = b.top + b.height / 2 + (l.classList.contains('hero__bit') ? sy : 0);
+        return { x: b.left + b.width / 2, y: y };
+      });
+      if (role) role.style.transform = roleT;
+      var far = Math.hypot(vw, vh) * 1.15;
+      var dists = pts.map(function (q) { return Math.hypot(q.x - gx, q.y - gy); });
+      var near = Math.min.apply(null, dists), span2 = Math.max(1, Math.max.apply(null, dists) - near);
+      blow = pts.map(function (q, j) {
+        var rnd = function (n) { var v = Math.sin((j + 1) * 12.9898 + n * 78.233) * 43758.5453; return v - Math.floor(v); };
+        var a = Math.atan2(q.y - gy, q.x - gx) + (rnd(1) - 0.5) * 0.5;   // about +-14 degrees
+        var d = far * (0.9 + rnd(2) * 0.3);
+        return {
+          x: Math.cos(a) * d,
+          y: Math.sin(a) * d,
+          spin: (rnd(3) < 0.5 ? -1 : 1) * (140 + rnd(4) * 260),
+          at: (dists[j] - near) / span2 * 0.08 + rnd(5) * 0.02   // nearest go a beat first, but they leave as a group
+        };
+      });
+    }
+    // quick, then slow, with a softer start (a fifth of a slow-in-slow-out)
+    function easeOut(t) { return 0.8 * (1 - Math.pow(1 - t, 3)) + 0.2 * ease(t); }
 
     // horizontal travel for things waiting off screen right: held until
     // they've dropped most of the way down, then a short slide in
@@ -293,11 +357,9 @@
       var y = current;
       var progress = clamp01(y / span);
 
-      // the role line floats up faster than the page and fades, clearing the stage
-      if (role) {
-        role.style.transform = 'translate3d(0,' + (-y * 0.45).toFixed(1) + 'px,0)';
-        role.style.opacity = Math.max(0, 1 - progress * 3.5).toFixed(3); // gone before it reaches the logo
-      }
+      // the role line floats up a little faster than the page (its letters
+      // blow away with the title's, below)
+      if (role) role.style.transform = 'translate3d(0,' + (-y * 0.45).toFixed(1) + 'px,0)';
 
       // title -> SG, over the first part of the scroll
       var raw = clamp01(y / (span * 0.55));
@@ -307,11 +369,16 @@
         caps[i].style.transform = 'translate3d(' + (m.dx * e).toFixed(2) + 'px,' + (m.dy * e).toFixed(2) + 'px,0) scale(' + sc.toFixed(4) + ')';
         caps[i].style.opacity = clamp01((1 - e) / 0.1).toFixed(3);
       });
-      // the other letters lift and fade one after another, done by mid-trip
+      // the other letters blow off the table: a quick push that slows as
+      // they sail off screen, turning as they go, lifted slightly (scale)
       letters.forEach(function (l, j) {
-        var t = ease(clamp01((raw - j * 0.035) / 0.4));
-        l.style.transform = 'translate3d(0,' + (-0.45 * t).toFixed(3) + 'em,0)';
-        l.style.opacity = (1 - t).toFixed(3);
+        var b = blow[j];
+        if (!b) return;
+        var t = 1 - easeOut(1 - clamp01((raw - b.at) / 0.67));   // mirrored: slow push then away on the way down, quick return that settles softly on the way up
+        if (t <= 0) { if (l.style.transform) l.style.transform = ''; l.style.visibility = ''; return; }
+        var lift = 1 + 0.12 * Math.min(1, t * 4);
+        l.style.transform = 'translate3d(' + (b.x * t).toFixed(1) + 'px,' + (b.y * t).toFixed(1) + 'px,0) rotate(' + (b.spin * t).toFixed(1) + 'deg) scale(' + lift.toFixed(3) + ')';
+        l.style.visibility = t >= 1 ? 'hidden' : '';
       });
       title.style.visibility = e >= 1 ? 'hidden' : '';
       if (logo && morph.length) {
@@ -329,12 +396,14 @@
         if (!s) {                      // 5th print onward: just sits in the grid
           el.style.transform = '';
           el.style.setProperty('--settle', 1);
+          stretch(el, c, 0);
           return;
         }
         // stagger: earlier sheets land first
         var stagger = 0.06;
         var t = ease(clamp01((progress - i * stagger) / Math.max(0.3, 1 - (n - 1) * stagger)));
         var k = 1 - t;
+        stretch(el, c, k);
         if (k < 0.001) {
           el.style.transform = '';
           el.style.setProperty('--settle', 1);
@@ -368,6 +437,51 @@
         var ty = (st[1] * vh + window.scrollY - c.y) * k;
         el.style.transform = 'translate3d(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px,0) rotate(' + tilt + ')';
       });
+    }
+
+    // a tall print (data-tall): its paper grows downward by (tall - 1)
+    // times its grid height, scaled by k (1 = scattered, 0 = landed). A
+    // matching negative margin keeps the grid exactly where it was; the
+    // caption under it is hidden until it lands (--settle).
+    function stretch(el, c, k) {
+      var tall = parseFloat(el.getAttribute('data-tall'));
+      if (!tall) return;
+      var paper = el.firstChild && el.firstChild.firstChild;
+      if (!paper) return;
+      var rot = parseFloat(el.getAttribute('data-rotate')) || 0;
+      var img = rot && paper.querySelector('img');
+      if (k < 0.001) {
+        if (paper.style.height) {
+          paper.style.height = ''; paper.style.marginBottom = ''; paper.style.aspectRatio = '';
+          if (img) img.removeAttribute('style');
+        }
+        return;
+      }
+      paper.style.aspectRatio = 'auto';           // the height sets the shape, not the width
+      var base = c.w * 3 / 4;                      // the grid's 4 / 3 print
+      var extra = base * (tall - 1) * k;
+      paper.style.height = (base + extra).toFixed(1) + 'px';
+      paper.style.marginBottom = (-extra).toFixed(1) + 'px';
+      if (img) turn(img, c.w, base + extra, rot * k, k);
+    }
+
+    // data-rotate: the image's own box swaps from the paper's shape (k = 0)
+    // to the paper turned sideways (k = 1), turns by deg, and scales just
+    // enough that no paper shows at the corners mid-turn. Its crop slides
+    // from the print's --pos (landed) to the middle (in the pile).
+    function turn(img, W, H, deg, k) {
+      var bw = W + (H - W) * k, bh = H + (W - H) * k;
+      var a = deg * Math.PI / 180, cs = Math.abs(Math.cos(a)), sn = Math.abs(Math.sin(a));
+      var sc = Math.max(1, (W * cs + H * sn) / bw, (W * sn + H * cs) / bh);
+      var pos = (getComputedStyle(img).getPropertyValue('--pos') || '50% 50%').trim().split(/\s+/);
+      var px = parseFloat(pos[0]) || 0, py = parseFloat(pos[1]);
+      if (isNaN(py)) py = 50;
+      img.style.cssText =
+        'position:absolute;max-width:none;' +
+        'width:' + bw.toFixed(1) + 'px;height:' + bh.toFixed(1) + 'px;' +
+        'left:' + ((W - bw) / 2).toFixed(1) + 'px;top:' + ((H - bh) / 2).toFixed(1) + 'px;' +
+        'transform:rotate(' + deg.toFixed(2) + 'deg) scale(' + sc.toFixed(4) + ');' +
+        'object-position:' + (px + (50 - px) * k).toFixed(1) + '% ' + (py + (50 - py) * k).toFixed(1) + '%';
     }
 
     function loop() {

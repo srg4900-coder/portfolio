@@ -49,6 +49,9 @@ body.home { background: transparent; }
   transform-origin: 0 0;
   will-change: transform, opacity;
 }
+/* the cut-outs that blow away turn about their own middle (the S and G
+   keep scaling from their top-left) */
+.hero__letter:not(.hero__cap) { transform-origin: 50% 50%; }
 
 /* the hero sits above the nav so the travelling title passes over the
    nav's paper fade instead of under it (pointer-events stay off) */
@@ -102,7 +105,8 @@ body.home { background: transparent; }
   cursor: pointer;
 }
 
-/* the printed paper itself */
+/* the printed paper itself (a tall print, data-tall, gets an inline
+   height while it's in the hero pile: js/home.js stretch()) */
 .sheet__paper {
   position: relative;
   aspect-ratio: var(--ratio);

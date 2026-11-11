@@ -17,6 +17,9 @@
   that element, for cases like the nav's "Mind Cloud"/"Contact" where the
   text itself recolors on hover and the dot's usual difference-blend
   would otherwise react to that in an unintended way.
+  data-cursor-solid="grab" does the same and doubles the dot's size: used
+  on things you can drag (the Idea papers on a case study), so the
+  cursor itself says "you can pick this up".
 
   Hit-testing is CONTINUOUS (re-run every animation frame via
   elementFromPoint at the label's own rendered position) rather than tied
@@ -133,7 +136,10 @@
       var solidTarget = hit ? hit.closest('[data-cursor-solid]') : null;
       if (solidTarget !== currentSolidTarget) {
         currentSolidTarget = solidTarget;
-        label.classList.toggle('is-solid-white', !!solidTarget && solidTarget.getAttribute('data-cursor-solid') === 'white');
+        var solid = solidTarget ? solidTarget.getAttribute('data-cursor-solid') : '';
+        label.classList.toggle('is-solid-white', solid === 'white' || solid === 'grab');
+        // "grab": over something you can drag, the dot also doubles in size
+        label.classList.toggle('is-grab', solid === 'grab');
       }
     }
 

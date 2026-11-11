@@ -57,13 +57,18 @@
     action: { label: 'View Live Site', url: 'https://...' }, // or video: 'path.mp4' to play it here
     hero: { src: '...', alt: '...' },      // add video: '...' for a moving hero; bw: true if it's already black and white
     home: { image: '...', video: '...' },  // optional preview thumbnail: homepage print + Next Project card (defaults to hero)
+                                           //   tall: 3 = 3x as tall in the hero pile, cropped to the grid as it lands
     idea: { copy: '[40 to 60 words]', images: [ ... ] },          // 2 to 4 images
     friction: { problem: '', response: '', result: '', images: [] }, // optional, 1 to 2 images
     work: { images: [ ... ], outcome: '[Under 25 words]' }       // 6 to 12 images
+    //   or work.groups: [{ title, kind, copy, links: [{ label, url }], ratio, images }]: one block per client
   }
 */
 window.HOME_ORDER = [
   'grassroots',
+  'mycourses',
+  'multiply',
+  'sol',
   'boys-club',
   'title-sequence',
   'gravity'
@@ -259,12 +264,266 @@ window.PROJECTS = {
     }
   },
 
+  // ---------- MyCourses Redesign (in progress) ----------
+  // Facts from Sadie (Nov 2026). Still being built: [brackets] and grey
+  // boxes are hers to fill in.
+  'mycourses': {
+    title: 'MyCourses Redesign',
+    hook: '[Hook, under 10 words]',
+    role: '[Role]',
+    disciplines: ['[Disciplines]'],
+    status: 'In Progress',
+    course: 'UI and UX Strategy',
+    // homepage only: in the hero pile the print is 3x as tall with the
+    // image turned 90 degrees (the poster standing up); as it lands it
+    // turns back and crops to the grid's shape, left-justified on the M.
+    // TODO(Sadie): swap in a larger export (this one is 624 x 348)
+    home: {
+      tall: 3,
+      rotate: 90,
+      position: '0% 50%',
+      image: 'assets/case-studies/mycourses/mycourses-home.jpg',
+      alt: 'MyCourses poster: a dark shape like a stretched letter M with MYCOURSES at its end, beside the line The Implementation of the AI Agent'
+    },
+    tools: ['[Tools]'],
+    // TODO(Sadie): the motion piece goes here: hero: { video: 'assets/video/...mp4', src: 'poster.webp', alt: '...' }
+    hero: { label: '[Motion piece]', alt: '' },
+    idea: {
+      copy: 'A redesign of MyCourses, my school\u2019s page for reaching courses and submitting work, reimagined around an AI agent. [What the agent does and why, 40 to 60 words in all]',
+      images: [
+        { label: '[Research]', alt: '' },
+        { label: '[Current MyCourses]', alt: '' },
+        { label: '[Sketches or flows]', alt: '' }
+      ]
+    },
+    friction: {
+      problem: '[One line]',
+      response: '[One line]',
+      result: '[One line]',
+      images: [
+        { label: '[Before vs. after]', alt: '' }
+      ]
+    },
+    work: {
+      ratio: '16 / 10',
+      images: [
+        { label: '[Course access page]', alt: '', large: true },
+        { label: '[Submission flow]', alt: '' },
+        { label: '[AI agent]', alt: '' },
+        { label: '[Screen 4]', alt: '' },
+        { label: '[Screen 5]', alt: '' },
+        { label: '[Screen 6]', alt: '' }
+      ],
+      outcome: '[Outcome line, under 25 words]'
+    }
+  },
+
+  // ---------- Multiply: Design Team Intern ----------
+  // Summer internship. Built differently from the other case studies: 03
+  // Work is split into one block per brand (work.groups), each holding its
+  // projects as cards with a click-through carousel. Facts from Sadie
+  // (Nov 2026); [brackets] are hers to fill in.
+  'multiply': {
+    title: 'Multiply: Design Team Intern',
+    hook: '[Hook, under 10 words]',
+    role: 'Design Team Intern',
+    disciplines: ['Campaign Concepting', 'AI Image Generation', 'Presentation Design', 'Motion Design'],
+    client: { name: 'Multiply', url: 'https://www.multiply.us/' },
+    home: { image: 'assets/case-studies/multiply/multiply-home.png', alt: 'The Multiply wordmark in white on near-black, with a yellow Fight Boring tag' },
+    tools: ['Figma', 'Photoshop', 'Illustrator', 'After Effects', 'Claude', 'Envato Image + Video Generation'],
+    hero: {
+      src: 'assets/case-studies/multiply/multiply-home.png',
+      alt: 'The Multiply wordmark in white on near-black, with a yellow Fight Boring tag'
+    },
+    idea: {
+      copy: 'A summer on Multiply\u2019s design team, working across pitches, productions and social content for Grenade, Fresca Hard, Minute Maid Spiked and Hi-Chew. [What you learned or what tied the work together, 40 to 60 words in all]',
+      images: [
+        { src: 'assets/case-studies/multiply/grenade-batter-trio.webp', alt: 'Generated image for the Grenade pitch: a catcher, a batter in a tricorn hat and powdered wig, and a young man in shoulder armor eating a Grenade bar' },
+        { src: 'assets/case-studies/multiply/fresca-posts-grid.webp', alt: 'Fresca Hard\u2019s Instagram grid from the golf shoot' },
+        { src: 'assets/case-studies/multiply/hichew-blueberry-sm-03.webp', video: 'assets/video/hichew-blueberry-sm-03.mp4', alt: 'Hi-Chew blueberry motion post: candies and blueberries falling into a Hi-Chew bag' },
+        { src: 'assets/case-studies/multiply/grenade-storyboard-sketch.jpg', alt: 'Pen storyboard sketches for the Grenade pitch: the batter trio eating bars, a dugout break with bars and tea, George crossing the Delaware as a football tackle, a team huddle' },
+        { src: 'assets/case-studies/multiply/grenade-lettering-sketch.jpg', alt: 'Pencil sketches: blocky GRENADE lettering, a grenade, bar wrapper layouts and a Knicks T-shirt' },
+        { src: 'assets/case-studies/multiply/mms-thumbnail-sketches.jpg', alt: 'Pencil thumbnails for the Minute Maid Spiked poster in a comic style: a can in a hoodie in a city, movie poster layouts, notes on blue and green reflected in a red can' }
+      ]
+    },
+    friction: {
+      problem: '[One line]',
+      response: '[One line]',
+      result: '[One line]',
+      images: []
+    },
+    work: {
+      outcome: '[Outcome line, under 25 words]',
+      // one block per brand; each brand's projects sit side by side as
+      // cards, each a click-through carousel (js/project.js carousel())
+      groups: [
+        {
+          title: 'Grenade',
+          projects: [
+            {
+              title: 'US launch pitch',
+              kind: '4th of July creative brief',
+              copy: 'A creative editorial concept I created for Multiply to pitch Grenade, the UK protein brand, for its big American launch. I used sketches and scenes created from scratch in Photoshop to rapidly iterate concepts in image generation software. The generated images were only ever a proof of concept: if the pitch was won, a human editorial team would bring it to life.\nThe concept: a cheeky take on US and British history for the Fourth of July, playing off the brand\u2019s tone guidelines.',
+              links: [{ label: 'View the pitch deck', url: 'assets/decks/multiply-grenade-pitch.pdf' }],
+              images: [
+                { src: 'assets/case-studies/multiply/grenade-batter-trio.webp', alt: 'Generated image: a catcher, a batter in a tricorn hat and powdered wig, and a young man in shoulder armor eating a Grenade bar' },
+                { src: 'assets/case-studies/multiply/grenade-flag.webp', alt: 'Generated image: athletes in tricorn hats, colonial jackets and baseball jerseys charge forward under a torn American flag, Grenade bars on the floor' },
+                { src: 'assets/case-studies/multiply/grenade-bench.webp', alt: 'Generated image: three athletes rest on a wooden bench with a teacup and Grenade bars, armor set down at their feet' },
+                { src: 'assets/case-studies/multiply/grenade-bar-hold.webp', alt: 'Generated image: a young man in a red colonial jacket and shoulder armor holds a Grenade bar' },
+                { src: 'assets/case-studies/multiply/grenade-dumbbell.webp', alt: 'Generated image: a woman in a powdered wig and worn G cap curls a Grenade dumbbell' },
+                { src: 'assets/case-studies/multiply/grenade-deck-cover.webp', contain: true, alt: 'Pitch deck cover: Creative Brief, made by Sadie for Grenade, Multiply 2026' }
+              ]
+            },
+            {
+              title: 'On the Hudson',
+              kind: 'Instagram post, Grenade US',
+              copy: 'A post for Grenade US\u2019s Instagram that I worked on concepting. [What the idea was and what you did, one line]',
+              links: [{ label: 'View the post on Instagram', url: 'https://www.instagram.com/p/De9t2h0SHH7/' }],
+              images: [
+                { src: 'assets/case-studies/multiply/grenade-just-landed-flag.webp', alt: 'An orange Grenade Just Landed flag on a jet ski, spray flying, the Statue of Liberty and Manhattan behind' },
+                { src: 'assets/case-studies/multiply/grenade-hudson-post.webp', alt: 'Instagram post: riders in orange on jet skis with Grenade flags race past the Manhattan skyline, captioned I saw you on the Hudson, eating a grenade protein bar, and you paid me no mind' }
+              ]
+            }
+          ]
+        },
+        {
+          title: 'Fresca Hard',
+          projects: [
+            {
+              title: 'Q2 golf shoot',
+              kind: 'On-set assistant',
+              copy: 'I was an assistant on set for Fresca Hard\u2019s Q2 golf shoot in New York, [what you did on set, one line]. Before the shoot, I reworked the production bible in Claude so it worked for everyone involved, especially the Multiply team, to streamline communication on the day.',
+              links: [{ label: 'View the content on Instagram', url: 'https://www.instagram.com/p/Dezam19kZFv/' }],
+              images: [
+                { src: 'assets/case-studies/multiply/fresca-posts-grid.webp', alt: 'Fresca Hard\u2019s Instagram grid from the shoot: cans on the green beside golf balls, cans scattered among tees, friends in golf whites sharing cans on the course and in a cart' },
+                { src: 'assets/case-studies/multiply/fresca-bts-swing.jpg', label: 'Behind the scenes', alt: 'My behind-the-scenes shot from set: a Fresca Hard can in the long grass, a golfer mid-swing behind it' },
+                { src: 'assets/case-studies/multiply/fresca-ad-frame.webp', alt: 'Frame from the Fresca Hard spot: friends hand round cans beside a golf cart under the Fresca Hard logo' },
+                { src: 'assets/case-studies/multiply/fresca-on-ice.webp', alt: 'A hand pulls a Fresca Hard can from a bucket of ice' }
+              ]
+            },
+            {
+              title: 'Served Hard',
+              kind: 'US Open activation, New York',
+              copy: 'My concept for Fresca Hard\u2019s US Open promotion, mocked up for Multiply: SERVED HARD spelled out in tennis balls on a street-side wall. Then the wall as it went up in New York this summer.',
+              images: [
+                { src: 'assets/case-studies/multiply/fresca-served-hard-concept.webp', contain: true, label: 'My concept mock-up', alt: 'Concept mock-up: a long blue wall reading SERVED HARD in tennis balls beside a tennis player and the Fresca Hard logo, a lawn with deck chairs in front and a crowd on the sidewalk' },
+                { src: 'assets/case-studies/multiply/fresca-served-hard-wall.jpg', label: 'The wall in New York', alt: 'Instagram story of the built wall in New York: SERVED HARD in tennis balls on a blue wall over turf, the D left unfinished, captioned Where\u2019s the D??' }
+              ]
+            }
+          ]
+        },
+        {
+          title: 'Minute Maid Spiked',
+          projects: [
+            {
+              title: 'Social content',
+              kind: 'Content capture, on camera',
+              copy: 'Real content I captured for Minute Maid Spiked\u2019s Instagram, including a video I\u2019m in.',
+              links: [{ label: 'View the post on Instagram', url: 'https://www.instagram.com/p/DaLkXTxCeYV/' }],
+              images: [
+                { src: 'assets/case-studies/multiply/mms-picnic.jpg', alt: 'Instagram video still: Sadie sits on a picnic blanket in a park holding up a can of Minute Maid Spiked in each hand' },
+                { src: 'assets/case-studies/multiply/mms-pink-lemonade.jpg', position: '50% 85%', alt: 'Instagram video still: a cup of water and a cup of pink lemonade either side of a Minute Maid Spiked Vodka Pink Lemonade can, captioned The sound of water vs the sound of my Minute Maid Spiked Vodka Pink Lemonade' }
+              ]
+            },
+            {
+              title: 'Poster',
+              copy: '[What you did on this poster: one line]',
+              images: [
+                { src: 'assets/case-studies/multiply/mms-poster.webp', contain: true, alt: 'Minute Maid Spiked poster: a lime margarita bottle and three cans, the Bold One, the Lead and the Wildcard, in a ruined city street' }
+              ]
+            }
+          ]
+        },
+        {
+          title: 'Hi-Chew',
+          kind: 'Multiply is their agency of record',
+          projects: [
+            {
+              title: 'Posts on @hichewusa',
+              kind: 'Instagram, 110k followers',
+              copy: 'Posts I concepted for Hi-Chew\u2019s US Instagram, 110k followers strong, from a sidewalk chalk bag to a summer camp packing list. My blueberry motion piece was picked for the account too.',
+              links: [{ label: 'View a post on Instagram', url: 'https://www.instagram.com/p/DaTSAp3DSTz/' }],
+              images: [
+                { src: 'assets/case-studies/multiply/hichew-blueberry-sm-03.webp', video: 'assets/video/hichew-blueberry-sm-03.mp4', alt: 'Hi-Chew blueberry motion post' },
+                { src: 'assets/case-studies/multiply/hichew-chalk.jpg', alt: 'Instagram post: a giant Hi-Chew bag drawn in rainbow sidewalk chalk beside a chalk Hi-Chew logo' },
+                { src: 'assets/case-studies/multiply/hichew-summer-camp.jpg', position: '50% 0%', alt: 'Instagram post: a summer camp nostalgic pack, cut-out camera, whistle, lounge chair, boombox, cooler and summer fit around three Hi-Chew bags over a cabin photo' },
+                { src: 'assets/case-studies/multiply/hichew-dessert-mix.jpg', alt: 'Instagram post: a Hi-Chew Dessert Mix bag and loose candies on an orange striped beach towel, the shadow of a drink across them' }
+              ]
+            },
+            {
+              title: 'Motion explorations',
+              kind: 'After Effects and Photoshop',
+              copy: 'More short-form pieces I made for the account in After Effects and Photoshop.',
+              images: [
+                { src: 'assets/case-studies/multiply/hichew-reel-01.webp', video: 'assets/video/hichew-reel-01.mp4', alt: 'Hi-Chew social reel' },
+                { src: 'assets/case-studies/multiply/hichew-creamsicle-2.webp', video: 'assets/video/hichew-creamsicle-2.mp4', alt: 'Hi-Chew creamsicle social post' }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+
+  // ---------- Sol (in progress) ----------
+  // Spec brand + product project, several iterations in; final version in
+  // progress. Facts from Sadie (Nov 2026).
+  'sol': {
+    title: 'Sol',
+    hook: 'Stay sun faded',
+    role: '[Role]',
+    disciplines: ['Branding', 'Product Design', 'Packaging', 'Advertising', 'AI Image Generation'],
+    status: 'In Progress',
+    tools: ['Sketching', 'ComfyUI', 'Figma Weave', 'Photoshop', 'Claude'],
+    // cursor: what the cursor reads over the hero (no link): the project is
+    // still in progress. TODO(Sadie): swap in a finished hero image
+    hero: {
+      src: 'assets/case-studies/sol/sol-bottle-sketches.webp',
+      position: '50% 42%',
+      cursor: 'Work In Progress',
+      alt: 'Pen sketches of Sol bottles: a corked bottle with a brown tint, the sun symbol and SOL on a clean white label, frosted glass versions and a tall bottle with SOL down its side'
+    },
+    idea: {
+      copy: 'Sol is a THC beverage brand I\u2019ve been building for over three years. It started with my own choice to ditch alcohol while still wanting the community it brings, one of the few left today. The name means sun, so everything follows it: the alchemical symbol for sol in the logo, cyanotype graphics across the brand, and the tagline \u201cStay sun faded.\u201d',
+      images: [
+        { src: 'assets/case-studies/sol/sol-mindmap.webp', alt: 'Pencil mind map around clean relaxation: surf cowboy, south western, vintage soda cans, natural fibers and plants, sun, waves and stars' },
+        { src: 'assets/case-studies/sol/sol-logo-sketches.webp', alt: 'Pen sketches of the SOL wordmark with a line over the O, sun symbols, a circle with a dot and a half sun over a towel labeled sunfaded' },
+        { src: 'assets/case-studies/sol/sol-figure-studies.webp', alt: 'Pencil figure studies of sunbathers in swimwear standing under a sketched sun' }
+      ]
+    },
+    friction: {
+      problem: 'Ask people to swap a drink for something new, without asking them to give up the ritual.',
+      response: 'Products that slot into how people already take the edge off the week: keep-cold flasks, single-use glass mini bottles for small doses and full cocktail sets.',
+      result: '[One line]',
+      images: [
+        { label: '[Iteration vs. final]', alt: '' }
+      ]
+    },
+    work: {
+      images: [
+        { src: 'assets/case-studies/sol/sol-iteration-04.webp', large: true, label: 'Iteration 01, generated', alt: 'Generated iteration: a frosted blue bottle with a wooden cork, coral seal and a cream label, a nautilus shell over S\u014dl, Blood Orange and Yuzu, 10mg THC, BOTTLED SLOWLY embossed in the glass' },
+        { src: 'assets/case-studies/sol/sol-iteration-01.webp', label: 'Iteration 02, generated', alt: 'Generated iteration: a clear blue bottle lying in beach sand, a white label reading S\u014dl, Coastal THC Drink, 5mg THC, the sun symbol embossed in the glass' },
+        { src: 'assets/case-studies/sol/sol-iteration-02.webp', label: 'Iteration 03, generated', alt: 'Generated iteration: an amber THC soda bottle on a sandstone ledge, the sun symbol embossed above a cream label reading S\u014dl THC Soda, Retro Adventure' },
+        { src: 'assets/case-studies/sol/sol-iteration-03.webp', label: 'Iteration 04, generated', alt: 'Generated iteration: a pale soda bottle pushed into white sand beside a blue striped towel, a large hand-drawn sun symbol on the glass and a S\u014dl THC Soda label' },
+        { src: 'assets/case-studies/sol/sol-iteration-05.webp', label: 'Iteration 05, generated', alt: 'Generated iteration: a close-up of the frosted bottle\u2019s neck, BOTTLED SLOWLY embossed in the glass, the sun mark, a blue nautilus and S\u014dl on a textured label' },
+        { src: 'assets/case-studies/sol/sol-iteration-06.webp', label: 'Iteration 06, generated', alt: 'Generated iteration: the frosted bottle with a cyanotype nautilus print on its label beside the sun mark, S\u014dl and 10mg THC' },
+        { src: 'assets/case-studies/sol/sol-ad-sketches.webp', position: '50% 0%', label: 'Ad sketches', alt: 'Pencil ad layouts: a cyanotype photo grid captioned Effects of getting some sun, and a pulp poster reading Sunkissed Madness, coming soon to a dispo near you' },
+        { label: '[Merch: sun faded tees]', alt: '' },
+        { label: '[Poster]', alt: '' }
+      ],
+      // the bottles are generated iterations, a few of many so far: each one
+      // is labeled so, and the outcome says it
+      ratio: '1 / 1',
+      outcome: 'A mock product line and lifestyle brand, with guerrilla-style advertising in progress, centered on relaxing, community and soaking up the sun. The bottles below are a few of many generated iterations so far.'
+    }
+  },
+
   // ---------- Gravity ----------
   // Facts from Sadie (Nov 2026). [Brackets] still need her words; grey
   // boxes (no src) are images still to come.
   'gravity': {
     title: 'Gravity',
-    hook: 'Comfort or discomfort? The *feeling* of gravity',
+    hook: 'How do you *feel* gravity? Comfort or Discomfort?',
     role: 'Immersive Interaction Designer',
     disciplines: ['Interaction Design', 'Immersive Experience Design', 'Creative Coding', 'UX/UI'],
     duration: '3-day group sprint',

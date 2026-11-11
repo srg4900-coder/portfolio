@@ -406,6 +406,13 @@ body.custom-cursor-active * {
   background: #FFFFFF;
   mix-blend-mode: normal;
 }
+/* over something draggable (data-cursor-solid="grab"): twice the size, with
+   a soft shadow so the white still reads over pale paper */
+.cursor-label.is-grab:not(.is-expanded) {
+  width: 20px;
+  height: 20px;
+  box-shadow: 0 1px 4px rgba(16, 14, 12, 0.28);
+}
 
 /* expanded into a label ("View", "Open"...): a sharp-cornered tag, like
    the site's printed labels; only the resting dot is round */
@@ -914,6 +921,10 @@ html.is-viewer-open { overflow: hidden; }
   max-height: 100%;
   object-fit: contain;
 }
+/* every image opens at the same height (its own width): small ones scale
+   up to fill the space too */
+img.viewer__media,
+video.viewer__media { height: 100%; width: auto; }
 /* stepping (arrows, keys, swipe): the next image drifts in a few px from
    the side it comes from and settles, on the homepage's ease and pace */
 .viewer__media.is-entering {
