@@ -940,3 +940,15 @@ button.cs-pitem__head:hover,
 
 /* the hero image as a link (action.hero, js/project.js) */
 .cs-hero__link { display: block; cursor: pointer; }
+
+/* a link inside project copy (js/project.js richCopy): underlined; on a
+   computer its letters roll on hover like the About call to action */
+.cs-inline-link {
+  color: inherit;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 1px;
+  padding-bottom: 2px;
+  cursor: pointer;
+}

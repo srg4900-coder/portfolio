@@ -110,7 +110,7 @@ window.PROJECTS = {
       alt: 'Still from the Grassroots fall film: a driver’s hands on the wheel of a vintage Porsche'
     },
     idea: {
-      copy: 'After seeing Boy’s Club, the in-house CD at Grassroots, a luxury car club out of NYC, hired me freelance as creative director on the film for their fall merch drop. I pitched a direction plus one alternate, then built storyboards, style sheets, and a timed shot list. The winning pitch: young love in the city, the thrill of speed, tension, and falling for someone new.',
+      copy: 'After seeing [Boy’s Club](project:boys-club), the in-house CD at Grassroots, a luxury car club out of NYC, hired me freelance as creative director on the film for their fall merch drop. I pitched a direction plus one alternate, then built storyboards, style sheets, and a timed shot list. The winning pitch: young love in the city, the thrill of speed, tension, and falling for someone new.',
       images: [
         // files: assets/case-studies/grassroots/idea/. scale: 1.2 = shown 20% larger than the rest
         { src: 'assets/case-studies/grassroots/idea/gr-pitch-moodboard.jpg', scale: 1.2, label: 'Pitch Deck', alt: 'Moodboard slide from the Grassroots pitch deck: vintage cars, couples and city scenes' },

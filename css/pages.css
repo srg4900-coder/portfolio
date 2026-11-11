@@ -520,18 +520,6 @@
 /* computers: the rolling words (about.html rolling()). Two copies stacked
    in one cell; letters leave upward and arrive from below, left to right,
    a beat apart (--i) */
-.about__cta-swap { display: inline-grid; vertical-align: bottom; overflow: hidden; }
-.about__cta-layer { grid-area: 1 / 1; white-space: pre; }
-.about__cta-layer > span {
-  display: inline-block;
-  transition:
-    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 240ms ease;
-  transition-delay: calc(var(--i, 0) * 14ms);
-}
-.about__cta-layer.is-below > span { transform: translateY(0.7em); opacity: 0; }
-.about__cta-layer.is-above > span { transform: translateY(-0.7em); opacity: 0; transition-delay: calc(var(--i, 0) * 10ms); }
-.about__cta-layer.is-still > span { transition: none; }
-@media (prefers-reduced-motion: reduce) {
-  .about__cta-layer > span { transition: none; }
+/* the letter roll itself (.about__cta-swap / -layer) lives in
+   css/components.css: project pages use it too */
 }

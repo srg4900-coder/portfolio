@@ -88,6 +88,61 @@
     return n + ' ' + m[2].toLowerCase() + (n === 1 ? '' : 's');
   }
   function projectUrl(s) { return Order.link('project.html?project=' + encodeURIComponent(s)); }
+
+  // copy with inline links: [words](project:slug) links to another case
+  // study, [words](https://...) opens a site in a new tab. Everything else
+  // stays plain text (so [placeholders] without a (link) are untouched).
+  var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  // the About page's letter roll (about.html rolling(), styles in
+  // css/components.css): two stacked copies of the words take turns, the
+  // shown one lifting away letter by letter as the other rises in
+  function roll(a, words) {
+    a.setAttribute('aria-label', words);
+    var swap = a.appendChild(el('span', 'about__cta-swap'));
+    swap.setAttribute('aria-hidden', 'true');
+    function layer(cls) {
+      var l = swap.appendChild(el('span', 'about__cta-layer' + cls));
+      words.split('').forEach(function (ch, k) {
+        var c = l.appendChild(el('span'));
+        c.textContent = ch;
+        c.style.setProperty('--i', k);
+      });
+      return l;
+    }
+    var showing = layer(''), waiting = layer(' is-below');
+    function go() {
+      var inn = waiting, out = showing;
+      inn.classList.add('is-still', 'is-below');
+      inn.classList.remove('is-above');
+      inn.getBoundingClientRect();
+      inn.classList.remove('is-still', 'is-below');
+      out.classList.add('is-above');
+      showing = inn;
+      waiting = out;
+    }
+    a.addEventListener('mouseenter', go);
+    a.addEventListener('mouseleave', go);
+  }
+
+  function richCopy(node, str) {
+    var re = /\[([^\]]+)\]\(([^)\s]+)\)/g, last = 0, m;
+    while ((m = re.exec(str))) {
+      if (m.index > last) node.appendChild(document.createTextNode(str.slice(last, m.index)));
+      var a = el('a', 'cs-inline-link');
+      if (finePointer) roll(a, m[1]);
+      else a.textContent = m[1];
+      var target = m[2];
+      if (/^project:/.test(target)) a.href = projectUrl(target.slice(8));
+      else {
+        a.href = target;
+        if (/^https?:/.test(target)) { a.target = '_blank'; a.rel = 'noopener'; }
+      }
+      node.appendChild(a);
+      last = re.lastIndex;
+    }
+    if (last < str.length) node.appendChild(document.createTextNode(str.slice(last)));
+    return node;
+  }
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // img, or a muted loop when the entry has `video` (src becomes the poster)
@@ -764,7 +819,7 @@
     var ideaImages = usable(idea.images);
     if (text(idea.copy) || ideaImages.length) {
       var ideaSec = section('idea', '01', 'Idea');
-      if (text(idea.copy)) ideaSec.appendChild(el('p', 'cs-section__copy text-project-body', text(idea.copy)));
+      if (text(idea.copy)) ideaSec.appendChild(richCopy(el('p', 'cs-section__copy text-project-body'), text(idea.copy)));
       var ideaPapers = ideaImages.length ? papers(ideaImages) : null;
       if (ideaPapers) ideaSec.appendChild(ideaPapers);
       sections.push({ node: ideaSec, num: '01', name: 'Idea' });
@@ -797,7 +852,7 @@
       var workName = inProgress ? 'Work So Far' : 'Work';
       var workSec = section('work', '03', workName);
       // the outcome sits under the heading, small like the Idea / Friction copy
-      if (text(work.outcome)) workSec.appendChild(el('p', 'cs-section__copy cs-outcome text-project-body', text(work.outcome)));
+      if (text(work.outcome)) workSec.appendChild(richCopy(el('p', 'cs-section__copy cs-outcome text-project-body'), text(work.outcome)));
       if (workImages.length) workSec.appendChild(figures(workImages, 'cs-grid', work.ratio));
       // groups: one block per brand: name left, stage, project list
       // (brandStage() above)
