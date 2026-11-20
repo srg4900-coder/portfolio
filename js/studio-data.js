@@ -9,7 +9,8 @@
       title: 'Title',
       medium: 'Oil on canvas',
       year: 2025,
-      award: ''                             // optional, e.g. 'Best in Show, ...'
+      award: '',                            // optional, e.g. 'Best in Show, ...'
+      cursor: 'Work In Progress'            // optional: the cursor reads this on hover
     }
   A group with book: true renders as the sketchbook (js/studio.js), one
   piece per page, in page order, beside the first group's pieces.
@@ -30,6 +31,14 @@ window.STUDIO = {
           medium: 'Color pastel',
           year: 2023,
           award: 'Selected for the RIT Studio Showcase'
+        },
+        {
+          src: 'assets/studio/paintings/lakeside-kids.jpg',
+          alt: 'Painting in progress: four kids in bright T-shirts by a lake, one in a yellow IOWA shirt looking up at the sky, one bent over with arms stretched out, faces left loose and unfinished',
+          title: 'Iowa',
+          medium: 'Oil paint on canvas',
+          year: 2026,
+          cursor: 'Work In Progress'   // what the cursor reads on hover (still being painted)
         }
       ]
     },

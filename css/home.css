@@ -283,3 +283,99 @@ body.home { background: transparent; }
   .hero__title > span, .hero__role, .sheet__paper, .sheet__award { animation: none; }
   .sheet { transform: none !important; }
 }
+
+/* ---------- sort (js/home.js SORT) ----------
+   The print-stack button: fixed at the bottom centre, dealt onto the
+   screen with the prints as the page loads. Hover fans the prints out
+   like a hand of cards; open, they stay fanned and the categories rise in
+   above it on a paper tag, one after another. */
+.work-sort {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--frame-width) + 24px + env(safe-area-inset-bottom, 0px));
+  z-index: var(--z-nav);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  animation: sort-in 800ms var(--ease-smooth) 240ms both;
+}
+.work-sort > * { pointer-events: auto; }
+@keyframes sort-in {
+  from { opacity: 0; transform: translateY(28px) scale(0.85); }
+}
+
+.work-sort__toggle {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+.work-sort__toggle svg { width: 72px; height: 72px; overflow: visible; }
+.work-sort__toggle rect {
+  fill: var(--color-white);
+  stroke: currentColor;
+  stroke-width: 0.6;   /* ~1.8px at 72px, the site's line weight */
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transition: transform var(--duration-base) var(--ease-smooth);
+}
+.work-sort__toggle:hover .work-sort__p1,
+.work-sort__toggle:focus-visible .work-sort__p1,
+.work-sort.is-open .work-sort__p1 { transform: rotate(-16deg) translateX(-2px); }
+.work-sort__toggle:hover .work-sort__p3,
+.work-sort__toggle:focus-visible .work-sort__p3,
+.work-sort.is-open .work-sort__p3 { transform: rotate(16deg) translateX(2px); }
+.work-sort__toggle:active svg { transform: scale(0.92); }
+
+.work-sort__menu {
+  position: absolute;
+  bottom: calc(100% + 14px);
+  left: 50%;
+  display: flex;
+  gap: 4px;
+  padding: 6px 8px;
+  background: var(--color-white);
+  box-shadow: var(--shadow-paper);
+  white-space: nowrap;
+  transform: translate(-50%, 8px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--duration-fast) ease, transform var(--duration-base) var(--ease-smooth), visibility 0s linear var(--duration-base);
+}
+.work-sort.is-open .work-sort__menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+  transition: opacity var(--duration-fast) ease, transform var(--duration-base) var(--ease-smooth);
+}
+.work-sort__opt {
+  padding: 6px 8px;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity var(--duration-fast) ease, transform var(--duration-base) var(--ease-smooth), color var(--duration-fast) ease;
+}
+.work-sort.is-open .work-sort__opt {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(var(--k, 0) * 35ms);
+}
+.work-sort__opt:hover,
+.work-sort__opt[aria-pressed="true"] { color: var(--color-ink); }
+.work-sort__opt[aria-pressed="true"] {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+@media (max-width: 420px) {
+  .work-sort__menu { gap: 0; padding: 4px; }
+  .work-sort__opt { padding: 6px 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .work-sort { animation: none; }
+  .work-sort__menu, .work-sort__opt, .work-sort__toggle rect { transition: none; }
+}

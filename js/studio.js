@@ -11,8 +11,8 @@
   grows to a two-page spread (the page below shifts to make room) and the
   cover swings over to the left. Click the right page to turn forward,
   the left page to turn back; one more click past either end closes it
-  (front cover = left end). It also closes once the mouse has been off it
-  for 2 seconds (on touch, a tap outside it). Keyboard: Enter opens,
+  (front cover = left end). It opens by itself on page load and stays
+  open until closed that way. Keyboard: Enter opens,
   arrow keys turn, Escape closes. Styles: .sketchbook in css/pages.css.
 */
 (function () {
@@ -66,6 +66,7 @@
       open.setAttribute('data-alt', item.alt || '');
       open.setAttribute('data-label', label);
       open.setAttribute('aria-label', 'View larger: ' + (item.alt || item.title || 'image'));
+      if (item.cursor) open.setAttribute('data-cursor-label', item.cursor);   // e.g. "Work In Progress"
       var img = el('img', 'cs-fig__media');
       img.src = item.src;
       img.alt = item.alt || '';
@@ -125,9 +126,8 @@
   // ---------- SKETCHBOOK ----------
   function sketchbook(group) {
     var pages = group.items.filter(function (i) { return i && i.src; });
-    var hover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var TURN_MS = reduced ? 0 : 900, OPEN_MS = reduced ? 0 : 850, IDLE_MS = 2000;
+    var TURN_MS = reduced ? 0 : 900, OPEN_MS = reduced ? 0 : 850;
 
     var cell = el('div', 'studio__book');
     var book = cell.appendChild(el('div', 'sketchbook'));
@@ -279,7 +279,9 @@
     }
 
     stack();
-    requestAnimationFrame(size);      // once the cell is in the grid
+    // the book opens by itself as the page loads (once its cell is in the
+    // grid): the cover swings over and the first spread is waiting
+    requestAnimationFrame(function () { size(); open(); });
     window.addEventListener('resize', function () { if (state === 'closed') size(); });
 
     ['pointerenter', 'focus'].forEach(function (ev) { book.addEventListener(ev, load); });
@@ -294,17 +296,9 @@
       else if (e.key === 'ArrowLeft') { e.preventDefault(); turn(-1); }
       else if (e.key === 'Escape') closeFront();
     });
-    if (hover) {
-      book.addEventListener('mouseleave', function () {
-        clearTimeout(idle);
-        idle = setTimeout(closeFront, IDLE_MS);
-      });
-      book.addEventListener('mouseenter', function () { clearTimeout(idle); });
-    } else {
-      document.addEventListener('click', function (e) {
-        if (!book.contains(e.target)) closeFront();
-      });
-    }
+    // open is its resting state now, so it no longer closes by itself
+    // when the mouse leaves or on a tap outside; it closes past either end
+    // (or Escape) and a click opens it again
     return cell;
   }
 })();

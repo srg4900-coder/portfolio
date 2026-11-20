@@ -74,6 +74,12 @@ window.HOME_ORDER = [
   'gravity'
 ];
 
+// Homepage sort button (js/home.js): the order a category shows its own
+// projects in when picked. A category not listed here uses HOME_ORDER.
+window.VIEW_ORDER = {
+  motion: ['title-sequence', 'grassroots', 'multiply']
+};
+
 // Old links that should still land on the right project.
 window.PROJECT_ALIASES = {
   'art-direction': 'grassroots'
@@ -83,6 +89,7 @@ window.PROJECTS = {
   // ---------- Grassroots: Fall Drop ----------
   'grassroots': {
     title: 'Grassroots: Fall Drop',
+    types: ['brand', 'motion'],   // homepage sort button (js/home.js): product, brand, ui, motion, studio
     hook: 'Feel the love, live fast',
     role: 'Creative Co-Director & Advisor',
     disciplines: ['Creative Direction', 'Styling', 'Storyboarding', 'Photography', 'Talent Direction'],
@@ -159,6 +166,7 @@ window.PROJECTS = {
   // ---------- Boy's Club ----------
   'boys-club': {
     title: 'Boy’s Club',
+    types: ['brand'],   // homepage sort button (js/home.js): product, brand, ui, motion, studio
     hook: 'Held close. His before it was hers.',
     role: 'Founder & Designer',
     disciplines: ['Brand & Creative Direction', 'Clothing Design, Alteration & Construction', 'Styling', 'Editorial Photography', 'Web & E-commerce Development'],
@@ -205,6 +213,7 @@ window.PROJECTS = {
   // references/ (inspiration boards).
   'title-sequence': {
     title: 'A Series of Unfortunate Events: Title Sequence',
+    types: ['motion'],   // homepage sort button (js/home.js): product, brand, ui, motion, studio
     hook: 'A clue in every frame',
     role: 'Motion Designer & Illustrator',
     disciplines: ['Motion Design', 'Illustration', 'Hand Animation'],
@@ -269,9 +278,10 @@ window.PROJECTS = {
   // boxes are hers to fill in.
   'mycourses': {
     title: 'MyCourses Redesign',
-    hook: '[Hook, under 10 words]',
-    role: '[Role]',
-    disciplines: ['[Disciplines]'],
+    types: ['product', 'ui'],   // homepage sort button (js/home.js): product, brand, ui, motion, studio
+    hook: 'What if MyCourses was a *predictive*, adaptable planner?',
+    role: 'UX/UI Designer',
+    disciplines: ['UX Strategy', 'UI Design', 'Design Systems', 'Persona Research', 'Motion Design'],
     status: 'In Progress',
     course: 'UX Design Strategies',
     // homepage only: in the hero pile the print is 3x as tall with the
@@ -286,15 +296,18 @@ window.PROJECTS = {
       alt: 'MyCourses poster: a dark shape like a stretched letter M with MYCOURSES at its end, beside the line The Implementation of the AI Agent'
     },
     tools: ['Figma', 'Illustrator', 'Claude Code', 'Figma Motion', 'After Effects'],
-    // TODO(Sadie): the motion piece can replace this: hero: { video: 'assets/video/...mp4', src: 'poster.webp', alt: '...' }
+    // the mode switching film, centred in the frame; the homepage keeps
+    // its own poster (home above)
     hero: {
-      src: 'assets/case-studies/mycourses/mycourses-today.png',
-      position: '50% 0%',
+      video: 'assets/video/mycourses-modes.mp4',
+      src: 'assets/case-studies/mycourses/mycourses-modes-poster.jpg',
+      position: '50% 50%',
+      silent: true,
       cursor: 'Work In Progress',
-      alt: 'MyCourses Today screen in red: Hi Mimi, Thursday Oct. 28, a BIME 200 lab report due 11:59pm with a suggested work block, a gym session faded out, and each course\u2019s status'
+      alt: 'MyCourses mode switching: the M mark turns like a block between Academic, Organize, Prep and Social, the screen changing color with each mode'
     },
     idea: {
-      copy: 'A redesign of MyCourses, my school\u2019s page for reaching courses and submitting work, reimagined around an AI agent. [What the agent does and why, 40 to 60 words in all]',
+      copy: 'A full redesign of MyCourses for UX Design Strategies, built around an AI agent and a persona drawn from real student needs. The brief: use an abstracted metaphor to make a design system nobody has seen before. Mine is a DJ deck, and the agent is a butler that organizes college life across academic, social and health spheres. Switch modes to put a different sphere first as life ebbs and flows.',
       images: [
         { src: 'assets/case-studies/mycourses/mycourses-moodboard.webp', alt: 'Moodboard titled clean and exciting: red agency sites, big type, Swiss layouts, product pages and posters' },
         { src: 'assets/case-studies/mycourses/mycourses-ai-shift-mode.png', label: 'Earlier rendition, AI UI tool', alt: 'An earlier AI-tool rendition of Shift Mode: a grid of half-hour pads to drag three hours of homework across, agent picks outlined in red dashes' },
@@ -304,9 +317,9 @@ window.PROJECTS = {
     },
     // the earlier versions came from AI UI tools; the current design is by hand
     friction: {
-      problem: 'My earlier renditions came from AI UI tools, great for iterating ideas out quickly.',
-      response: 'I redesigned the screens by hand.',
-      result: 'A design that feels more human and intuitive.',
+      problem: 'Turning an abstract metaphor into something real that leans on mental models students already know, with a design system built from scratch.',
+      response: 'I start from what my persona really needs, design simple and build up, iterating fast with AI UI tools and cutting anything that doesn\u2019t serve the what if.',
+      result: 'The AI renditions got ideas on screen fast; the screens I\u2019m designing by hand feel more human and intuitive.',
       ratio: '4 / 3',
       images: [
         { src: 'assets/case-studies/mycourses/mycourses-ai-today.png', label: 'Earlier rendition, AI UI tool', alt: 'An earlier AI-tool rendition of the Today page: Hello Mimi, a timeline of the day, a yellow Next Up card for an upload step, suggestions and things done overnight' },
@@ -321,17 +334,17 @@ window.PROJECTS = {
       // same screen in each color) together
       ratio: '45 / 32',
       images: [
-        { src: 'assets/case-studies/mycourses/mycourses-deck-day.png', large: true, alt: 'MyCourses Deck, day view: Hi Mimi, your day is set, a list of classes with a BIME 200 work block added at 8pm for Lab Report 2, beside Need help? Just ask.' },
+        { src: 'assets/case-studies/mycourses/mycourses-walkthrough-poster.jpg', video: 'assets/video/mycourses-walkthrough.mp4', large: true, alt: 'Walkthrough of the MyCourses Deck: the day list of classes, the BIME 200 lab report due tonight and its work block, and Need help? Just ask.' },
+        { src: 'assets/case-studies/mycourses/mycourses-deck-day.png', alt: 'MyCourses Deck, day view: Hi Mimi, your day is set, a list of classes with a BIME 200 work block added at 8pm for Lab Report 2, beside Need help? Just ask.' },
         { src: 'assets/case-studies/mycourses/mycourses-today.png', alt: 'MyCourses Today screen in red: Hi Mimi, a lab report due with a suggested work block and each course\u2019s status' },
         { src: 'assets/case-studies/mycourses/mycourses-mode-switcher.png', contain: true, label: 'Mode switcher', alt: 'Four M-shaped cards, dark, cream, blue and yellow, each with a column of dots: picking a dot switches to Academic, Organize, Prep or Social' },
         { src: 'assets/case-studies/mycourses/mycourses-mode-academic.png', label: 'Academic mode', alt: 'Academic Mode: the cream M mark on red' },
         { src: 'assets/case-studies/mycourses/mycourses-mode-organize.png', label: 'Organize mode', alt: 'Organize Mode: the dark M mark on cream' },
         { src: 'assets/case-studies/mycourses/mycourses-mode-prep.png', label: 'Prep mode', alt: 'Prep Mode: the cream M mark on blue' },
         { src: 'assets/case-studies/mycourses/mycourses-mode-social.png', label: 'Social mode', alt: 'Social Mode: the dark M mark on yellow' },
-        { label: '[Motion piece]', alt: '' },
         { label: '[Courses page]', alt: '' }
       ],
-      outcome: '[Outcome line, under 25 words]'
+      outcome: 'Every night the agent audits your whole calendar and finds time for the work. Skip the lab report for dinner with friends? You get reminders on your phone, and if the deadline slips, it shifts tasks by priority and helps you write the extension email. A partner that moves with you, not a nagging parent or an angry professor.'
     }
   },
 
@@ -342,6 +355,7 @@ window.PROJECTS = {
   // (Nov 2026); [brackets] are hers to fill in.
   'multiply': {
     title: 'Multiply: Design Team Intern',
+    types: ['brand', 'motion'],   // homepage sort button (js/home.js): product, brand, ui, motion, studio
     hook: '[Hook, under 10 words]',
     role: 'Design Team Intern',
     disciplines: ['Campaign Concepting', 'AI Image Generation', 'Presentation Design', 'Motion Design'],
@@ -487,6 +501,7 @@ window.PROJECTS = {
   // progress. Facts from Sadie (Nov 2026).
   'sol': {
     title: 'Sol',
+    types: ['brand', 'product'],   // homepage sort button (js/home.js): product, brand, ui, motion, studio
     hook: 'Stay sun faded',
     role: '[Role]',
     disciplines: ['Branding', 'Product Design', 'Packaging', 'Advertising', 'AI Image Generation'],
@@ -495,17 +510,18 @@ window.PROJECTS = {
     // cursor: what the cursor reads over the hero (no link): the project is
     // still in progress. TODO(Sadie): swap in a finished hero image
     hero: {
-      src: 'assets/case-studies/sol/sol-bottle-sketches.webp',
-      position: '50% 42%',
+      src: 'assets/case-studies/sol/sol-iteration-05.webp',
+      position: '50% 55%',
       cursor: 'Work In Progress',
-      alt: 'Pen sketches of Sol bottles: a corked bottle with a brown tint, the sun symbol and SOL on a clean white label, frosted glass versions and a tall bottle with SOL down its side'
+      alt: 'Generated iteration: a close-up of a frosted blue S\u014dl bottle, BOTTLED SLOWLY embossed in the glass, a coral seal over the cork, the sun mark and a blue nautilus on a textured cream label'
     },
     idea: {
       copy: 'Sol is a THC beverage brand I\u2019ve been building for over three years. It started with my own choice to ditch alcohol while still wanting the community it brings, one of the few left today. The name means sun, so everything follows it: the alchemical symbol for sol in the logo, cyanotype graphics across the brand, and the tagline \u201cStay sun faded.\u201d',
       images: [
         { src: 'assets/case-studies/sol/sol-mindmap.webp', alt: 'Pencil mind map around clean relaxation: surf cowboy, south western, vintage soda cans, natural fibers and plants, sun, waves and stars' },
         { src: 'assets/case-studies/sol/sol-logo-sketches.webp', alt: 'Pen sketches of the SOL wordmark with a line over the O, sun symbols, a circle with a dot and a half sun over a towel labeled sunfaded' },
-        { src: 'assets/case-studies/sol/sol-figure-studies.webp', alt: 'Pencil figure studies of sunbathers in swimwear standing under a sketched sun' }
+        { src: 'assets/case-studies/sol/sol-figure-studies.webp', alt: 'Pencil figure studies of sunbathers in swimwear standing under a sketched sun' },
+        { src: 'assets/case-studies/sol/sol-bottle-sketches.webp', alt: 'Pen sketches of Sol bottles: a corked bottle with a brown tint, the sun symbol and SOL on a clean white label, frosted glass versions and a tall bottle with SOL down its side' }
       ]
     },
     friction: {
@@ -540,6 +556,7 @@ window.PROJECTS = {
   // boxes (no src) are images still to come.
   'gravity': {
     title: 'Gravity',
+    types: ['ui'],   // homepage sort button (js/home.js): product, brand, ui, motion, studio
     hook: 'How do you *feel* gravity? Comfort or Discomfort?',
     role: 'Immersive Interaction Designer',
     disciplines: ['Interaction Design', 'Immersive Experience Design', 'Creative Coding', 'UX/UI'],
@@ -596,6 +613,7 @@ window.PROJECTS = {
   // needs your words.
   'special-olympics': {
     title: 'Special Olympics New York: Site Redesign',
+    types: ['product', 'ui'],   // homepage sort button (js/home.js): product, brand, ui, motion, studio
     hook: '[Hook]',
     role: '[Role]',
     disciplines: ['[Disciplines]'],

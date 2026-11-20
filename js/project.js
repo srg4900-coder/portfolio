@@ -692,15 +692,18 @@
       heroFig.appendChild(heroMedia);
       // moving hero: muted by default, sound only from this button
       if (heroData.video) {
-        var mute = el('button', 'cs-hero__mute', 'Unmute');
-        mute.type = 'button';
-        mute.setAttribute('data-cursor-solid', 'white');
-        mute.addEventListener('click', function () {
-          heroMedia.muted = !heroMedia.muted;
-          mute.textContent = heroMedia.muted ? 'Unmute' : 'Mute';
-          heroMedia.play().catch(function () {});
-        });
-        heroFig.appendChild(mute);
+        // silent: true for a screen recording with no sound (no Unmute button)
+        var mute = heroData.silent ? null : el('button', 'cs-hero__mute', 'Unmute');
+        if (mute) {
+          mute.type = 'button';
+          mute.setAttribute('data-cursor-solid', 'white');
+          mute.addEventListener('click', function () {
+            heroMedia.muted = !heroMedia.muted;
+            mute.textContent = heroMedia.muted ? 'Unmute' : 'Mute';
+            heroMedia.play().catch(function () {});
+          });
+          heroFig.appendChild(mute);
+        }
         if (reduceMotion) heroMedia.controls = true;
         else heroMedia.play().catch(function () {});
       }

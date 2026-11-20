@@ -33,6 +33,7 @@
 
       var sheet = document.createElement('article');
       sheet.className = 'sheet';
+      sheet.setAttribute('data-slug', slug);
       sheet.style.setProperty('--i', i);
       sheet.style.setProperty('--rest-rot', (i % 2 ? 0.6 : -0.5) + 'deg');
       if (home.position) sheet.style.setProperty('--pos', home.position);
@@ -73,6 +74,117 @@
     });
 
     var sheets = Array.prototype.slice.call(root.querySelectorAll('.sheet'));
+    var baseOrder = sheets.slice();
+
+    // ---------- SORT (the print-stack button) ----------
+    // A print-stack button fixed at the bottom centre of the screen,
+    // dealt on with the prints as the page loads. It opens a row of
+    // categories; picking one moves that category's projects to the front
+    // (in their usual order) and the rest follow, each print gliding to its
+    // new cell. Categories come from each project's `types` in
+    // js/projects-data.js. The pick is kept for this tab (sessionStorage),
+    // and a link can open on one: sadiegold.co/?for=name&view=product.
+    var VIEWS = [['all', 'All'], ['product', 'Product'], ['brand', 'Brand'], ['ui', 'UI'], ['motion', 'Motion'], ['studio', 'Studio']]
+      .filter(function (v) {
+        return v[0] === 'all' || baseOrder.some(function (el) { return (data[el.getAttribute('data-slug')].types || []).indexOf(v[0]) > -1; });
+      });
+    var sortUI = null, view = 'all';
+
+    // a category's own order (window.VIEW_ORDER in js/projects-data.js)
+    // comes first, then any other projects in it, then everything else
+    function orderFor(v) {
+      if (v === 'all') return baseOrder.slice();
+      var has = function (el) { return (data[el.getAttribute('data-slug')].types || []).indexOf(v) > -1; };
+      var pick = ((window.VIEW_ORDER || {})[v] || []).map(function (slug) {
+        return baseOrder.filter(function (el) { return el.getAttribute('data-slug') === slug && has(el); })[0];
+      }).filter(Boolean);
+      var front = pick.concat(baseOrder.filter(function (el) { return has(el) && pick.indexOf(el) < 0; }));
+      return front.concat(baseOrder.filter(function (el) { return front.indexOf(el) < 0; }));
+    }
+
+    // put the sheets in the new order (DOM, list and the 01 / 02 numbers);
+    // animate: each print glides from where it was (on its inner link, so
+    // the scroll motion's own transform on the sheet is left alone)
+    function applyView(v, animate) {
+      view = v;
+      try { sessionStorage.setItem('sg-view', v); } catch (e) {}
+      var next = orderFor(v);
+      var links = sheets.map(function (el) { return el.firstChild; });
+      var before = animate ? links.map(function (l) { return l.getBoundingClientRect(); }) : null;
+      next.forEach(function (el, i) {
+        root.appendChild(el);
+        var n = el.querySelector('.sheet__num');
+        if (n) n.textContent = String(i + 1).padStart(2, '0');
+        el.style.setProperty('--rest-rot', (i % 2 ? 0.6 : -0.5) + 'deg');   // tilts keep alternating
+      });
+      var prev = sheets.slice();
+      sheets.length = 0;
+      Array.prototype.push.apply(sheets, next);
+      if (sortUI) sortUI.querySelectorAll('[data-view]').forEach(function (b) {
+        b.setAttribute('aria-pressed', b.getAttribute('data-view') === v ? 'true' : 'false');
+      });
+      window.dispatchEvent(new Event('resize'));   // the grid re-measures its cells
+      if (!before) return;
+      prev.forEach(function (el, i) {
+        var l = el.firstChild, a = before[i], b = l.getBoundingClientRect();
+        var dx = a.left - b.left, dy = a.top - b.top;
+        if (!dx && !dy) return;
+        l.style.transition = 'none';
+        l.style.transform = 'translate3d(' + dx + 'px,' + dy + 'px,0)';
+        l.getBoundingClientRect();
+        l.style.transition = 'transform 1000ms var(--ease-smooth) ' + (next.indexOf(el) * 45) + 'ms';
+        l.style.transform = '';
+        l.addEventListener('transitionend', function done() {
+          l.style.transition = '';
+          l.removeEventListener('transitionend', done);
+        });
+      });
+    }
+
+    if (VIEWS.length > 2) {
+      sortUI = document.createElement('div');
+      sortUI.className = 'work-sort';
+      var menu = sortUI.appendChild(document.createElement('div'));
+      menu.className = 'work-sort__menu';
+      menu.id = 'work-sort-menu';
+      VIEWS.forEach(function (v, k) {
+        var b = menu.appendChild(document.createElement('button'));
+        b.type = 'button';
+        b.className = 'work-sort__opt text-label';
+        b.setAttribute('data-view', v[0]);
+        b.style.setProperty('--k', k);
+        b.textContent = v[1];
+      });
+      var toggle = sortUI.appendChild(document.createElement('button'));
+      toggle.type = 'button';
+      toggle.className = 'work-sort__toggle';
+      toggle.setAttribute('aria-label', 'Sort projects by type');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-controls', 'work-sort-menu');
+      toggle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+        '<rect class="work-sort__p1" x="6" y="4.5" width="12" height="15" rx="1.5"/>' +
+        '<rect class="work-sort__p3" x="6" y="4.5" width="12" height="15" rx="1.5"/>' +
+        '<rect class="work-sort__p2" x="6" y="4.5" width="12" height="15" rx="1.5"/></svg>';
+      document.body.appendChild(sortUI);
+      var setOpen = function (open) {
+        sortUI.classList.toggle('is-open', open);
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      };
+      toggle.addEventListener('click', function () { setOpen(!sortUI.classList.contains('is-open')); });
+      menu.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-view]');
+        if (!b) return;
+        var v = b.getAttribute('data-view');
+        if (v !== view) applyView(v, true);
+        setOpen(false);
+      });
+      document.addEventListener('click', function (e) { if (!sortUI.contains(e.target)) setOpen(false); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
+      var start = new URLSearchParams(location.search).get('view');
+      if (!start) { try { start = sessionStorage.getItem('sg-view'); } catch (e) {} }
+      if (start && VIEWS.some(function (v) { return v[0] === start; })) applyView(start, false);
+      else applyView('all', false);
+    }
 
     // ---------- references (js/references-data.js) ----------
     // Little cards scattered on the light box at the top of the page. They
