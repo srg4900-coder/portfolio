@@ -325,6 +325,19 @@ body.home { background: transparent; }
   transition: opacity var(--duration-base) ease;
 }
 
+/* LIGHTS OFF (the default; add ?menu=glass to the URL for the frosted
+   glass instead): opening the menu switches the light table off. The page
+   fades to deep black in 0.2s with a soft click (js/home.js), the prints
+   sink to faint dark ghosts, and only the paper strips stay lit. */
+.lights-off .work-sort__veil {
+  background: rgba(6, 5, 4, 0.93);
+  -webkit-backdrop-filter: grayscale(1) brightness(0.6);
+  backdrop-filter: grayscale(1) brightness(0.6);
+}
+/* one quick, smooth switch: 0.2s each way */
+.lights-off .work-sort__veil { transition: opacity 200ms ease, visibility 0s linear 200ms; }
+.lights-off.is-sorting .work-sort__veil { transition: opacity 200ms ease; }
+
 /* the button. Its dark chip is a separate layer (.work-sort__chip, laid
    on the page itself) so it can blend with "difference" against whatever
    is behind it; the prints sit on top, unblended. */
@@ -409,7 +422,7 @@ body:has(.work-sort__toggle:active) .work-sort__chip { transform: translateY(-6p
   white-space: nowrap;
   color: var(--color-ink);
   background: var(--color-white);
-  box-shadow: var(--shadow-paper);
+  box-shadow: none;   /* flat strips, no glow */
   cursor: pointer;
   opacity: 0;
   transform: translateY(24px) rotate(var(--tilt, 0deg));

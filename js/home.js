@@ -165,6 +165,8 @@
         '<rect class="work-sort__p1" x="6" y="4.5" width="12" height="15" rx="1.5"/>' +
         '<rect class="work-sort__p3" x="6" y="4.5" width="12" height="15" rx="1.5"/>' +
         '<rect class="work-sort__p2" x="6" y="4.5" width="12" height="15" rx="1.5"/></svg>';
+      // the open menu's backdrop: lights off (default) or frosted glass (?menu=glass)
+      if (new URLSearchParams(location.search).get('menu') !== 'glass') document.documentElement.classList.add('lights-off');
       var veil = document.createElement('div');
       veil.className = 'work-sort__veil';
       veil.setAttribute('aria-hidden', 'true');
@@ -174,7 +176,33 @@
       chip.setAttribute('aria-hidden', 'true');
       document.body.appendChild(chip);
       document.body.appendChild(sortUI);
+      // a soft light-switch click on lights off / on (Web Audio, no file):
+      // a few milliseconds of filtered noise, quiet; the "on" click a touch
+      // brighter. Only with the lights-off look, and only on a real change.
+      var audio = null;
+      var click = function (on) {
+        if (!document.documentElement.classList.contains('lights-off')) return;
+        try {
+          audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+          if (audio.state === 'suspended') audio.resume();
+          var t = audio.currentTime, len = Math.floor(audio.sampleRate * 0.03);
+          var buf = audio.createBuffer(1, len, audio.sampleRate), d = buf.getChannelData(0);
+          for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 6);
+          var src = audio.createBufferSource();
+          src.buffer = buf;
+          var bp = audio.createBiquadFilter();
+          bp.type = 'bandpass';
+          bp.frequency.value = on ? 2600 : 1800;
+          bp.Q.value = 1.2;
+          var gain = audio.createGain();
+          gain.gain.setValueAtTime(0.35, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+          src.connect(bp); bp.connect(gain); gain.connect(audio.destination);
+          src.start(t);
+        } catch (e) { /* no sound: fine */ }
+      };
       var setOpen = function (open) {
+        if (open !== sortUI.classList.contains('is-open')) click(!open);
         sortUI.classList.toggle('is-open', open);
         document.documentElement.classList.toggle('is-sorting', open);
         toggle.setAttribute('aria-expanded', open ? 'true' : 'false');

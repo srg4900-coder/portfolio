@@ -72,8 +72,8 @@ window.HOME_ORDER = [
   'mycourses',
   'multiply',
   'sol',
-  'boys-club',
   'title-sequence',
+  'boys-club',
   'gravity'
 ];
 
@@ -175,30 +175,31 @@ window.PROJECTS = {
     disciplines: ['Brand & Creative Direction', 'Clothing Design, Alteration & Construction', 'Styling', 'Editorial Photography', 'Web & E-commerce Development'],
     duration: 'Ongoing',
     status: 'In Progress',
-    award: '**CADalyst** Student Opportunity Fund',   // plain text in the credits; **word** = bold
+    award: '**CADalyst** Student Funding Award',   // plain text in the credits; **word** = bold
     awardPlain: true,
     tools: ['Figma', 'Sony A6100', 'Lightroom', 'JavaScript, AI-assisted development', 'Sewing machine'],
     // TODO(Sadie): paste the site address into url; until then the button shows greyed out
     action: { label: 'View Site', url: '', hero: true },   // hero: true = the main image links there too (cursor reads View Site)
     hero: { src: 'assets/case-studies/boys-club/bc-02.jpg', bw: true, alt: 'Black and white editorial: the model on a leather sofa beside a white dog, Boy’s Club B mark overlaid' },
     idea: {
-      copy: 'Sketched in a three hour train delay in Italy. The premise: a girl who wears the clothes taken from the men she holds close. The core image: rigid menswear worn for years until its lines loosen, cut and cloth intact, structure softened into her lines. Drop one blends 1920s athletic wear, vintage collegiate, and 60s rock and roll.',
+      copy: 'Sketched in a three hour train delay in Italy this spring, then built all summer, shoot included. The premise: a girl who wears the clothes taken from the men she holds close. The core image: rigid menswear worn for years until its lines loosen, cut and cloth intact, structure softened into her lines. Drop one blends 1920s athletic wear, vintage collegiate, and 60s rock and roll.',
       images: [
-        { src: 'assets/case-studies/boys-club/bc-08.jpg', label: 'Editorial, drop one', alt: 'Black and white editorial: the model lying across a bed in an oversized white tee' },
-        { label: 'Original sketch, Italy', alt: '' },
-        { src: 'assets/case-studies/boys-club/bc-04-cutout.webp', cutout: true, label: 'Pennant flag', alt: 'Cream felt pennant with a navy B and navy border' },
-        { src: 'assets/case-studies/boys-club/bc-03.jpg', label: 'Editorial, white sweater', alt: 'The model sitting on a wooden dresser in an oversized white sweater, tote at her feet' },
-        { label: 'Reference: 1930s athletic wear', alt: '' },
-        { src: 'assets/case-studies/boys-club/bc-06-cutout.webp', cutout: true, label: 'Drop 001 label', alt: 'Hand-stamped cloth label: B mark, boy’s club, drop 001' },
-        { src: 'assets/case-studies/boys-club/bc-07-cutout.webp', cutout: true, label: 'Typewritten hang tag', alt: 'Typewritten tag: Boy’s Club, est 1989, NYC, young forever, flirt with me' },
-        { label: 'Moodboard', alt: '' },
-        { src: 'assets/case-studies/boys-club/bc-05.jpg', label: 'At the cutting table', alt: 'Red tee laid flat with a ruler, pencil and a sketchbook of B lettering' }
+        { src: 'assets/case-studies/boys-club/bc-08.jpg', place: [0.011, 0.01, 0.297, 3, -3.7], label: 'Editorial, drop one', alt: 'Black and white editorial: the model lying across a bed in an oversized white tee' },
+        { src: 'assets/case-studies/boys-club/bc-italy-sketch-drop.webp', place: [0.300, 0.02, 0.13, 10, -2], label: 'Original sketch, Italy: the first drop', alt: 'Pen sketchbook page titled your boyfriend\u2019s house: a cotton button shirt, waffle henley, plain tee, worn-in dress shirt and relaxed jeans, accessories like a watch, sunglasses, card holder and duffle, a color note of blues, whites and browns, a first drop list, and the line it\u2019s his, but it looks better on me' },
+        { src: 'assets/case-studies/boys-club/bc-italy-sketch-shoot.webp', place: [0.432, 0.0, 0.13, 11, 2.2], label: 'Original sketch, Italy: shoot and aesthetics', alt: 'Pen sketchbook page of shoot thumbnails, socks, reading, kiss goodbye, posed, running late, workout and morning, with notes: use rock music for campaigns, intimate cool girl chic, NYC LA Paris, she\u2019s like her bf but cooler, should feel like Sunday morning' },
+        { src: 'assets/case-studies/boys-club/bc-04-cutout.webp', place: [0.615, 0.015, 0.235, 5, -3], cutout: true, label: 'Pennant flag', alt: 'Cream felt pennant with a navy B and navy border' },
+        { src: 'assets/case-studies/boys-club/bc-03.jpg', place: [0.4225, 0.105, 0.32, 8, 2], label: 'Editorial, white sweater', alt: 'The model sitting on a wooden dresser in an oversized white sweater, tote at her feet' },
+        { label: 'Reference: 1930s athletic wear', place: [0.734, 0.006, 0.245, 1, 0.5], alt: '' },
+        { src: 'assets/case-studies/boys-club/bc-06-cutout.webp', place: [0.02, 0.2, 0.16, 6, -2], cutout: true, scale: 0.625, label: 'Drop 001 label', alt: 'Hand-stamped cloth label: B mark, boy’s club, drop 001' },
+        { src: 'assets/case-studies/boys-club/bc-07-cutout.webp', place: [0.4825, 0.335, 0.1625, 9, -1.5], cutout: true, scale: 0.625, label: 'Typewritten hang tag', alt: 'Typewritten tag: Boy’s Club, est 1989, NYC, young forever, flirt with me' },
+        { src: 'assets/case-studies/boys-club/bc-site-moodboard.webp', place: [0.16, 0.229, 0.34, 7, 0], label: 'Moodboard: Site Design', alt: 'Site design moodboard: black and white photographs of women lounging and reading, handwritten notes, Feminin and Masculin type, a sailboat, loafers and editorial spreads' },
+        { src: 'assets/case-studies/boys-club/bc-05.jpg', place: [0.6775, 0.2025, 0.23, 4, 0], label: 'At the cutting table', alt: 'Red tee laid flat with a ruler, pencil and a sketchbook of B lettering' }
       ]
     },
     friction: {
-      problem: 'I planned a campaign film and a manufactured line. I had one location, one model, no manufacturer, and my own budget.',
+      problem: 'Most of my ideas are big budget, the scale of real brands. Here I planned a campaign film and a manufactured line, with one location, one model, no manufacturer, and my own budget.',
       response: 'Cut the film, shot editorial and product photography instead, sourced and altered nine pieces, and remade some pieces from sourced material to fit the collection.',
-      result: 'A full brand from what I could find. Getting it made beats waiting for perfection; every drop will build on the last.',
+      result: 'A full brand from what I could find, and a way to shape big thinking into smaller deliverables, one step at a time. My department head and professors encouraged me to keep developing it outside of class.',
       // the shorts as a pair: the only rebuilt garment, so the clearest proof of design over styling
       images: [
         { label: 'Shorts: source material', alt: '' },
@@ -207,7 +208,7 @@ window.PROJECTS = {
     },
     work: {
       // the photos now live in 01 Idea (the interactive papers)
-      outcome: 'Ten pieces, one model, 180 selects. Storefront launching November. Next: a 36-unit domestic production run, pending funding.'
+      outcome: 'Ten pieces, one model, 180 selects, a site iterated all summer, and a photobook telling the brand story. Awarded RIT\u2019s CADalyst Student Funding Award: next spring, a manufactured small batch drop for real buyers.'
     }
   },
 
