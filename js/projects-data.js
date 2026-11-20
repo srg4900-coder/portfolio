@@ -290,13 +290,12 @@ window.PROJECTS = {
     // homepage only: in the hero pile the print is 3x as tall with the
     // image turned 90 degrees (the poster standing up); as it lands it
     // turns back and crops to the grid's shape, left-justified on the M.
-    // TODO(Sadie): swap in a larger export (this one is 624 x 348)
     home: {
       tall: 3,
       rotate: 90,
       position: '0% 50%',
-      image: 'assets/case-studies/mycourses/mycourses-home.jpg',
-      alt: 'MyCourses poster: a dark shape like a stretched letter M with MYCOURSES at its end, beside the line The Implementation of the AI Agent'
+      image: 'assets/case-studies/mycourses/mycourses-home-solid.webp',
+      alt: 'MyCourses card: a solid dark M mark beside a dark box reading MYCOURSES AGENT REDESIGN with a white dot'
     },
     tools: ['Figma', 'Illustrator', 'Claude Code', 'Figma Motion', 'After Effects'],
     // the mode switching film, centred in the frame; the homepage keeps
