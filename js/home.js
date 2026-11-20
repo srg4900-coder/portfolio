@@ -152,7 +152,7 @@
         b.type = 'button';
         b.className = 'work-sort__opt text-label';
         b.setAttribute('data-view', v[0]);
-        b.style.setProperty('--k', k);
+        b.style.setProperty('--r', VIEWS.length - 1 - k);
         b.textContent = v[1];
       });
       var toggle = sortUI.appendChild(document.createElement('button'));
@@ -165,9 +165,18 @@
         '<rect class="work-sort__p1" x="6" y="4.5" width="12" height="15" rx="1.5"/>' +
         '<rect class="work-sort__p3" x="6" y="4.5" width="12" height="15" rx="1.5"/>' +
         '<rect class="work-sort__p2" x="6" y="4.5" width="12" height="15" rx="1.5"/></svg>';
+      var veil = document.createElement('div');
+      veil.className = 'work-sort__veil';
+      veil.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(veil);
+      var chip = document.createElement('div');   // the button's blended dark chip (css/home.css)
+      chip.className = 'work-sort__chip';
+      chip.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(chip);
       document.body.appendChild(sortUI);
       var setOpen = function (open) {
         sortUI.classList.toggle('is-open', open);
+        document.documentElement.classList.toggle('is-sorting', open);
         toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
       };
       toggle.addEventListener('click', function () { setOpen(!sortUI.classList.contains('is-open')); });

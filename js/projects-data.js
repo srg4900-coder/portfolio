@@ -504,10 +504,10 @@ window.PROJECTS = {
   // Spec brand + product project, several iterations in; final version in
   // progress. Facts from Sadie (Nov 2026).
   'sol': {
-    title: 'Sol',
+    title: 'S\u014dl',
     types: ['brand', 'product'],   // homepage sort button (js/home.js): product, brand, ui, motion, studio
     hook: 'Stay sun faded',
-    role: '[Role]',
+    role: 'Lead Product & Brand Designer',
     disciplines: ['Branding', 'Product Design', 'Packaging', 'Advertising', 'AI Image Generation'],
     status: 'In Progress',
     tools: ['Sketching', 'ComfyUI', 'Figma Weave', 'Photoshop', 'Claude'],
@@ -520,18 +520,19 @@ window.PROJECTS = {
       alt: 'Generated iteration: a close-up of a frosted blue S\u014dl bottle, BOTTLED SLOWLY embossed in the glass, a coral seal over the cork, the sun mark and a blue nautilus on a textured cream label'
     },
     idea: {
-      copy: 'Sol is a THC beverage brand I\u2019ve been building for over three years. It started with my own choice to ditch alcohol while still wanting the community it brings, one of the few left today. The name means sun, so everything follows it: the alchemical symbol for sol in the logo, cyanotype graphics across the brand, and the tagline \u201cStay sun faded.\u201d',
+      copy: 'S\u014dl is a personal passion project I started three years ago, on one of my drives: a THC beverage brand born from feeling left out of social situations because I don\u2019t drink. I still wanted to join in and build community as a young person today, so I set out to design the space that didn\u2019t exist for me. The name means sun: the alchemical symbol for sol in the logo, cyanotype graphics across the brand, and the tagline \u201cStay sun faded.\u201d',
       images: [
-        { src: 'assets/case-studies/sol/sol-mindmap.webp', alt: 'Pencil mind map around clean relaxation: surf cowboy, south western, vintage soda cans, natural fibers and plants, sun, waves and stars' },
-        { src: 'assets/case-studies/sol/sol-logo-sketches.webp', alt: 'Pen sketches of the SOL wordmark with a line over the O, sun symbols, a circle with a dot and a half sun over a towel labeled sunfaded' },
-        { src: 'assets/case-studies/sol/sol-figure-studies.webp', alt: 'Pencil figure studies of sunbathers in swimwear standing under a sketched sun' },
-        { src: 'assets/case-studies/sol/sol-bottle-sketches.webp', alt: 'Pen sketches of Sol bottles: a corked bottle with a brown tint, the sun symbol and SOL on a clean white label, frosted glass versions and a tall bottle with SOL down its side' }
+        { src: 'assets/case-studies/sol/sol-mindmap.webp', place: [0.081, 0.014, 0.276, 1, 1.8], alt: 'Pencil mind map around clean relaxation: surf cowboy, south western, vintage soda cans, natural fibers and plants, sun, waves and stars' },
+        { src: 'assets/case-studies/sol/sol-logo-sketches.webp', place: [0.356, 0, 0.276, 2, -3.5], alt: 'Pen sketches of the SOL wordmark with a line over the O, sun symbols, a circle with a dot and a half sun over a towel labeled sunfaded' },
+        { src: 'assets/case-studies/sol/sol-figure-studies.webp', place: [0.579, 0, 0.294, 3, -3.4], alt: 'Pencil figure studies of sunbathers in swimwear standing under a sketched sun' },
+        { src: 'assets/case-studies/sol/sol-bottle-sketches.webp', place: [0.2, 0.148, 0.278, 5, 0], alt: 'Pen sketches of Sol bottles: a corked bottle with a brown tint, the sun symbol and SOL on a clean white label, frosted glass versions and a tall bottle with SOL down its side' },
+        { src: 'assets/case-studies/sol/sol-ad-sketches.webp', place: [0.476, 0.225, 0.285, 4, 3.7], label: 'Ad sketches', alt: 'Pencil ad layouts: a cyanotype photo grid captioned Effects of getting some sun, and a pulp poster reading Sunkissed Madness, coming soon to a dispo near you' }
       ]
     },
     friction: {
-      problem: 'Ask people to swap a drink for something new, without asking them to give up the ritual.',
-      response: 'Products that slot into how people already take the edge off the week: keep-cold flasks, single-use glass mini bottles for small doses and full cocktail sets.',
-      result: '[One line]',
+      problem: 'Building a whole lifestyle brand on my own, and understanding the full scope of what that takes.',
+      response: 'World building first: products that slot into how people already unwind, from keep-cold flasks and single-use mini bottles to cocktail sets and sun faded tees, introduced with guerrilla marketing in the spirit of the early 2000s, like Red Bull\u2019s crushed cans left around college campuses and Zoo York\u2019s Spread the Word campaign.',
+      result: 'As designer and strategist, I pitched the brand to an angel investor and venture capitalists, who endorsed the identity and encouraged me to keep developing it.',
       images: [
         { label: '[Iteration vs. final]', alt: '' }
       ]
@@ -544,14 +545,14 @@ window.PROJECTS = {
         { src: 'assets/case-studies/sol/sol-iteration-03.webp', label: 'Iteration 04, generated', alt: 'Generated iteration: a pale soda bottle pushed into white sand beside a blue striped towel, a large hand-drawn sun symbol on the glass and a S\u014dl THC Soda label' },
         { src: 'assets/case-studies/sol/sol-iteration-05.webp', label: 'Iteration 05, generated', alt: 'Generated iteration: a close-up of the frosted bottle\u2019s neck, BOTTLED SLOWLY embossed in the glass, the sun mark, a blue nautilus and S\u014dl on a textured label' },
         { src: 'assets/case-studies/sol/sol-iteration-06.webp', label: 'Iteration 06, generated', alt: 'Generated iteration: the frosted bottle with a cyanotype nautilus print on its label beside the sun mark, S\u014dl and 10mg THC' },
-        { src: 'assets/case-studies/sol/sol-ad-sketches.webp', position: '50% 0%', label: 'Ad sketches', alt: 'Pencil ad layouts: a cyanotype photo grid captioned Effects of getting some sun, and a pulp poster reading Sunkissed Madness, coming soon to a dispo near you' },
         { label: '[Merch: sun faded tees]', alt: '' },
-        { label: '[Poster]', alt: '' }
+        { label: '[Poster]', alt: '' },
+        { label: '[Accessories: flasks, mini bottles, cocktail sets]', alt: '' }
       ],
       // the bottles are generated iterations, a few of many so far: each one
       // is labeled so, and the outcome says it
       ratio: '1 / 1',
-      outcome: 'A mock product line and lifestyle brand, with guerrilla-style advertising in progress, centered on relaxing, community and soaking up the sun. The bottles below are a few of many generated iterations so far.'
+      outcome: 'A study in world building: how a strong world story lets design elevate a brand identity. Mock products and guerrilla-style advertising are in progress; the bottles below are a few of many generated iterations so far.'
     }
   },
 

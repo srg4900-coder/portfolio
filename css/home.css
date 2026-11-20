@@ -253,7 +253,7 @@ body.home { background: transparent; }
 }
 .sheet__num { color: var(--color-ink); }
 .sheet__title { color: var(--text-soft); }
-.sheet__role { color: var(--text-strong); opacity: 0.45; text-align: right; }
+.sheet__role { color: var(--text-soft); text-align: right; }   /* as dark as the title */
 
 @keyframes deal {
   from { opacity: 0; translate: 12vw 4vh; rotate: 6deg; }
@@ -285,16 +285,17 @@ body.home { background: transparent; }
 }
 
 /* ---------- sort (js/home.js SORT) ----------
-   The print-stack button: fixed at the bottom centre, dealt onto the
-   screen with the prints as the page loads. Hover fans the prints out
-   like a hand of cards; open, they stay fanned and the categories rise in
-   above it on a paper tag, one after another. */
+   The print-stack button: an ink chip fixed at the bottom centre, dealt
+   onto the screen with the prints as the page loads. Hover fans the prints
+   out like a hand of cards. Open: the page drops behind frosted dark glass
+   and the categories rise up the middle as a stack of paper strips, one
+   after another, big enough to hit easily. */
 .work-sort {
   position: fixed;
   left: 0;
   right: 0;
   bottom: calc(var(--frame-width) + 24px + env(safe-area-inset-bottom, 0px));
-  z-index: var(--z-nav);
+  z-index: 960;                  /* over the frame and nav, under the contact popup */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -306,18 +307,75 @@ body.home { background: transparent; }
   from { opacity: 0; transform: translateY(28px) scale(0.85); }
 }
 
+/* the frosted dark glass the page falls behind while the menu is open */
+.work-sort__veil {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  background: rgba(16, 14, 12, 0.5);
+  -webkit-backdrop-filter: blur(14px) saturate(0.85);
+  backdrop-filter: blur(14px) saturate(0.85);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--duration-base) ease, visibility 0s linear var(--duration-base);
+}
+.is-sorting .work-sort__veil {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--duration-base) ease;
+}
+
+/* the button. Its dark chip is a separate layer (.work-sort__chip, laid
+   on the page itself) so it can blend with "difference" against whatever
+   is behind it; the prints sit on top, unblended. */
 .work-sort__toggle {
   position: relative;
-  width: 72px;
-  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 84px;
+  height: 84px;
   color: var(--color-ink);
   cursor: pointer;
+  transform-origin: 50% 100%;   /* grows up from its base */
+  transition: transform var(--duration-base) var(--ease-smooth);
 }
-.work-sort__toggle svg { width: 72px; height: 72px; overflow: visible; }
+.work-sort__toggle:hover,
+.work-sort__toggle:focus-visible { transform: translateY(-6px) scale(1.2); }
+.work-sort__toggle:active { transform: translateY(-6px) scale(1.12); }
+
+/* the chip: 20% smaller than the button, 80% opacity, difference blend;
+   it follows the button's hover (rise + grow from the button's base) */
+.work-sort__chip {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--frame-width) + 24px + env(safe-area-inset-bottom, 0px) + 8.4px);
+  z-index: 955;
+  width: 67.2px;
+  height: 67.2px;
+  margin-left: -33.6px;
+  border-radius: 14px;
+  background: var(--color-ink);
+  opacity: 0.8;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  transform-origin: 50% calc(100% + 8.4px);
+  transition: transform var(--duration-base) var(--ease-smooth);
+  /* the entrance uses translate / scale / opacity, leaving transform free
+     for the hover */
+  animation: chip-in 800ms var(--ease-smooth) 240ms both;
+}
+@keyframes chip-in {
+  from { opacity: 0; translate: 0 28px; scale: 0.85; }
+}
+body:has(.work-sort__toggle:hover) .work-sort__chip,
+body:has(.work-sort__toggle:focus-visible) .work-sort__chip { transform: translateY(-6px) scale(1.2); }
+body:has(.work-sort__toggle:active) .work-sort__chip { transform: translateY(-6px) scale(1.12); }
+.work-sort__toggle svg { width: 60px; height: 60px; overflow: visible; }
 .work-sort__toggle rect {
   fill: var(--color-white);
-  stroke: currentColor;
-  stroke-width: 0.6;   /* ~1.8px at 72px, the site's line weight */
+  stroke: var(--color-ink);
+  stroke-width: 0.8;
   transform-box: fill-box;
   transform-origin: 50% 100%;
   transition: transform var(--duration-base) var(--ease-smooth);
@@ -328,54 +386,54 @@ body.home { background: transparent; }
 .work-sort__toggle:hover .work-sort__p3,
 .work-sort__toggle:focus-visible .work-sort__p3,
 .work-sort.is-open .work-sort__p3 { transform: rotate(16deg) translateX(2px); }
-.work-sort__toggle:active svg { transform: scale(0.92); }
 
+/* the categories: a stack of paper strips above the button */
 .work-sort__menu {
   position: absolute;
-  bottom: calc(100% + 14px);
+  bottom: calc(100% + 22px);
   left: 50%;
   display: flex;
-  gap: 4px;
-  padding: 6px 8px;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  transform: translateX(-50%);
+  visibility: hidden;
+  transition: visibility 0s linear var(--duration-base);
+}
+.work-sort.is-open .work-sort__menu { visibility: visible; transition: none; }
+.work-sort__opt {
+  min-width: 260px;
+  padding: 14px 36px;
+  font-size: calc(var(--text-label-size) * 2);
+  text-align: center;
+  white-space: nowrap;
+  color: var(--color-ink);
   background: var(--color-white);
   box-shadow: var(--shadow-paper);
-  white-space: nowrap;
-  transform: translate(-50%, 8px);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity var(--duration-fast) ease, transform var(--duration-base) var(--ease-smooth), visibility 0s linear var(--duration-base);
-}
-.work-sort.is-open .work-sort__menu {
-  opacity: 1;
-  visibility: visible;
-  transform: translate(-50%, 0);
-  transition: opacity var(--duration-fast) ease, transform var(--duration-base) var(--ease-smooth);
-}
-.work-sort__opt {
-  padding: 6px 8px;
-  color: var(--text-muted);
   cursor: pointer;
   opacity: 0;
-  transform: translateY(4px);
-  transition: opacity var(--duration-fast) ease, transform var(--duration-base) var(--ease-smooth), color var(--duration-fast) ease;
+  transform: translateY(24px) rotate(var(--tilt, 0deg));
+  transition: opacity var(--duration-fast) ease, transform var(--duration-base) var(--ease-smooth), background-color var(--duration-fast) ease, color var(--duration-fast) ease;
 }
+.work-sort__opt:nth-child(odd) { --tilt: -1.2deg; }
+.work-sort__opt:nth-child(even) { --tilt: 1deg; }
 .work-sort.is-open .work-sort__opt {
   opacity: 1;
-  transform: none;
-  transition-delay: calc(var(--k, 0) * 35ms);
+  transform: rotate(var(--tilt, 0deg));
+  transition-delay: calc(var(--r, 0) * 45ms);   /* nearest the button rises first */
 }
-.work-sort__opt:hover,
-.work-sort__opt[aria-pressed="true"] { color: var(--color-ink); }
-.work-sort__opt[aria-pressed="true"] {
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 4px;
+.work-sort.is-open .work-sort__opt:hover,
+.work-sort.is-open .work-sort__opt:focus-visible {
+  transform: translateY(-3px) rotate(0deg) scale(1.03);
+  transition-delay: 0ms;
 }
+/* the view showing now: an ink strip */
+.work-sort__opt[aria-pressed="true"] { background: var(--color-ink); color: var(--color-white); }
+
 @media (max-width: 420px) {
-  .work-sort__menu { gap: 0; padding: 4px; }
-  .work-sort__opt { padding: 6px 6px; }
+  .work-sort__opt { min-width: 220px; padding: 12px 28px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .work-sort { animation: none; }
-  .work-sort__menu, .work-sort__opt, .work-sort__toggle rect { transition: none; }
+  .work-sort, .work-sort__chip { animation: none; }
+  .work-sort__veil, .work-sort__menu, .work-sort__opt, .work-sort__toggle, .work-sort__toggle rect { transition: none; }
 }

@@ -24,19 +24,16 @@
   images (keep them small: ~800px on the long side). For now the image
   cards are grey: their old srcs are commented out below.
 */
-window.REFERENCES = [
+// HIDDEN for now (Nov 2026, Sadie): the homepage shows no reference cards.
+// To bring them back, change the last line of this file to
+// window.REFERENCES = window.REFERENCES_SAVED;
+window.REFERENCES_SAVED = [
   {
     type: 'image',
     // src: 'assets/studio/paintings/master-work.jpg',
     // alt: 'Pastel master study of a moonlit river city',
     width: 0.36, behind: 0, at: [-0.08, 0.66], tilt: -5,
     start: [0.40, 0.80]
-  },
-  {
-    type: 'note',
-    text: '[A line about how you work]',
-    width: 0.26, behind: 1, at: [0.80, -0.10], tilt: 6,
-    start: [0.95, 0.60]
   },
   {
     type: 'image',
@@ -59,3 +56,4 @@ window.REFERENCES = [
     start: [1.30, 0.12]
   }
 ];
+window.REFERENCES = [];
