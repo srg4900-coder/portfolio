@@ -25,6 +25,9 @@
     cutout: true        transparent PNG/WebP: shown whole on a plain print
     contain: true       show the whole image, uncropped (slides, sheets)
     scale: 1.2          (01 Idea papers) shown that much larger than the others
+    place: [x, y, w, z, tilt]  (01 Idea papers) a hand-set starting spot on a computer:
+                       x, y, w as fractions of the section width, z = stack order, tilt in deg.
+                       Used only when every paper in the section has one.
     large: true         (03 Work only) spans wider in the grid
   01 Idea images become loose papers you can shuffle and drag: any number,
   any shape, shown whole (no crop), no caption on the page (label still
@@ -307,12 +310,14 @@ window.PROJECTS = {
       alt: 'MyCourses mode switching: the M mark turns like a block between Academic, Organize, Prep and Social, the screen changing color with each mode'
     },
     idea: {
-      copy: 'A full redesign of MyCourses for UX Design Strategies, built around an AI agent and a persona drawn from real student needs. The brief: use an abstracted metaphor to make a design system nobody has seen before. Mine is a DJ deck, and the agent is a butler that organizes college life across academic, social and health spheres. Switch modes to put a different sphere first as life ebbs and flows.',
+      copy: 'A full redesign of MyCourses for UX Design Strategies, built around an AI agent and a persona drawn from real student needs. The brief: use an abstracted metaphor to make a design system nobody has seen before. Mine is a DJ deck, and the agent is a butler that organizes college life across academic, social, and health spheres. Switch modes to put a different sphere first as life ebbs and flows.',
       images: [
-        { src: 'assets/case-studies/mycourses/mycourses-moodboard.webp', alt: 'Moodboard titled clean and exciting: red agency sites, big type, Swiss layouts, product pages and posters' },
-        { src: 'assets/case-studies/mycourses/mycourses-ai-shift-mode.png', label: 'Earlier rendition, AI UI tool', alt: 'An earlier AI-tool rendition of Shift Mode: a grid of half-hour pads to drag three hours of homework across, agent picks outlined in red dashes' },
-        { src: 'assets/case-studies/mycourses/mycourses-ai-lockscreen.png', label: 'Earlier rendition, AI UI tool', alt: 'An earlier AI-tool rendition of a phone lock screen notification: Morning Mimi, 3 moved overnight, with a day bar and the moved classes' },
-        { src: 'assets/case-studies/mycourses/mycourses-deck-week.png', label: 'Earlier rendition, AI UI tool', alt: 'An earlier AI-tool rendition of the Deck, week view: a color-coded grid of lectures, gym and free time, a Next Up card for HW 4 and Need help? Just ask.' }
+        { src: 'assets/case-studies/mycourses/mycourses-persona.webp', place: [0, 0.02, 0.44, 1, -0.6], alt: 'Persona: Mimi, the Try-not-so-hard, a 19 year old RIT student with lots of hobbies, friends and classes; a bio, favorite brands and personality sliders from introvert to extrovert, busy to time rich, passive to active' },
+        { src: 'assets/case-studies/mycourses/mycourses-what-if.png', place: [0.256, 0.159, 0.441, 6, 1], alt: 'What if mycourses was an adaptable planning partner that responds to a changing collegiate lifestyle.' },
+        { src: 'assets/case-studies/mycourses/mycourses-moodboard.webp', place: [0.39, 0, 0.61, 2, 0.8], label: 'Moodboard: Design Style', alt: 'Moodboard titled clean and exciting: red agency sites, big type, Swiss layouts, product pages and posters' },
+        { src: 'assets/case-studies/mycourses/mycourses-dj-deck-reference.webp', place: [0.158, 0.244, 0.29, 3, -0.4], alt: 'DJ deck references, the abstracted metaphor: glowing orange cue and loop buttons, beat jump keys and a controller with rows of colored performance pads' },
+        { src: 'assets/case-studies/mycourses/mycourses-wireframe-v2.png', place: [0.503, 0.295, 0.395, 4, -1.8], contain: true, alt: 'Wireframe of the Deck, marked WIREFRAME: a header bar, a five by five grid of pads in a large panel, and a side panel with a chat box and a small button' },
+        { src: 'assets/case-studies/mycourses/mycourses-early-pads.png', place: [0.76, 0.39, 0.235, 5, 2.5], label: 'Early work', alt: 'Early work: the Deck as a grid of pads, BIOE 104 assignments in yellow and MED 112 lab studies in black among empty grey pads, a Shuffle button above and the two courses listed beside it' }
       ]
     },
     // the earlier versions came from AI UI tools; the current design is by hand

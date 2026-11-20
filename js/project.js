@@ -472,6 +472,9 @@
       paper.setAttribute('data-draggable', '');
       paper.setAttribute('data-cursor-solid', 'grab');   // the dot grows, solid white (js/cursor.js)
       if (item.scale) paper.setAttribute('data-scale', item.scale);
+      // place: [left, top, width, stack, tilt] fixes where it starts on a
+      // computer (left / top / width as fractions of the section's width)
+      if (item.place) paper.setAttribute('data-place', item.place.join(','));
       var inner = el('div', 'paper__inner');
       if (item.src) {
         // opens in the viewer itself (on the second click), not on the first
@@ -545,8 +548,24 @@
       return;
     }
     list.forEach(function (p) { p.classList.remove('is-wide'); });
-    var rand = seeded(slug);
     var W = wrap.clientWidth;
+    // hand-set arrangement: every sheet has a place, so start exactly there
+    if (list.length && list.every(function (p) { return p.hasAttribute('data-place'); })) {
+      var low = 0;
+      list.forEach(function (p) {
+        var v = p.getAttribute('data-place').split(',').map(Number);
+        var w = Math.round(v[2] * W), h = w / shape(p);
+        p.style.width = w + 'px';
+        p.style.left = Math.round(v[0] * W) + 'px';
+        p.style.top = Math.round(v[1] * W) + 'px';
+        p.style.zIndex = String(v[3] || 1);
+        p.style.setProperty('--tilt', (v[4] || 0) + 'deg');
+        low = Math.max(low, v[1] * W + h);
+      });
+      wrap.style.height = Math.ceil(low + 32) + 'px';
+      return;
+    }
+    var rand = seeded(slug);
     var n = list.length;
     var rows = n > 4 ? 2 : 1;
     var perRow = Math.ceil(n / rows);
